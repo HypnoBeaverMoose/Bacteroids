@@ -5,7 +5,7 @@ public class PlayerController : MonoBehaviour {
 
     public float Force { get; private set; }
     public float Angle { get; private set; }
-    public float Energy { get;  set; }
+    public float Energy { get { return _energy; } set { _energy = Mathf.Clamp(value, 0, _startingEnergy); } }
     public float MaxEnergy { get { return _startingEnergy; } }
 
     [SerializeField]
@@ -30,7 +30,7 @@ public class PlayerController : MonoBehaviour {
     private GameObject _projectilePrefab;
 
     private Rigidbody2D _rigidbody;
-
+    private float _energy;
 
 	void Start () 
     {
@@ -43,15 +43,21 @@ public class PlayerController : MonoBehaviour {
 	
 	void Update () 
     {
+        Energy -= _idleEnergyCost * Time.deltaTime;
         Force = Mathf.Max(0, Input.GetAxis("Vertical"));
         Angle = Input.GetAxis("Horizontal");
-        Energy -= _idleEnergyCost * Time.deltaTime;
+
+        if(Energy <= 10)
+        {
+            Force = Angle = 0;            
+        }
+
         if (Force > 0)
         {
             _engineParticles.Emit(1);            
         }
 
-        if(Input.GetKeyDown( KeyCode.Space))    
+        if(Input.GetKeyDown( KeyCode.Space) && Energy > 10)    
         {
             Instantiate(_projectilePrefab, transform.position + transform.up* 0.5f, transform.localRotation);
             Energy -= _shootEnergyCost;
@@ -59,9 +65,11 @@ public class PlayerController : MonoBehaviour {
 
         if (Energy <= 0)
         {
-            Destroy(gameObject);
+            transform.position = Vector3.zero;
+            Energy = _startingEnergy;
+            _rigidbody.velocity = Vector3.zero;
+            _rigidbody.angularVelocity = 0;
         }
-
 	}
 
     void FixedUpdate()
