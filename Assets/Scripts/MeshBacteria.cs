@@ -25,6 +25,7 @@ public class MeshBacteria : MonoBehaviour
     private List<Vector3> _originalVerticies;
     private List<float> _vertexCoDistance = null;
     private List<Vector3> _normals = new List<Vector3>();
+    private List<Color> _colors = new List<Color>();
     private List<Vector2> _points = new List<Vector2>();
     private List<int> _triangles = new List<int>();
     private static Vector3[] _startVertices = new Vector3[] {   Vector3.zero,
@@ -58,6 +59,7 @@ public class MeshBacteria : MonoBehaviour
     {
         _triangles.Clear();
         _normals.Clear();
+        _colors.Clear();
         int pivot = 0;
         for (int id = 1; id < _vertices.Count; id++)
         {
@@ -74,23 +76,26 @@ public class MeshBacteria : MonoBehaviour
             {
                 _points.Add(_vertices[id]);
             }
+            _colors.Add(Color.white);
+
         }
+        _colors[0] = new Color(1,1,1,0);
         _mesh.Clear();
         _mesh.SetVertices(_vertices);
         _mesh.SetTriangles(_triangles, 0);
         _mesh.SetNormals(_normals);
-        _mesh.SetUVs(0, _vertices);        
-        //_mesh.UploadMeshData(false);
-        //_collider.points = _points.ToArray();
+        _mesh.SetColors(_colors);
+
     }
 
     private void OnCollisionEnter2D(Collision2D collision)
     {
-        Vector2 force = (collision.relativeVelocity * collision.rigidbody.mass) / Time.fixedDeltaTime;
+        float mass = collision.rigidbody != null ? collision.rigidbody.mass : _rigidbody.mass;
+        Vector2 force = (collision.relativeVelocity * mass) / Time.fixedDeltaTime;
         AddDeformingForce(collision.contacts[0].point, force);
         if (collision.gameObject.CompareTag("Projectile"))
         {            
-            _rigidbody.AddForceAtPosition(-force , collision.contacts[0].point);            
+            _rigidbody.AddForceAtPosition(-force, collision.contacts[0].point);            
             var go = Instantiate<GameObject>(_energy);
             float damage = Random.Range(5, 20);
             this.Energy -= damage;
@@ -98,9 +103,6 @@ public class MeshBacteria : MonoBehaviour
             go.transform.position = collision.contacts[0].point;
             go.GetComponent<Rigidbody2D>().AddForceAtPosition(-force.magnitude * collision.contacts[0].normal, collision.contacts[0].point);
         }
-        
-
-
     }
 
     public void AddDeformingForce(Vector3 point, Vector3 force)
@@ -118,8 +120,8 @@ public class MeshBacteria : MonoBehaviour
         float attenuatedForce = force.magnitude / (1f + pointToVertex.sqrMagnitude);
         float velocity = attenuatedForce * Time.fixedDeltaTime;
         _vertexVelocities[i] += force.normalized * velocity;
-       // _rigidbody.velocity -= (Vector2)((force.normalized * velocity) /(float)_vertexVelocities.Count);
     }
+
     void FixedUpdate()
     {
         float damping = 0.5f;
@@ -136,12 +138,10 @@ public class MeshBacteria : MonoBehaviour
             _vertices[i] += velocity * Time.fixedDeltaTime;            
         }
 
-        //_rigidbody.velocity = -(vel / _vertexVelocities.Count) * Time.deltaTime;
         UpdateMesh();
     }
-    void Update()
+    private void Update()
     {
-
         if (Energy <= 0)
         {
             Destroy(gameObject);
