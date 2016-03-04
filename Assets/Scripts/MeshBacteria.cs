@@ -34,13 +34,13 @@ public class MeshBacteria : MonoBehaviour
                                                                 new Vector3(.5f, -.5f, 0),
                                                                 new Vector3(-.5f, -.5f, 0) };
     private void Start()
-    {
-        Init();
+    {        
         _collider = GetComponent<PolygonCollider2D>();
         _rigidbody = GetComponent<Rigidbody2D>();
         _mesh = GetComponent<MeshFilter>().mesh;
         _mesh.MarkDynamic();
         Energy = _startEnergy;
+        Init();
         UpdateMesh();
     }
     
@@ -49,10 +49,15 @@ public class MeshBacteria : MonoBehaviour
         _vertices = new List<Vector3>(_startVertices);
         _originalVerticies = new List<Vector3>(_startVertices);
         _vertexVelocities = new List<Vector3>();
-        foreach (var vertex in _vertices)
+        for (int id = 0; id < _vertices.Count; id++)
         {
             _vertexVelocities.Add(Vector3.zero);
+            if (id > 0)
+            {
+                _points.Add(_vertices[id]);
+            }
         }
+        _collider.points = _points.ToArray();
     }
 
     private void UpdateMesh()
@@ -74,7 +79,7 @@ public class MeshBacteria : MonoBehaviour
             _normals.Add(Vector3.forward);
             if (id > 0)
             {
-                _points.Add(_vertices[id]);
+                _collider.points[id-1] =_vertices[id];
             }
             _colors.Add(Color.white);
 
@@ -85,14 +90,13 @@ public class MeshBacteria : MonoBehaviour
         _mesh.SetTriangles(_triangles, 0);
         _mesh.SetNormals(_normals);
         _mesh.SetColors(_colors);
-
     }
 
     private void OnCollisionEnter2D(Collision2D collision)
     {
         float mass = collision.rigidbody != null ? collision.rigidbody.mass : _rigidbody.mass;
         Vector2 force = (collision.relativeVelocity * mass) / Time.fixedDeltaTime;
-        AddDeformingForce(collision.contacts[0].point, force);
+        AddDeformingForce(collision.contacts[0].point, force * 2);
         if (collision.gameObject.CompareTag("Projectile"))
         {            
             _rigidbody.AddForceAtPosition(-force, collision.contacts[0].point);            
@@ -124,7 +128,7 @@ public class MeshBacteria : MonoBehaviour
 
     void FixedUpdate()
     {
-        float damping = 0.5f;
+        float damping = 0.1f;
         float springForce = 20;
         Vector3 vel = Vector3.zero;
         for (int i = 0; i < _vertices.Count; i++)
