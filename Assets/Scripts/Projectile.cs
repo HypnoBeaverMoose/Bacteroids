@@ -1,7 +1,7 @@
 ﻿using UnityEngine;
 using System.Collections;
 
-public class ProjectileController : MonoBehaviour
+public class Projectile : MonoBehaviour
 {
 
     [SerializeField]

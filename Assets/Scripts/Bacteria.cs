@@ -1,7 +1,7 @@
 ﻿using UnityEngine;
 using System.Collections;
 
-public class BacteriaController : MonoBehaviour {
+public class Bacteria : MonoBehaviour {
 
     public static float MIN_SIZE = 0.6f;
     // Use this for initialization
@@ -75,12 +75,12 @@ public class BacteriaController : MonoBehaviour {
         {
             if (transform.localScale.x <= MIN_SIZE)
             {
-                collider.GetComponent<PlayerController>().Energy += 10;
+                collider.GetComponent<Player>().Energy += 10;
                 Kill();
             }
-            else if (collider.GetComponent<PlayerController>() != null)
+            else if (collider.GetComponent<Player>() != null)
             {                
-                collider.GetComponent<PlayerController>().Energy -= 20;
+                collider.GetComponent<Player>().Energy -= 20;
             }
         }
     }

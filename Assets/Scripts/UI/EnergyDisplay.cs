@@ -9,13 +9,13 @@ public class EnergyDisplay : MonoBehaviour
     [SerializeField]
     private float _smoothTime;
 
-    private PlayerController _player;
+    private Player _player;
     private Vector3 _target;
     private Vector3 _velocity;
 
 	void Start () 
     {
-        _player = FindObjectOfType<PlayerController>();
+        _player = FindObjectOfType<Player>();
         _target = Vector3.one;
 	}
 	
@@ -28,7 +28,7 @@ public class EnergyDisplay : MonoBehaviour
         }
         else
         {
-            _player = FindObjectOfType<PlayerController>();
+            _player = FindObjectOfType<Player>();
         }
 	}
 }

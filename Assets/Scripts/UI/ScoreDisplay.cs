@@ -8,7 +8,7 @@ public class ScoreDisplay : MonoBehaviour
     private Text _valueDisplay;
 
     private GameController _controller;
-	void Start () 
+	void Start ()   
     {
         _controller = FindObjectOfType<GameController>();
 	}

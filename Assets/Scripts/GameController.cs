@@ -39,7 +39,7 @@ public class GameController : MonoBehaviour {
     private float _scorePerKill;
 
     private List<GameObject> _enemies = new List<GameObject>();
-    private PlayerController _player;
+    private Player _player;
     private float _spawnTimer = 0;
     private bool _stopSpawn = false;
 
@@ -59,14 +59,15 @@ public class GameController : MonoBehaviour {
 
     private void StartGame()
     {
-        _player = Instantiate<GameObject>(_playerPrefab).GetComponent<PlayerController>();
+        _player = Instantiate<GameObject>(_playerPrefab).GetComponent<Player>();
         _player.OnPlayerKilled += PlayerKilled;
-        _spawnTimer = GetSpawnTime();
         _stopSpawn = false;
+        _spawnTimer = GetSpawnTime();
+        
         var energies = FindObjectsOfType<Energy>();
-        foreach (var item in energies)
+        foreach (var energy in energies)
         {
-            Destroy(item.gameObject);
+            Destroy(energy.gameObject);
         }
         foreach (var enemy in _enemies)
         {

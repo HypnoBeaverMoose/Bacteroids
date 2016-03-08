@@ -1,7 +1,7 @@
 ﻿using UnityEngine;
 using System.Collections;
 
-public class PlayerController : MonoBehaviour {
+public class Player : MonoBehaviour {
 
     public delegate void PlayerKilled();
     public event PlayerKilled OnPlayerKilled;

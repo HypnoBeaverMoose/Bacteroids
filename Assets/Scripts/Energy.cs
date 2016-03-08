@@ -26,7 +26,7 @@ public class Energy : MonoBehaviour {
     {
         if (collision.collider.CompareTag("Player"))
         {
-            collision.gameObject.GetComponent<PlayerController>().Energy += Amount;
+            collision.gameObject.GetComponent<Player>().Energy += Amount;
             Destroy(gameObject);
         }
     }
