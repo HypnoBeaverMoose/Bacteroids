@@ -8,7 +8,11 @@ public class SimpleSoftBody : MonoBehaviour, ISoftBody
 {
     private Mesh _mesh = null;
     private PolygonCollider2D _collider;
+    private Rigidbody2D _rigidbody;
+    private Vector3 _averageVelocity = Vector3.zero;
 
+    private float damping = 0.6f;
+    private float springForce = 7;
 
     private List<Vector3> _vertices = null;
     private List<Vector3> _vertexVelocities;
@@ -23,8 +27,16 @@ public class SimpleSoftBody : MonoBehaviour, ISoftBody
                                                                 new Vector3(.5f, .5f, 0),
                                                                 new Vector3(.5f, -.5f, 0),
                                                                 new Vector3(-.5f, -.5f, 0) };
+
+
+    public Vector3 AverageVelocity
+    {
+        get { return _averageVelocity; }
+    }
+
     public void Init()
     {
+        _rigidbody = GetComponent<Rigidbody2D>();
         _collider = GetComponent<PolygonCollider2D>();
         _mesh = GetComponent<MeshFilter>().mesh;
         _mesh.MarkDynamic();
@@ -44,19 +56,20 @@ public class SimpleSoftBody : MonoBehaviour, ISoftBody
 
     public void UpdateDeformation()
     {
-        float damping = 0.1f;
-        float springForce = 20;
-        Vector3 vel = Vector3.zero;
+        _averageVelocity = Vector3.zero;
         for (int i = 0; i < _vertices.Count; i++)
         {
             Vector3 velocity = _vertexVelocities[i];
-            vel += velocity;
+
             Vector3 displacement = _vertices[i] - _originalVerticies[i];
             velocity -= displacement * springForce * Time.fixedDeltaTime;
             velocity *= 1f - damping * Time.fixedDeltaTime;
+            
             _vertexVelocities[i] = velocity;
-            _vertices[i] += velocity * Time.fixedDeltaTime;
+            _vertices[i] += (velocity) * Time.fixedDeltaTime;
+            _averageVelocity += velocity;
         }
+        _averageVelocity /= _vertices.Count;
     }
 
     public void UpdateBody()
@@ -72,13 +85,13 @@ public class SimpleSoftBody : MonoBehaviour, ISoftBody
             _triangles.Add(id);
             _triangles.Add(nextID);
         }
-
+        Vector2[] pnts = new Vector2[_collider.points.Length];
         for (int id = 0; id < _vertices.Count; id++)
         {
             _normals.Add(Vector3.forward);
             if (id > 0)
             {
-                _collider.points[id - 1] = _vertices[id];
+              pnts[id - 1] = _vertices[id];
             }
             _colors.Add(Color.white);
 
@@ -89,6 +102,7 @@ public class SimpleSoftBody : MonoBehaviour, ISoftBody
         _mesh.SetTriangles(_triangles, 0);
         _mesh.SetNormals(_normals);
         _mesh.SetColors(_colors);
+        _collider.points = pnts;
     }
 
     public void AddDeformingForce(Vector3 point, Vector3 force)
@@ -96,7 +110,7 @@ public class SimpleSoftBody : MonoBehaviour, ISoftBody
         point = transform.InverseTransformPoint(point);
         for (int i = 0; i < _vertices.Count; i++)
         {
-            AddForceToVertex(i, point, force);
+            AddForceToVertex(i, point, transform.InverseTransformDirection(force));
         }
     }
     

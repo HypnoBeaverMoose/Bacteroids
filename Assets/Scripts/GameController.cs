@@ -123,36 +123,11 @@ public class GameController : MonoBehaviour {
             }
 
             _spawnTimer -= Time.deltaTime;
-            if (_spawnTimer == 0 || _enemies.Count == 0)
+            if (_spawnTimer <= 0 || _enemies.Count == 0)
             {
                 _enemies.Add(SpawnEnemy(FindSpawnPos()));
                 _spawnTimer = GetSpawnTime();
             }
         }
     }
-
-    //private IEnumerator EndWaveCoroutine(int Timeout)
-    //{
-    //    yield return new WaitForSeconds(Timeout);
-    //    StartWave(++WaveNumber);
-    //}
-
-    //public void StartWave(int wave)
-    //{
-    //    _enemiesToSpawn = StartEnemies + (wave - 1) * EnemyInc;
-    //    _enemies.Clear();
-    //    _spawnTimer = 0;
-    //    _waveStarted = true;
-    //    //OnWaveStart(wave);
-    //}
-
-    //public void EndWave()
-    //{
-    //    _waveStarted = false;
-    //    _player.transform.position = Vector2.zero;
-    //    StartCoroutine(EndWaveCoroutine(WaveTimeout));
-    //    //OnWaveEnd(WaveTimeout);
-    //}
-
-
 }

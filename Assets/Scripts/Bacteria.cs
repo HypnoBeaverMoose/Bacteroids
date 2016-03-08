@@ -33,20 +33,26 @@ public class Bacteria : MonoBehaviour
 
     private void OnCollisionEnter2D(Collision2D collision)
     {
+        if (collision.rigidbody == null)
+        {
+            return;
+        }
         float mass = collision.rigidbody != null ? collision.rigidbody.mass : _rigidbody.mass;
         Vector2 force = (collision.relativeVelocity * mass) / Time.fixedDeltaTime;
         
-        _softBody.AddDeformingForce(collision.contacts[0].point, force * 2);
+        _softBody.AddDeformingForce(collision.contacts[0].point,  - force / 2);
         
         if (collision.gameObject.CompareTag("Projectile"))
         {            
-            _rigidbody.AddForceAtPosition(-force, collision.contacts[0].point);            
+            _rigidbody.AddForceAtPosition(-force / 2, collision.contacts[0].point);
+            
             var go = Instantiate<GameObject>(_energy);
             float damage = Random.Range(5, 20);
             this.Energy -= damage;
+            
             go.GetComponent<Energy>().Amount = damage;
             go.transform.position = collision.contacts[0].point;
-            go.GetComponent<Rigidbody2D>().AddForceAtPosition(-force.magnitude * collision.contacts[0].normal, collision.contacts[0].point);
+            //go.GetComponent<Rigidbody2D>().AddForceAtPosition(-force.magnitude * collision.contacts[0].normal, collision.contacts[0].point);
         }
     }
 
@@ -54,6 +60,11 @@ public class Bacteria : MonoBehaviour
     {
         _softBody.UpdateDeformation();
         _softBody.UpdateBody();
+
+        if (_softBody.AverageVelocity.magnitude < 1)
+        {
+            _softBody.AddDeformingForce((Vector2)transform.position + Random.insideUnitCircle, 1.5f * Random.insideUnitCircle.normalized);
+        }
     }
 
     private void Update()
