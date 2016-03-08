@@ -6,6 +6,7 @@ using System.Collections.Generic;
 [RequireComponent(typeof(PolygonCollider2D))]
 public class MeshBacteria : MonoBehaviour 
 {
+    
     public float GrowSpeed = 1.0f;
     public int MaxVertices = 8;
     public float Energy { get; set; }

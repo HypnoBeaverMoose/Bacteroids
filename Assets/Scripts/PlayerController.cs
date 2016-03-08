@@ -3,6 +3,9 @@ using System.Collections;
 
 public class PlayerController : MonoBehaviour {
 
+    public delegate void PlayerKilled();
+    public event PlayerKilled OnPlayerKilled;
+
     public float Force { get; private set; }
     public float Angle { get; private set; }
     public float Energy { get { return _energy; } set { _energy = Mathf.Clamp(value, 0, _startingEnergy); } }
@@ -65,10 +68,15 @@ public class PlayerController : MonoBehaviour {
 
         if (Energy <= 0)
         {
-            transform.position = Vector3.zero;
-            Energy = _startingEnergy;
-            _rigidbody.velocity = Vector3.zero;
-            _rigidbody.angularVelocity = 0;
+            //transform.position = Vector3.zero;
+            //Energy = _startingEnergy;
+            //_rigidbody.velocity = Vector3.zero;
+            //_rigidbody.angularVelocity = 0;
+  
+            if (OnPlayerKilled != null)
+            {
+                OnPlayerKilled();
+            }
         }
 	}
 

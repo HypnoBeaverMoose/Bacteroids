@@ -13,20 +13,20 @@ public class GameController : MonoBehaviour {
     //public int WaveTimeout = 3;
 
 
-    //public delegate void WaveStartEvent(int wave);
-    //public static event WaveStartEvent OnWaveStart;
-
+    
     //public delegate void WaveEndEvent(int timeout);
     //public static event WaveEndEvent OnWaveEnd;
 
     //private int _enemiesToSpawn;
     //private float _spawnTimer;   
     //private bool _waveStarted = false;
-
+    public float Score { get; set; }
     public float Radius { get { return _radius; } }
 
     [SerializeField]
-    private StartScreen _startScreen;
+    private EndScreen _endScreen;
+    [SerializeField]
+    private  StartScreen _startScreen;
     [SerializeField]
     private GameObject _enemyPrefab;
     [SerializeField]
@@ -35,23 +35,53 @@ public class GameController : MonoBehaviour {
     private AnimationCurve _spawnCurve;
     [SerializeField]
     private float _radius;
+    [SerializeField]
+    private float _scorePerKill;
 
     private List<GameObject> _enemies = new List<GameObject>();
     private PlayerController _player;
     private float _spawnTimer = 0;
-        
+    private bool _stopSpawn = false;
 
 	void Awake () 
     {
         _startScreen.gameObject.SetActive(true);
-        _startScreen.OnStartGame += OnStartGame;
+        _startScreen.OnStartGame += StartGame;
+        _endScreen.OnEndGame += EndGame;
+        _stopSpawn = true;
     }
 
-    private void OnStartGame()
+    void EndGame()
+    {
+        _endScreen.gameObject.SetActive(false);
+        _startScreen.gameObject.SetActive(true);
+    }
+
+    private void StartGame()
     {
         _player = Instantiate<GameObject>(_playerPrefab).GetComponent<PlayerController>();
+        _player.OnPlayerKilled += PlayerKilled;
         _spawnTimer = GetSpawnTime();
+        _stopSpawn = false;
+        var energies = FindObjectsOfType<Energy>();
+        foreach (var item in energies)
+        {
+            Destroy(item.gameObject);
+        }
+        foreach (var enemy in _enemies)
+        {
+            Destroy(enemy);
+        }
+        _enemies.Clear();
+        Score = 0;        
+    }
 
+    private void PlayerKilled()
+    {
+        _stopSpawn = true;
+       
+        Destroy(_player.gameObject);
+        _endScreen.gameObject.SetActive(true);
     }
 
     public GameObject SpawnEnemy(Vector2 position)
@@ -80,19 +110,23 @@ public class GameController : MonoBehaviour {
 	// Update is called once per frame
 	void Update () 
     {
-        for (int i = 0; i < _enemies.Count; i++)
+        if (!_stopSpawn)
         {
-            if (_enemies[i] == null)
+            for (int i = 0; i < _enemies.Count; i++)
             {
-                _enemies.RemoveAt(i--);
+                if (_enemies[i] == null)
+                {
+                    _enemies.RemoveAt(i--);
+                    Score += _scorePerKill;
+                }
             }
-        }
 
-        _spawnTimer -= Time.deltaTime;
-        if (_spawnTimer == 0 ||_enemies.Count == 0)
-        {
-            _enemies.Add(SpawnEnemy(FindSpawnPos()));
-            _spawnTimer = GetSpawnTime();
+            _spawnTimer -= Time.deltaTime;
+            if (_spawnTimer == 0 || _enemies.Count == 0)
+            {
+                _enemies.Add(SpawnEnemy(FindSpawnPos()));
+                _spawnTimer = GetSpawnTime();
+            }
         }
     }
 

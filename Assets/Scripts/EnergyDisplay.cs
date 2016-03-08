@@ -26,5 +26,9 @@ public class EnergyDisplay : MonoBehaviour
             _target.x = _player.Energy / _player.MaxEnergy;
             _energyBar.localScale = Vector3.SmoothDamp(_energyBar.localScale, _target, ref _velocity, _smoothTime);
         }
+        else
+        {
+            _player = FindObjectOfType<PlayerController>();
+        }
 	}
 }
