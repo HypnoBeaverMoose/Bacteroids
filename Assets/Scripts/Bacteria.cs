@@ -38,21 +38,20 @@ public class Bacteria : MonoBehaviour
             return;
         }
         float mass = collision.rigidbody != null ? collision.rigidbody.mass : _rigidbody.mass;
-        Vector2 force = (collision.relativeVelocity * mass) / Time.fixedDeltaTime;
-        
-        _softBody.AddDeformingForce(collision.contacts[0].point,  - force / 2);
-        
-        if (collision.gameObject.CompareTag("Projectile"))
+        Vector2 force = -(collision.relativeVelocity * mass) / Time.fixedDeltaTime;
+
+        _softBody.AddDeformingForce(collision.contacts[0].point, force);
+
+        if (collision.gameObject.CompareTag("Projectile") && collision.rigidbody != null)
         {            
-            _rigidbody.AddForceAtPosition(-force / 2, collision.contacts[0].point);
+            _rigidbody.AddForceAtPosition(force, collision.contacts[0].point);
             
             var go = Instantiate<GameObject>(_energy);
             float damage = Random.Range(5, 20);
-            this.Energy -= damage;
-            
+            this.Energy -= damage;            
             go.GetComponent<Energy>().Amount = damage;
             go.transform.position = collision.contacts[0].point;
-            //go.GetComponent<Rigidbody2D>().AddForceAtPosition(-force.magnitude * collision.contacts[0].normal, collision.contacts[0].point);
+            go.GetComponent<Rigidbody2D>().AddForce(-force.magnitude * collision.contacts[0].normal * 5);
         }
     }
 
@@ -60,11 +59,6 @@ public class Bacteria : MonoBehaviour
     {
         _softBody.UpdateDeformation();
         _softBody.UpdateBody();
-
-        if (_softBody.AverageVelocity.magnitude < 1)
-        {
-            _softBody.AddDeformingForce((Vector2)transform.position + Random.insideUnitCircle, 1.5f * Random.insideUnitCircle.normalized);
-        }
     }
 
     private void Update()
@@ -73,6 +67,8 @@ public class Bacteria : MonoBehaviour
         {
             Destroy(gameObject);
         }
+        //transform.localScale += Vector3.one * GrowSpeed * Time.deltaTime;
+        //GetComponent<Renderer>().material.SetFloat("_Thickness", Mathf.Lerp(0, 0.95f, Mathf.Sqrt(transform.localScale.x)));
     }
 
 }

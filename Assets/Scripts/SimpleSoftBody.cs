@@ -10,9 +10,9 @@ public class SimpleSoftBody : MonoBehaviour, ISoftBody
     private PolygonCollider2D _collider;
     private Rigidbody2D _rigidbody;
     private Vector3 _averageVelocity = Vector3.zero;
-
-    private float damping = 0.6f;
-    private float springForce = 7;
+    private Vector3 _test = Vector3.zero;
+    private float damping = 0.5f;
+    private float springForce = 8;
 
     private List<Vector3> _vertices = null;
     private List<Vector3> _vertexVelocities;
@@ -27,7 +27,6 @@ public class SimpleSoftBody : MonoBehaviour, ISoftBody
                                                                 new Vector3(.5f, .5f, 0),
                                                                 new Vector3(.5f, -.5f, 0),
                                                                 new Vector3(-.5f, -.5f, 0) };
-
 
     public Vector3 AverageVelocity
     {
@@ -67,9 +66,7 @@ public class SimpleSoftBody : MonoBehaviour, ISoftBody
             
             _vertexVelocities[i] = velocity;
             _vertices[i] += (velocity) * Time.fixedDeltaTime;
-            _averageVelocity += velocity;
         }
-        _averageVelocity /= _vertices.Count;
     }
 
     public void UpdateBody()
@@ -105,20 +102,16 @@ public class SimpleSoftBody : MonoBehaviour, ISoftBody
         _collider.points = pnts;
     }
 
-    public void AddDeformingForce(Vector3 point, Vector3 force)
+    public Vector3 AddDeformingForce(Vector3 point, Vector3 force)
     {
         point = transform.InverseTransformPoint(point);
         for (int i = 0; i < _vertices.Count; i++)
         {
-            AddForceToVertex(i, point, transform.InverseTransformDirection(force));
+            Vector3 pointToVertex = _vertices[i] - point;
+            float attenuatedForce = force.magnitude / (1f + pointToVertex.sqrMagnitude);
+            float velocity = attenuatedForce * Time.fixedDeltaTime;
+            _vertexVelocities[i] += force.normalized * velocity;
         }
-    }
-    
-    private void AddForceToVertex(int i, Vector3 point, Vector3 force)
-    {
-        Vector3 pointToVertex = _vertices[i] - point;
-        float attenuatedForce = force.magnitude / (1f + pointToVertex.sqrMagnitude);
-        float velocity = attenuatedForce * Time.fixedDeltaTime;
-        _vertexVelocities[i] += force.normalized * velocity;
+        return _vertexVelocities[0];
     }
 }

@@ -11,5 +11,5 @@ public interface ISoftBody
 
     void UpdateDeformation();
 
-    void AddDeformingForce(Vector3 point, Vector3 force);
+    Vector3 AddDeformingForce(Vector3 point, Vector3 force);
 }
