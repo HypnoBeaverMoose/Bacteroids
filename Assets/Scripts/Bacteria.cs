@@ -2,7 +2,7 @@
 using System.Collections;
 using System.Collections.Generic;
 
-
+[RequireComponent(typeof(CompoundSoftBody))]
 public class Bacteria : MonoBehaviour 
 {
     
@@ -16,11 +16,11 @@ public class Bacteria : MonoBehaviour
     private float _startEnergy;
    
     private Rigidbody2D _rigidbody = null;
-    private ISoftBody _softBody;
+    private CompoundSoftBody _softbody;
 
     private void Awake()
     {
-        _softBody = gameObject.AddComponent<SimpleSoftBody>();
+        _softbody = gameObject.GetComponent<CompoundSoftBody>();
         _rigidbody = GetComponent<Rigidbody2D>();
         Energy = _startEnergy;
 
@@ -28,7 +28,7 @@ public class Bacteria : MonoBehaviour
 
     private void Start()
     {
-        _softBody.Init();
+        _softbody.Init();
     }    
 
     private void OnCollisionEnter2D(Collision2D collision)
@@ -40,26 +40,20 @@ public class Bacteria : MonoBehaviour
         float mass = collision.rigidbody != null ? collision.rigidbody.mass : _rigidbody.mass;
         Vector2 force = -(collision.relativeVelocity * mass) / Time.fixedDeltaTime;
 
-        _softBody.AddDeformingForce(collision.contacts[0].point, force);
 
         if (collision.gameObject.CompareTag("Projectile") && collision.rigidbody != null)
-        {            
+        {
             _rigidbody.AddForceAtPosition(force, collision.contacts[0].point);
-            
+
             var go = Instantiate<GameObject>(_energy);
             float damage = Random.Range(5, 20);
-            this.Energy -= damage;            
+            this.Energy -= damage;
             go.GetComponent<Energy>().Amount = damage;
             go.transform.position = collision.contacts[0].point;
             go.GetComponent<Rigidbody2D>().AddForce(-force.magnitude * collision.contacts[0].normal * 5);
         }
     }
 
-    void FixedUpdate()
-    {
-        _softBody.UpdateDeformation();
-        _softBody.UpdateBody();
-    }
 
     private void Update()
     {

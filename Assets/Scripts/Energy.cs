@@ -1,7 +1,8 @@
 ﻿using UnityEngine;
 using System.Collections;
 
-public class Energy : MonoBehaviour {
+public class Energy : MonoBehaviour 
+{
 
     [SerializeField]
     private float _sizeFactor;
