@@ -8,7 +8,7 @@ public class CompoundSoftBody : MonoBehaviour
     public float Damping;
     public float Frequency;
     public int Vertices;
-
+    public float Size = 1.0f;
     private Mesh _mesh = null;
 
     private List<Rigidbody2D>   _bodies = new List<Rigidbody2D>();
@@ -19,7 +19,6 @@ public class CompoundSoftBody : MonoBehaviour
     private List<int>           _triangles = new List<int>();
     private List<SpringJoint2D> _joints = new List<SpringJoint2D>();
 
-
     public void Init()
     {
         _mesh = GetComponent<MeshFilter>().mesh;
@@ -28,10 +27,9 @@ public class CompoundSoftBody : MonoBehaviour
         UpdateBody();
 
     }
-
-    // Update is called once per frame
+    
 	void FixedUpdate () 
-    {
+    {        
         if (Random.value < 0.005f && _bodies[0].velocity.magnitude < 0.1f)
         {
             var body = _bodies[Random.Range(1, _bodies.Count)];
@@ -41,8 +39,9 @@ public class CompoundSoftBody : MonoBehaviour
         for (int i = 0; i < _vertices.Count; i++)
         {
             var pos = transform.InverseTransformPoint(_bodies[i].position);
-            _vertices[i] = pos + pos.normalized * _offsets[i];
+            _vertices[i] = pos + pos.normalized * (_offsets[i] + _bodies[i].GetComponent<CircleCollider2D>().radius);
         }
+
         UpdateBody();
 	}
 
@@ -50,13 +49,11 @@ public class CompoundSoftBody : MonoBehaviour
     {
         float inc = (2 * Mathf.PI) / count;
         float initialOffset =  Random.Range(0, Mathf.PI);
-        float realInc = inc * Mathf.Rad2Deg;
 
         Vector3[] vertices = new Vector3[count + 1];
         vertices[0] = Vector3.zero;
-        
-        float bigR = 1.0f / Mathf.Sqrt(2);
-        float smallR = bigR / 2;
+
+        float bigR = Size;
         
         for (int i = 0; i < count; i++)
         {
@@ -64,8 +61,8 @@ public class CompoundSoftBody : MonoBehaviour
             float angle = initialOffset - i * inc + randomOffset;
             Vector3 vec = new Vector3(Mathf.Cos(angle), Mathf.Sin(angle),0);
             vertices[i + 1] = vec * bigR;
-        }        
-        var center = CreateRigidChild(gameObject, vertices[0], 0.2f, false);
+        }
+        var center = CreateRigidChild(gameObject, vertices[0], Size / 2, false);
         
         _bodies.Add(center);
         _offsets.Add(0);
@@ -77,9 +74,8 @@ public class CompoundSoftBody : MonoBehaviour
             var body = CreateRigidChild(new GameObject("Element"), pos, Vector3.Cross((vertices[next] - vertices[i]).normalized, pos - vertices[i]).magnitude);
             _joints.Add(CreateSpringJoint(body.gameObject, center));
             _bodies.Add(body);
-            _offsets.Add((vertices[i] - body.transform.localPosition).magnitude);
+            _offsets.Add((vertices[i] - body.transform.localPosition).magnitude - body.GetComponent<CircleCollider2D>().radius);
         }
-
         for (int i = 1; i < _bodies.Count; i++)
         {
             int next = i == _bodies.Count - 1 ? 1 : i + 1;
@@ -105,6 +101,7 @@ public class CompoundSoftBody : MonoBehaviour
             _triangles.Add(id);
             _triangles.Add(nextID);
         }
+
         for (int id = 0; id < _vertices.Count; id++)
         {
             _normals.Add(Vector3.forward);
@@ -148,6 +145,7 @@ public class CompoundSoftBody : MonoBehaviour
         body.drag = BodyPrototype.drag;
         body.angularDrag = BodyPrototype.angularDrag;
         body.gravityScale = BodyPrototype.gravityScale;
+        go.AddComponent<CollisionHandler>();
         return body;
     }
 

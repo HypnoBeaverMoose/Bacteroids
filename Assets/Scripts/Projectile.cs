@@ -41,11 +41,7 @@ public class Projectile : MonoBehaviour
     }
 
     void OnCollisionEnter2D(Collision2D collision)
-    {
-        if (collision.gameObject.layer == LayerMask.NameToLayer("Bacteria"))
-        {
-            collision.rigidbody.AddForceAtPosition(collision.relativeVelocity, collision.contacts[0].point, ForceMode2D.Impulse);
-        }
+    {      
         Kill();
     }
 }

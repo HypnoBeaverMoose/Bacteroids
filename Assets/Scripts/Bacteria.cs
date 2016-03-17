@@ -31,26 +31,24 @@ public class Bacteria : MonoBehaviour
         _softbody.Init();
     }    
 
-    private void OnCollisionEnter2D(Collision2D collision)
+    public void OnCollisionEnterChild(Rigidbody2D child, Collision2D collision)
     {
-        if (collision.rigidbody == null)
+        if (collision.gameObject.CompareTag("Projectile"))
         {
-            return;
-        }
-        float mass = collision.rigidbody != null ? collision.rigidbody.mass : _rigidbody.mass;
-        Vector2 force = -(collision.relativeVelocity * mass) / Time.fixedDeltaTime;
-
-
-        if (collision.gameObject.CompareTag("Projectile") && collision.rigidbody != null)
-        {
-            _rigidbody.AddForceAtPosition(force, collision.contacts[0].point);
+            child.AddForceAtPosition(collision.relativeVelocity.magnitude * collision.contacts[0].normal, collision.contacts[0].point, ForceMode2D.Impulse);
 
             var go = Instantiate<GameObject>(_energy);
             float damage = Random.Range(5, 20);
             this.Energy -= damage;
             go.GetComponent<Energy>().Amount = damage;
             go.transform.position = collision.contacts[0].point;
-            go.GetComponent<Rigidbody2D>().AddForce(-force.magnitude * collision.contacts[0].normal * 5);
+            go.GetComponent<Rigidbody2D>().AddForce(-collision.relativeVelocity.magnitude * collision.contacts[0].normal / 2, ForceMode2D.Impulse);
+        }
+
+        if (collision.gameObject.CompareTag("Player"))
+        { 
+            collision.rigidbody.AddForceAtPosition(3 * Random.insideUnitCircle.normalized, collision.contacts[0].point, ForceMode2D.Impulse);
+            collision.gameObject.GetComponent<Player>().Energy -= Random.Range(5, 20);
         }
     }
 
