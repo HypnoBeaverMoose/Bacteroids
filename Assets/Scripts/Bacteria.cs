@@ -21,7 +21,6 @@ public class Bacteria : MonoBehaviour
     private void Awake()
     {
         _softbody = gameObject.GetComponent<CompoundSoftBody>();
-        _rigidbody = GetComponent<Rigidbody2D>();
         Energy = _startEnergy;
 
     }
@@ -29,6 +28,8 @@ public class Bacteria : MonoBehaviour
     private void Start()
     {
         _softbody.Init();
+        _rigidbody = GetComponent<Rigidbody2D>();
+
     }    
 
     public void OnCollisionEnterChild(Rigidbody2D child, Collision2D collision)
