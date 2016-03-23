@@ -17,7 +17,7 @@ public class
     private float _startingEnergy;
     [Space(10)]
     [SerializeField]
-    private float _idleEnergyCost;
+    private float _idleEnergyBonus;
     [SerializeField]
     private float _shootEnergyCost;
     [SerializeField]
@@ -48,7 +48,7 @@ public class
 	
 	void Update () 
     {
-        Energy -= _idleEnergyCost * Time.deltaTime;
+        Energy += _idleEnergyBonus * Time.deltaTime;
         Force = Mathf.Max(0, Input.GetAxis("Vertical"));
         Angle = Input.GetAxis("Horizontal");
 

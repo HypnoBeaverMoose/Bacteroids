@@ -32,6 +32,7 @@ public class CompoundSoftBody : MonoBehaviour
 
     public void Init()
     {
+        //Size = 1;
         _mesh = GetComponent<MeshFilter>().mesh;
         _mesh.MarkDynamic();
         _transform = transform;
