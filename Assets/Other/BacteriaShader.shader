@@ -2,7 +2,8 @@
 {
 	Properties
 	{
-		_Thickness ("Thickness", Float) = 0.5
+		_Thickness ("Thickness", Float) = 0.5		
+		_Color ("Color", Color) = (1,1,1,1)
 	}
 	SubShader
 	{
@@ -29,6 +30,7 @@
 			};
 			
 			float _Thickness;
+			fixed4 _Color;
 			v2f vert (appdata v)
 			{
 				v2f o;
@@ -39,7 +41,7 @@
 			
 			fixed4 frag (v2f i) : SV_Target
 			{
-				fixed4 col = i.alpha >  _Thickness ? fixed4(1,1,1,i.alpha) : fixed4(0,0,0,0);
+				fixed4 col = i.alpha >  _Thickness ? fixed4(_Color.rgb, i.alpha) : fixed4(0,0,0,0);
 				return col;
 			}
 			ENDCG

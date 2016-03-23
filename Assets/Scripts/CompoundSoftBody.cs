@@ -4,16 +4,7 @@ using System.Collections.Generic;
 
 public class CompoundSoftBody : MonoBehaviour 
 {
-    private class Node
-    {
-        public Rigidbody2D body;
-        public CircleCollider2D collider;
-        public Node leftNode;
-        public Node rightNode;
-        public SpringJoint2D leftJoint;
-        public SpringJoint2D rightJoint;
-        public SpringJoint2D centerJoint;
-    }
+    
 
     [SerializeField]
     private Rigidbody2D _prototype;
@@ -21,10 +12,10 @@ public class CompoundSoftBody : MonoBehaviour
     private float _damping;
     [SerializeField]
     public float _frequency;
-    [SerializeField]
-    private int _startVertices;
-    [SerializeField]
-    private float _startSize = 1.0f;
+
+    
+    public int Vertices;
+    public float Size { get { return _radius * 2; } set { _radius = value / 2; } }
     
     
     private Mesh _mesh = null;
@@ -41,131 +32,213 @@ public class CompoundSoftBody : MonoBehaviour
 
     public void Init()
     {
-        _radius = _startSize / 2;
+        //Size = 1;
         _mesh = GetComponent<MeshFilter>().mesh;
         _mesh.MarkDynamic();
         _transform = transform;
-        CreateBody(_startVertices);        
+        CreateBody(Vertices);
         UpdateBody();
 
     }
     
 	void FixedUpdate () 
     {
-        
-        if (Input.GetKeyDown(KeyCode.A))
-        {
-            AddNode();
-        }
-        if (Input.GetKeyDown(KeyCode.G))
-        {
-            Grow(0.2f);
-        }
-
+        //if (Input.GetKeyDown(KeyCode.A))
+        //{
+        //    AddNode(0.2f);
+        //}
+        //if (Input.GetKeyDown(KeyCode.G))
+        //{
+        //    Grow(0.2f);
+        //}
+        //if (Input.GetKeyDown(KeyCode.S))
+        //{
+        //    Grow(-0.2f);
+        //}
+        //if ((Input.GetKeyDown(KeyCode.Space)))
+        //{
+        //    RemoveNode(_nodes[Random.Range(0, _nodes.Count)].body, 0.2f);
+        //}
         UpdateVertices();
 	}
-    private void CreateBody(int vertexCount)
-    {
-        float angle = (2 * Mathf.PI) / vertexCount;
-        float initialOffset = Random.Range(0, Mathf.PI);
-        float randomOffsetSize = 0.25f;
-        _center = SoftBodyHelper.CreateRigidChild(gameObject, transform, Vector3.zero, _prototype, _radius, false);
-        _vertices.Add(Vector3.zero);
-        // add rigid bodies
-        for (int i = 0; i < vertexCount; i++)
-        {
-            Node node = new Node();
-            float randomOffset = Random.Range(-angle, angle) * randomOffsetSize;
-            float angleOffset = initialOffset - i * angle + randomOffset;
-            Vector3 position = new Vector3(Mathf.Cos(angleOffset), Mathf.Sin(angleOffset), 0) * _radius;
-            node.body = SoftBodyHelper.CreateRigidChild(new GameObject("Node"), _transform, position, _prototype, _radius);
-            node.collider = node.body.GetComponent<CircleCollider2D>();
-            _vertices.Add(position * 2); 
-            _nodes.Add(node);
-        }
-        
-        //add spring joints
-        for (int i = 0; i < _nodes.Count; i++)
-        {
-            Node node = _nodes[i];
-            Node right = _nodes[(i + 1) % _nodes.Count];
-            Node left = _nodes[i == 0 ? _nodes.Count - 1 : i - 1];            
-            node.centerJoint = SoftBodyHelper.CreateSpringJoint(node.body.gameObject, _center, _frequency, _damping);
-            node.leftNode = left;
-            node.leftJoint = SoftBodyHelper.CreateSpringJoint(node.body.gameObject, left.body, _frequency, _damping);
-            node.rightNode = right;
-            node.rightJoint = SoftBodyHelper.CreateSpringJoint(node.body.gameObject, right.body, _frequency, _damping);
-        }
-    }
 
     public void Grow(float by)
     {
         StartCoroutine(GrowRoutine(by));
     }
 
-    public void AddNode()
+    public void RemoveNode(Rigidbody2D body, float shrinkBy)
     {
-        StartCoroutine(AddNodeRoutine());
-    }
-    
-    private IEnumerator AddNodeRoutine()
-    {
-
-        int index = 1;// Random.Range(1, _nodes.Count - 1);
-        Node prev = _nodes[index - 1];
-        Node next = _nodes[index];
-        var pos = ((next.body.position - prev.body.position) * 0.5f);
-        Node newNode = new Node();
-        newNode.body = SoftBodyHelper.CreateRigidChild(new GameObject("NewNode"), _transform, pos, _prototype, _radius);
-        newNode.centerJoint = SoftBodyHelper.CreateSpringJoint(newNode.body.gameObject, _center, _frequency, _damping);
-        newNode.leftJoint = SoftBodyHelper.CreateSpringJoint(newNode.body.gameObject, prev.body, _frequency, _damping);
-        newNode.rightJoint = SoftBodyHelper.CreateSpringJoint(newNode.body.gameObject, next.body, _frequency, _damping);
-        newNode.collider = newNode.body.GetComponent<CircleCollider2D>();
-        newNode.leftNode = prev;
-        newNode.rightNode = next;
-
-        prev.rightNode = newNode;
-        prev.rightJoint.connectedBody = newNode.body;
-        next.leftNode = newNode;
-        next.leftJoint.connectedBody = newNode.body;
-
-        newNode.body.transform.SetSiblingIndex(index);
-        _nodes.Insert(index, newNode);
-        
-        float angle = (2 * Mathf.PI) / _nodes.Count;
-        float initialOffset = Random.Range(0, Mathf.PI);
-        float randomOffsetSize = 0.5f;
-        _vertices.Clear();
-        _vertices.Add(Vector3.zero);
-        for (int i = 0; i < _nodes.Count; i++)
-        {
-            float randomOffset = Random.Range(-angle, angle) * randomOffsetSize;
-            float angleOffset = initialOffset - i * angle + randomOffset;
-            Vector3 position = new Vector3(Mathf.Cos(angleOffset), Mathf.Sin(angleOffset), 0) * _radius;
-            _nodes[i].body.position = transform.TransformPoint(position);
-            _vertices.Add(position);
-        }
+        var positions = new List<Vector3>();
+        CachePositions(positions, _nodes);
+        Disassemble();
+        int index = _nodes.FindIndex(n => n.body.Equals(body));
+        _nodes.RemoveAt(index);
+        positions.RemoveAt(index);
+        _radius -= shrinkBy * 0.5f;
+        _center.GetComponent<CircleCollider2D>().radius = _radius;
+        CreateVerticies(_nodes, _vertices);
+        Assemble();
         UpdateBody();
-        yield return new WaitForSeconds(1.0f);
-        UpdateDistances();        
+        RevertPositions(positions, _nodes);
+        Destroy(body.gameObject);
+    }
+
+    public void AddNode(float growBy)
+    {
+        List<Vector3> oldPos = new List<Vector3>();
+        CachePositions(oldPos, _nodes);
+        Disassemble();
+        int index = Random.Range(1, _nodes.Count - 1);
+
+        int prev = index == 0 ? _nodes.Count - 1 : index - 1;
+        int next = (index + 1) % _nodes.Count;
+        _nodes.Insert(index, new Node());
+        _nodes[index].body = SoftBodyHelper.CreateRigidChild(new GameObject("New Node"), _transform, 
+            Vector3.zero, _prototype, 0.1f);
+        _nodes[index].collider = _nodes[index].body.GetComponent<CircleCollider2D>();
+        _radius += growBy * 0.5f;
+        _center.GetComponent<CircleCollider2D>().radius = _radius;
+        CreateVerticies(_nodes, _vertices);
+        oldPos.Insert(index, (_nodes[prev].body.position + _nodes[next].body.position) / 2);
+        Assemble();
+        UpdateBody();
+        RevertPositions(oldPos, _nodes);        
     }
 
     private IEnumerator GrowRoutine(float by)
     {
-        _radius += by * 0.5f;
-        _center.GetComponent<CircleCollider2D>().radius = _radius;
+        Disassemble();
+        List<Vector3> velocities = new List<Vector3>();
         foreach (var node in _nodes)
         {
-            node.centerJoint.distance = _radius;
-            node.collider.radius = _radius;
-            node.body.AddForce((node.body.position - _center.position) * 10, ForceMode2D.Impulse);
-            yield return new WaitForSeconds(0.1f);
+
+            velocities.Add(node.body.velocity);
         }
-        yield return new WaitForSeconds(1.0f);        
-        //not too sure about this
-        UpdateDistances();
+        _radius += by * 0.5f;
+        _center.GetComponent<CircleCollider2D>().radius = _radius;
+        CreateVerticies(_nodes, _vertices);
+        Assemble();
+
+        for(int i= 0; i < _nodes.Count; i++)
+        {
+            _nodes[i].body.velocity = velocities[i];
+        }
+
+        for (int i = 0; i < _nodes.Count; i++)
+        {
+            _nodes[i].body.AddForce(_nodes[i].body.transform.localPosition, ForceMode2D.Impulse);
+        }
+        yield return new WaitForSeconds(0.2f);
     }
-  
+    public int ChildIndex(Rigidbody2D child)
+    {
+        return _nodes.FindIndex(n => n.body.Equals(child));
+    }
+    public Rigidbody2D ChildAtIndex(int index)
+    {
+        return index > _nodes.Count - 1 ? _nodes[_nodes.Count - 1].body : _nodes[index].body;
+    }
+
+    #region creation
+    private void CreateBody(int vertexCount)
+    {
+        _center = SoftBodyHelper.CreateRigidChild(gameObject, transform, Vector3.zero, _prototype, _radius, false);
+
+        // add rigid bodies
+        CreateNodes(_nodes, vertexCount);
+        // set verticies
+        CreateVerticies(_nodes, _vertices);
+        //add spring joints
+        Assemble();
+    }
+
+    private void CreateNodes(List<Node> nodes, int count)
+    {
+        for (int i = 0; i < count; i++)
+        {
+            Node node = new Node();
+            node.body = SoftBodyHelper.CreateRigidChild(new GameObject("Node" + i.ToString()), _transform, Vector3.zero, _prototype, .1f);
+            node.collider = node.body.GetComponent<CircleCollider2D>();
+            nodes.Add(node);
+        }
+    }
+
+    private void CreateVerticies(List<Node> nodes, List<Vector3> verticies)
+    {
+        float angle = (2 * Mathf.PI) / nodes.Count;
+        float initialOffset = Random.Range(0, Mathf.PI);
+        float randomOffsetSize = 0.25f;
+        _vertices.Clear();
+        _vertices.Add(Vector3.zero);
+        for (int i = 0; i < nodes.Count; i++)
+        {
+            float randomOffset = Random.Range(-angle, angle) * randomOffsetSize;
+            float angleOffset = initialOffset - i * angle + randomOffset;
+            Vector3 position = new Vector3(Mathf.Cos(angleOffset), Mathf.Sin(angleOffset), 0) * _radius;
+            nodes[i].body.position = _transform.TransformPoint(position);
+            _vertices.Add(position * 2);
+        }
+    }
+    #endregion
+    #region utility
+    private void CachePositions(List<Vector3> positoins, List<Node> nodes)
+    {
+        foreach (var node in nodes)
+        {
+            positoins.Add(node.body.position);
+        }
+
+    }
+    private void RevertPositions(List<Vector3> positoins, List<Node> nodes)
+    {
+        for (int i = 0; i < nodes.Count; i++)
+        {
+            nodes[i].body.position = positoins[i];
+        }
+    }
+
+    private void Assemble()
+    {
+        //add spring joints
+        for (int i = 0; i < _nodes.Count; i++)
+        {
+            Node node = _nodes[i];
+            node.SetNode(Node.JointType.Left, _nodes[i == 0 ? _nodes.Count - 1 : i - 1], _frequency, _damping);
+            node.SetNode(Node.JointType.Right, _nodes[(i + 1) % _nodes.Count], _frequency, _damping);
+            node.SetBody(Node.JointType.Center, _center, _frequency, _damping);
+            node.collider.radius = Mathf.Min(
+                                                Vector3.Distance(node.body.position, _center.position),
+                                                Vector3.Distance(node.body.position, _nodes[i == 0 ? _nodes.Count - 1 : i - 1].body.position),
+                                                Vector3.Distance(node.body.position, _nodes[(i + 1) % _nodes.Count].body.position)
+                                            );
+        }
+    }
+
+    private void Disassemble()
+    {
+        for (int i = 0; i < _nodes.Count; i++)
+        {
+            for (var type = Node.JointType.Center; type <= Node.JointType.Right; type++)
+            {
+                _nodes[i].ClearNode(type);
+            }
+        }
+    }
+
+    private IEnumerator UpdateDistances()
+    {
+        foreach (var node in _nodes)
+        {
+            node.JointCenter.distance = Vector3.Distance(node.body.position, _center.position);
+            node.JointLeft.distance = Vector3.Distance(node.NodeLeft.body.position, node.body.position);
+            node.JointRight.distance = Vector3.Distance(node.NodeRight.body.position, node.body.position);
+            
+        }
+        yield return null;
+    }
+    #endregion
+    #region drawing
     public void UpdateBody()
     {
         _triangles.Clear();
@@ -202,14 +275,7 @@ public class CompoundSoftBody : MonoBehaviour
             _vertices[i + 1] = pos + pos.normalized * (_nodes[i].collider.radius);
         }
         _mesh.SetVertices(_vertices);
+        Vertices = _vertices.Count - 1;
     }
-    private void UpdateDistances()
-    {
-        foreach (var node in _nodes)
-        {
-            node.centerJoint.connectedBody = _center;
-            node.leftJoint.connectedBody = node.leftNode.body;
-            node.rightJoint.connectedBody = node.rightNode.body;
-        }
-    }
+    #endregion
 }

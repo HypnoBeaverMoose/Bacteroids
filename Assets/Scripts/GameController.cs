@@ -37,6 +37,10 @@ public class GameController : MonoBehaviour {
     private float _radius;
     [SerializeField]
     private float _scorePerKill;
+    [SerializeField]
+    private float _startBacteriaSize;
+    [SerializeField]
+    private int _startBacteriaVertices;
 
     private List<GameObject> _enemies = new List<GameObject>();
     private Player _player;
@@ -85,9 +89,13 @@ public class GameController : MonoBehaviour {
         _endScreen.gameObject.SetActive(true);
     }
 
-    public GameObject SpawnEnemy(Vector2 position)
+    public GameObject SpawnBacteria(Vector2 position, float size, int vertices)
     {
         var go = (GameObject)Instantiate(_enemyPrefab, position, Quaternion.identity);
+        var body = go.GetComponent<CompoundSoftBody>();
+        body.Size = size;
+        body.Vertices = vertices;
+        _enemies.Add(go);
         return go;
     }
 
@@ -100,7 +108,6 @@ public class GameController : MonoBehaviour {
         }
 
         return pos;
-
     }
 
     private float GetSpawnTime()
@@ -125,7 +132,7 @@ public class GameController : MonoBehaviour {
             _spawnTimer -= Time.deltaTime;
             if (_spawnTimer <= 0 || _enemies.Count == 0)
             {
-                _enemies.Add(SpawnEnemy(FindSpawnPos()));
+                SpawnBacteria(FindSpawnPos(), _startBacteriaSize, 4);
                 _spawnTimer = GetSpawnTime();
             }
         }

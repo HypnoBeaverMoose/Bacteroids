@@ -6,13 +6,18 @@ public static class SoftBodyHelper
     public static SpringJoint2D CreateSpringJoint(GameObject obj, Rigidbody2D anchor, float frequency, float damping)
     {
         var spring = obj.AddComponent<SpringJoint2D>();
+        SetSpringJointAnchor(spring, anchor, frequency, damping);
+        return spring;
+    }
+
+    public static void SetSpringJointAnchor(SpringJoint2D spring, Rigidbody2D anchor, float frequency, float damping)
+    {
         spring.connectedBody = anchor;
-        spring.distance = (obj.transform.position - anchor.transform.position).magnitude;
+        spring.distance = (anchor.transform.position - spring.transform.position).magnitude;
         spring.frequency = frequency;
         spring.dampingRatio = damping;
-        spring.autoConfigureConnectedAnchor = true;
+        spring.autoConfigureConnectedAnchor = false;
         spring.autoConfigureDistance = false;
-        return spring;
     }
 
     public static Rigidbody2D CreateRigidChild(GameObject go, Transform parent, Vector3 position, Rigidbody2D prototype, float radius, bool setPos = true)
