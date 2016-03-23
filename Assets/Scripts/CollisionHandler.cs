@@ -11,7 +11,6 @@ public class CollisionHandler : MonoBehaviour
         _bacteria = GetComponentInParent<Bacteria>();
 	}
 
-
     private void OnCollisionEnter2D(Collision2D collision)
     {
         if (_bacteria != null)
@@ -20,4 +19,20 @@ public class CollisionHandler : MonoBehaviour
         }
     }
 
+    private void OnTriggerEnter2D(Collider2D other)
+    {
+        if (_bacteria != null)
+        {
+            _bacteria.OnTriggerEnterChild(GetComponent<Rigidbody2D>(), other);
+        } 
+    }
+
+
+    private void OnTriggerExit2D(Collider2D other)
+    {
+        if (_bacteria != null)
+        {
+            _bacteria.OnTriggerExitChild(GetComponent<Rigidbody2D>(), other);
+        }
+    }
 }

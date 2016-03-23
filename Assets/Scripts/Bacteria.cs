@@ -38,7 +38,8 @@ public class Bacteria : MonoBehaviour
     private Material _material;
     private float _growTimer;
     private float _moveTimer;
-    private bool _nearPlayer = false;
+    private List<Rigidbody2D> _childrenNearPlayer = new List<Rigidbody2D>();
+    private bool _nearPlayer { get { return _childrenNearPlayer.Count > 0; } }
     private void Awake()
     {
         _softbody = gameObject.GetComponent<CompoundSoftBody>();
@@ -171,20 +172,36 @@ public class Bacteria : MonoBehaviour
         }
     }
 
-    private void OnTriggerEnter2D(Collider2D other)
+    //private void OnTriggerEnter2D(Collider2D other)
+    //{
+    //    if (other.CompareTag("Player"))
+    //    {
+    //        _nearPlayer = true;
+    //    }
+    //}
+
+    //private void OnTriggerExit2D(Collider2D other)
+    //{
+    //    if (other.CompareTag("Player"))
+    //    {
+    //        _nearPlayer = false;
+    //    }
+    //}
+
+
+    public void OnTriggerEnterChild(Rigidbody2D rigidbody2D, Collider2D other)
     {
-        if (other.CompareTag("Player"))
+        if (other.CompareTag("Player") && !_childrenNearPlayer.Contains(rigidbody2D))
         {
-            _nearPlayer = true;
+            _childrenNearPlayer.Add(rigidbody2D);
         }
     }
 
-    private void OnTriggerExit2D(Collider2D other)
+    public void OnTriggerExitChild(Rigidbody2D rigidbody2D, Collider2D other)
     {
-        if (other.CompareTag("Player"))
+        if (other.CompareTag("Player") && _childrenNearPlayer.Contains(rigidbody2D))
         {
-            _nearPlayer = false;
+            _childrenNearPlayer.Remove(rigidbody2D);
         }
     }
-
 }
