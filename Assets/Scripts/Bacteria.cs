@@ -6,10 +6,13 @@ using System.Collections.Generic;
 public class Bacteria : MonoBehaviour 
 {
     public static int EnergyMultiplier = 100;
-    public static int DamageMultiplier = 30; 
+    public static int DamageMultiplier = 30;
 
+    
     [SerializeField]
     private AnimationCurve _thickness;
+    [SerializeField]
+    private float _moveForce;
     [SerializeField]
     private float _addThreshold = 0.6f;
     [SerializeField]
@@ -34,12 +37,14 @@ public class Bacteria : MonoBehaviour
     private CompoundSoftBody _softbody;
     private Material _material;
     private float _growTimer;
-    private bool _consumed = false;
+    private float _moveTimer;
+    private bool _nearPlayer = false;
     private void Awake()
     {
         _softbody = gameObject.GetComponent<CompoundSoftBody>();
         _material = gameObject.GetComponent<Renderer>().material;        
         _growTimer = Random.Range(_growIntervalMin, _growIntervalMax);
+        _moveTimer = Random.Range(_growIntervalMin, _growIntervalMax) / 2;
     }
 
     private void Start()
@@ -118,7 +123,7 @@ public class Bacteria : MonoBehaviour
     {
         float thickness = _thickness.Evaluate(_softbody.Size);
         _material.SetFloat("_Thickness", thickness);
-        if (!_consumed && isEnergy && thickness > 0)
+        if (!_nearPlayer && isEnergy && thickness > 0)
         {
             SetLayer(LayerMask.NameToLayer("Bacteria"));
         }
@@ -126,8 +131,23 @@ public class Bacteria : MonoBehaviour
         {
             SetLayer(LayerMask.NameToLayer("Energy"));
         }
-
+        _moveTimer -= isEnergy ? 0 : Time.deltaTime;
         _growTimer -= _softbody.Size < _maxSize ? Time.deltaTime : 0;
+
+        if (_moveTimer < 0)
+        {
+            Vector3 direction = Random.insideUnitCircle.normalized;
+            float mult = 1;
+            if (_nearPlayer)
+            {
+                mult = 2;
+                direction = (FindObjectOfType<Player>().transform.position - transform.position).normalized;
+            }
+            var hit = Physics2D.Raycast(transform.position + direction * _softbody.Size, -direction, 100, LayerMask.GetMask("Bacteria"));
+            hit.rigidbody.AddForce(direction * _moveForce * mult, ForceMode2D.Impulse);
+            _moveTimer = Random.Range(_growIntervalMin, _growIntervalMax) / 2;
+        }
+
         if (_growTimer < 0.0f)
         {
             if (_softbody.Size < _addThreshold)
@@ -155,7 +175,7 @@ public class Bacteria : MonoBehaviour
     {
         if (other.CompareTag("Player"))
         {
-            _consumed = true;
+            _nearPlayer = true;
         }
     }
 
@@ -163,7 +183,7 @@ public class Bacteria : MonoBehaviour
     {
         if (other.CompareTag("Player"))
         {
-            _consumed = false;
+            _nearPlayer = false;
         }
     }
 

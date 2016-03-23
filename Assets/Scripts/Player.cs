@@ -48,6 +48,19 @@ public class
 	
 	void Update () 
     {
+        if (Energy <= 0)
+        {
+            //transform.position = Vector3.zero;
+            //Energy = _startingEnergy;
+            //_rigidbody.velocity = Vector3.zero;
+            //_rigidbody.angularVelocity = 0;
+
+            if (OnPlayerKilled != null)
+            {
+                OnPlayerKilled();
+            }
+        }
+
         Energy += _idleEnergyBonus * Time.deltaTime;
         Force = Mathf.Max(0, Input.GetAxis("Vertical"));
         Angle = Input.GetAxis("Horizontal");
@@ -68,18 +81,7 @@ public class
             Energy -= _shootEnergyCost;
         }
 
-        if (Energy <= 0)
-        {
-            //transform.position = Vector3.zero;
-            //Energy = _startingEnergy;
-            //_rigidbody.velocity = Vector3.zero;
-            //_rigidbody.angularVelocity = 0;
-  
-            if (OnPlayerKilled != null)
-            {
-                OnPlayerKilled();
-            }
-        }
+
 	}
 
     void FixedUpdate()
