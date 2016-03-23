@@ -32,7 +32,6 @@ public class CompoundSoftBody : MonoBehaviour
 
     public void Init()
     {
-        //Size = 1;
         _mesh = GetComponent<MeshFilter>().mesh;
         _mesh.MarkDynamic();
         _transform = transform;
@@ -70,24 +69,31 @@ public class CompoundSoftBody : MonoBehaviour
     public void RemoveNode(Rigidbody2D body, float shrinkBy)
     {
         var positions = new List<Vector3>();
+        var velocities = new List<Vector3>();
         CachePositions(positions, _nodes);
+        CacheVelocities(velocities, _nodes);
         Disassemble();
         int index = _nodes.FindIndex(n => n.body.Equals(body));
         _nodes.RemoveAt(index);
         positions.RemoveAt(index);
+        velocities.RemoveAt(index);
         _radius -= shrinkBy * 0.5f;
         _center.GetComponent<CircleCollider2D>().radius = _radius;
         CreateVerticies(_nodes, _vertices);
         Assemble();
         UpdateBody();
         RevertPositions(positions, _nodes);
+        RestoreVelocities(velocities, _nodes);
         Destroy(body.gameObject);
     }
 
     public void AddNode(float growBy)
     {
         List<Vector3> oldPos = new List<Vector3>();
+        List<Vector3> velocities = new List<Vector3>();
+
         CachePositions(oldPos, _nodes);
+        CacheVelocities(velocities, _nodes);
         Disassemble();
         int index = Random.Range(1, _nodes.Count - 1);
 
@@ -101,30 +107,24 @@ public class CompoundSoftBody : MonoBehaviour
         _center.GetComponent<CircleCollider2D>().radius = _radius;
         CreateVerticies(_nodes, _vertices);
         oldPos.Insert(index, (_nodes[prev].body.position + _nodes[next].body.position) / 2);
+        velocities.Insert(index, Vector3.zero);
         Assemble();
         UpdateBody();
-        RevertPositions(oldPos, _nodes);        
+        RevertPositions(oldPos, _nodes);
+        RestoreVelocities(velocities, _nodes);
     }
 
     private IEnumerator GrowRoutine(float by)
     {
         Disassemble();
         List<Vector3> velocities = new List<Vector3>();
-        foreach (var node in _nodes)
-        {
-
-            velocities.Add(node.body.velocity);
-        }
+        CacheVelocities(velocities, _nodes);
         _radius += by * 0.5f;
         _center.GetComponent<CircleCollider2D>().radius = _radius;
         CreateVerticies(_nodes, _vertices);
         Assemble();
 
-        for(int i= 0; i < _nodes.Count; i++)
-        {
-            _nodes[i].body.velocity = velocities[i];
-        }
-
+        RestoreVelocities(velocities, _nodes);
         for (int i = 0; i < _nodes.Count; i++)
         {
             _nodes[i].body.AddForce(_nodes[i].body.transform.localPosition, ForceMode2D.Impulse);
@@ -139,6 +139,7 @@ public class CompoundSoftBody : MonoBehaviour
     {
         return index > _nodes.Count - 1 ? _nodes[_nodes.Count - 1].body : _nodes[index].body;
     }
+
 
     #region creation
     private void CreateBody(int vertexCount)
@@ -236,6 +237,22 @@ public class CompoundSoftBody : MonoBehaviour
             
         }
         yield return null;
+    }
+    public void CacheVelocities(List<Vector3> velocities, List<Node> nodes)
+    {
+        foreach (var node in _nodes)
+        {
+            velocities.Add(node.body.velocity);
+        }
+    }
+
+    public void RestoreVelocities(List<Vector3> velocities, List<Node> nodes)
+    {
+        for (int i = 0; i < nodes.Count; i++)
+        {
+            nodes[i].body.velocity = velocities[i];
+        }
+
     }
     #endregion
     #region drawing
