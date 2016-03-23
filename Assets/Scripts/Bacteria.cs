@@ -97,6 +97,10 @@ public class Bacteria : MonoBehaviour
     {
         yield return null;
         int index = _softbody.ChildIndex(child);
+        if (index == -1)
+        {
+            yield break;
+        }
         if (_softbody.Vertices > 4)
         {
             _softbody.RemoveNode(child, _growAmount);
@@ -139,7 +143,7 @@ public class Bacteria : MonoBehaviour
         {
             Vector3 direction = Random.insideUnitCircle.normalized;
             float mult = 1;
-            if (_nearPlayer)
+            if (_nearPlayer && FindObjectOfType<Player>() != null)
             {
                 mult = 2;
                 direction = (FindObjectOfType<Player>().transform.position - transform.position).normalized;
@@ -171,23 +175,6 @@ public class Bacteria : MonoBehaviour
             transform.GetChild(i).gameObject.layer = layer;
         }
     }
-
-    //private void OnTriggerEnter2D(Collider2D other)
-    //{
-    //    if (other.CompareTag("Player"))
-    //    {
-    //        _nearPlayer = true;
-    //    }
-    //}
-
-    //private void OnTriggerExit2D(Collider2D other)
-    //{
-    //    if (other.CompareTag("Player"))
-    //    {
-    //        _nearPlayer = false;
-    //    }
-    //}
-
 
     public void OnTriggerEnterChild(Rigidbody2D rigidbody2D, Collider2D other)
     {

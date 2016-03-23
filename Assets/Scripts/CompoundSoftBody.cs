@@ -4,15 +4,20 @@ using System.Collections.Generic;
 
 public class CompoundSoftBody : MonoBehaviour 
 {
-    
+    [SerializeField]
+    private AnimationCurve _FrequencySize;
+    [SerializeField]
+    private AnimationCurve _DampingOverSize;
+    [SerializeField]
+    private AnimationCurve _DragOverSize;
 
+ 
     [SerializeField]
     private Rigidbody2D _prototype;
     [SerializeField]
     private float _damping;
-    [SerializeField]
+    [SerializeField] 
     public float _frequency;
-
     
     public int Vertices;
     public float Size { get { return _radius * 2; } set { _radius = value / 2; } }
@@ -43,22 +48,23 @@ public class CompoundSoftBody : MonoBehaviour
     
 	void FixedUpdate () 
     {
-        //if (Input.GetKeyDown(KeyCode.A))
-        //{
-        //    AddNode(0.2f);
-        //}
-        //if (Input.GetKeyDown(KeyCode.G))
-        //{
-        //    Grow(0.2f);
-        //}
-        //if (Input.GetKeyDown(KeyCode.S))
-        //{
-        //    Grow(-0.2f);
-        //}
-        //if ((Input.GetKeyDown(KeyCode.Space)))
-        //{
-        //    RemoveNode(_nodes[Random.Range(0, _nodes.Count)].body, 0.2f);
-        //}
+        for (int i = 0; i < _nodes.Count; i++)
+        {
+            float freq = _FrequencySize.Evaluate(Size);
+            float damping = _DampingOverSize.Evaluate(Size);
+            float drag = _DragOverSize.Evaluate(Size);
+            _nodes[i].body.drag = drag;
+            _nodes[i].JointCenter.frequency = freq;
+            _nodes[i].JointLeft.frequency = freq;
+            _nodes[i].JointRight.frequency = freq;
+
+
+
+            _nodes[i].JointCenter.dampingRatio = damping;
+            _nodes[i].JointLeft.dampingRatio = damping;
+            _nodes[i].JointRight.dampingRatio = damping;
+        }
+        _center.drag = _DragOverSize.Evaluate(Size);
         UpdateVertices();
 	}
 
@@ -138,6 +144,7 @@ public class CompoundSoftBody : MonoBehaviour
     }
     public Rigidbody2D ChildAtIndex(int index)
     {
+        Debug.Log(_nodes.Count + "    " + index);        
         return index > (_nodes.Count - 1) ? _nodes[_nodes.Count - 1].body : _nodes[index].body;
     }
 
