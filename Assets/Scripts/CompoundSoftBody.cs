@@ -144,7 +144,7 @@ public class CompoundSoftBody : MonoBehaviour
     }
     public Rigidbody2D ChildAtIndex(int index)
     {
-        Debug.Log(_nodes.Count + "    " + index);        
+        ///Debug.Log(_nodes.Count + "    " + index);        
         return index > (_nodes.Count - 1) ? _nodes[_nodes.Count - 1].body : _nodes[index].body;
     }
 

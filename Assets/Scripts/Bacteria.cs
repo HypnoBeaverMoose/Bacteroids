@@ -101,19 +101,21 @@ public class Bacteria : MonoBehaviour
         {
             yield break;
         }
+        float chunkSize = Mathf.Lerp(0.1f, 0.2f, Vector3.Dot(collision.relativeVelocity.normalized, -collision.contacts[0].normal));
         if (_softbody.Vertices > 4)
         {
-            _softbody.RemoveNode(child, _growAmount);
+            _softbody.RemoveNode(child, chunkSize);
         }
         else
-        {            
-            _softbody.Grow(-_growAmount);
-        }        
+        {
+            _softbody.Grow(-chunkSize);
+        }
+        Debug.Log(chunkSize);
         _softbody.ChildAtIndex(index).AddForceAtPosition(collision.relativeVelocity.magnitude * 
             collision.contacts[0].normal / 2, collision.contacts[0].point, ForceMode2D.Impulse);
         yield return new WaitForSeconds(0.1f);
         
-        var bacteria = FindObjectOfType<GameController>().SpawnBacteria(collision.contacts[0].point, 0.1f, 4);
+        var bacteria = FindObjectOfType<GameController>().SpawnBacteria(collision.contacts[0].point, chunkSize, 4);
         var dir = Random.insideUnitCircle;
         if (Vector3.Dot(dir, collision.relativeVelocity.normalized) < 0)
         {
