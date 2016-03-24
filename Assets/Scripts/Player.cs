@@ -7,7 +7,8 @@ public class
 
     public delegate void PlayerKilled();
     public event PlayerKilled OnPlayerKilled;
-
+    public float EnergyThreshold = 30;
+    public bool NoDNA { get; private set; }
     public float Force { get; private set; }
     public float Angle { get; private set; }
     public float Energy { get { return _energy; } set { _energy = Mathf.Clamp(value, 0, _startingEnergy); } }
@@ -39,22 +40,23 @@ public class
 
 	void Start () 
     {
+        NoDNA = false;
         Force = 0;
         Angle = 0;
         Energy = _startingEnergy;
         _rigidbody = GetComponent<Rigidbody2D>();
 	}
-	
+    private IEnumerator NoDNARoutine()
+    {
+        Energy += 30;
+        yield return new WaitForSeconds(0.7f);
+        NoDNA = false;
+    }
 	
 	void Update () 
     {
         if (Energy <= 0)
         {
-            //transform.position = Vector3.zero;
-            //Energy = _startingEnergy;
-            //_rigidbody.velocity = Vector3.zero;
-            //_rigidbody.angularVelocity = 0;
-
             if (OnPlayerKilled != null)
             {
                 OnPlayerKilled();
@@ -65,7 +67,16 @@ public class
         Force = Mathf.Max(0, Input.GetAxis("Vertical"));
         Angle = Input.GetAxis("Horizontal");
 
-        if(Energy <= 10)
+        if (Energy < EnergyThreshold)
+        {
+            if (!NoDNA)
+            {
+                StartCoroutine(NoDNARoutine());
+            }
+            NoDNA = true;
+        }
+
+        if (NoDNA)
         {
             Force = Angle = 0;            
         }
@@ -75,13 +86,11 @@ public class
             _engineParticles.Emit(1);            
         }
 
-        if(Input.GetKeyDown( KeyCode.Space) && Energy > 10)    
+        if (Input.GetKeyDown(KeyCode.Space) && !NoDNA)    
         {
             Instantiate(_projectilePrefab, transform.position + transform.up* 0.5f, transform.localRotation);
             Energy -= _shootEnergyCost;
         }
-
-
 	}
 
     void FixedUpdate()
