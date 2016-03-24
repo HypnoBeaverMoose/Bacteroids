@@ -52,6 +52,11 @@ public class EndScreen : MonoBehaviour {
 
         if (Input.GetKeyDown(KeyCode.Space))
         {
+            if(_nameInput.text != "___")
+            {
+                HighScores.Add(_nameInput.text, (int)FindObjectOfType<GameController>().Score);
+                HighScores.Save();
+            }
             if (OnEndGame != null)
             {
                 OnEndGame();

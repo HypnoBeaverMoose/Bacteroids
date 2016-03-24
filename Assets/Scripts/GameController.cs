@@ -3,28 +3,16 @@ using System.Collections;
 using System.Collections.Generic;
 
 
-public class GameController : MonoBehaviour {
+public class GameController : MonoBehaviour 
+{
 
-
-    //public int WaveNumber { get; private set; }
-    //public int StartEnemies = 1;
-    //public int SpawnTime = 60;
-    //public int EnemyInc = 5;
-    //public int WaveTimeout = 3;
-
-
-    
-    //public delegate void WaveEndEvent(int timeout);
-    //public static event WaveEndEvent OnWaveEnd;
-
-    //private int _enemiesToSpawn;
-    //private float _spawnTimer;   
-    //private bool _waveStarted = false;
     public float Score { get; set; }
     public float Radius { get { return _radius; } }
 
     [SerializeField]
     private EndScreen _endScreen;
+    [SerializeField]
+    private HighScoreScreen _scoreScreen;
     [SerializeField]
     private  StartScreen _startScreen;
     [SerializeField]
@@ -52,13 +40,21 @@ public class GameController : MonoBehaviour {
         _startScreen.gameObject.SetActive(true);
         _startScreen.OnStartGame += StartGame;
         _endScreen.OnEndGame += EndGame;
+        _scoreScreen.OnSkipScores += SkipScores;
         _stopSpawn = true;
+        HighScores.Load();
+    }
+
+    void SkipScores()
+    {
+        _scoreScreen.gameObject.SetActive(false);
+        _startScreen.gameObject.SetActive(true);
     }
 
     void EndGame()
     {
         _endScreen.gameObject.SetActive(false);
-        _startScreen.gameObject.SetActive(true);
+        _scoreScreen.gameObject.SetActive(true);
     }
 
     private void StartGame()
