@@ -1,12 +1,15 @@
 ﻿using UnityEngine;
 using System.Collections;
+using UnityEngine.UI;
 
-public class 
-    
-    Player : MonoBehaviour {
+public class Player : MonoBehaviour 
+{
 
     public delegate void PlayerKilled();
     public event PlayerKilled OnPlayerKilled;
+    public delegate void ColorChanged(Color newColor);
+    public event ColorChanged OnColorChanged;
+
     public float EnergyThreshold = 30;
     public bool NoDNA { get; private set; }
     public float Force { get; private set; }
@@ -14,6 +17,20 @@ public class
     public float Energy { get { return _energy; } set { _energy = Mathf.Clamp(value, 0, _startingEnergy); } }
     public float MaxEnergy { get { return _startingEnergy; } }
 
+    public Color Color
+    {
+        get { return _color; }
+        set 
+        {
+            _color = value;
+            _playerSprite.color = _color;
+            _engineParticles.startColor = _color;
+            if (OnColorChanged != null)
+            {
+                OnColorChanged(_color);
+            }
+        }
+    }
 
     [SerializeField]
     private float _boostTimeout;
@@ -41,14 +58,18 @@ public class
     private ParticleSystem _engineParticles;
     [SerializeField]
     private GameObject _projectilePrefab;
+    [SerializeField]
+    private SpriteRenderer _playerSprite;
+
 
     private Rigidbody2D _rigidbody;
     private float _energy;
-    private float lastBoost = 0;
+    private float _lastBoost = 0;
+    private Color _color = Color.white;
 	void Start () 
     {
         NoDNA = false;
-        lastBoost = Time.time;
+        _lastBoost = Time.time;
         Force = 0;
         Angle = 0;
         Energy = _startingEnergy;
@@ -56,10 +77,10 @@ public class
 	}
     private IEnumerator NoDNARoutine()
     {
-        if (Time.time - lastBoost > _boostTimeout)
+        if (Time.time - _lastBoost > _boostTimeout)
         {
             Energy += _noEnergyBonus;
-            lastBoost = Time.time;
+            _lastBoost = Time.time;
         }
         yield return new WaitForSeconds(_noEnergyTimePenalty);
         NoDNA = false;
@@ -89,7 +110,8 @@ public class
         {
             if (Input.GetKeyDown(KeyCode.Space))
             {
-                Instantiate(_projectilePrefab, transform.position + transform.up * 0.5f, transform.localRotation);
+                var go = Instantiate(_projectilePrefab, transform.position + transform.up * 0.5f, transform.localRotation) as GameObject;
+                go.GetComponent<Projectile>().Color = Color;
                 Energy -= _shootEnergyCost;
             }
 

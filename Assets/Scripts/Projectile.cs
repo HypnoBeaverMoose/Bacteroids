@@ -6,11 +6,14 @@ public class Projectile : MonoBehaviour
 
     [SerializeField]
     private float _speed;
-    //[SerializeField]
-    //private ParticleSystem _explosion;
+    [SerializeField]
+    private SpriteRenderer _sprite;
+    public Color Color { get { return _sprite.color; } set { _sprite.color = value; } }
     private bool _destructionStarted = false;
-	void Start () {
+	void Start () 
+    {
         GetComponent<Rigidbody2D>().AddForce(transform.up * _speed);
+        
 	}
 	
 	// Update is called once per frame
@@ -36,12 +39,20 @@ public class Projectile : MonoBehaviour
         var explosion = Instantiate(Resources.Load<ParticleSystem>("explosion"));
         explosion.transform.SetParent(transform, false);
         explosion.Emit(30);
+        explosion.startColor = Color;
+        Destroy(explosion, 5);
         yield return new WaitForSeconds(1.0f);
         Destroy(gameObject);
     }
 
     void OnCollisionEnter2D(Collision2D collision)
-    {      
-        Kill();
+    {
+        //if (Color == Color.white || (collision.gameObject.CompareTag("Bacteria") && (collision.gameObject.GetComponent<Bacteria>().Color == Color
+        //    || collision.gameObject.GetComponent<Bacteria>().Color == Color.white)))
+        //{
+             
+        //}
+        Kill();   
+        
     }
 }

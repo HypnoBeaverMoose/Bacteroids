@@ -1,6 +1,7 @@
 ﻿using UnityEngine;
 using System.Collections;
 using System.Collections.Generic;
+using UnityEngine.UI;
 
 
 public class GameController : MonoBehaviour 
@@ -60,6 +61,7 @@ public class GameController : MonoBehaviour
     private void StartGame()
     {
         _player = Instantiate<GameObject>(_playerPrefab).GetComponent<Player>();
+        _player.OnColorChanged+= OnColorChanged;
         _player.OnPlayerKilled += PlayerKilled;
         _stopSpawn = false;
         _spawnTimer = GetSpawnTime();
@@ -77,6 +79,14 @@ public class GameController : MonoBehaviour
         Score = 0;        
     }
 
+    private void OnColorChanged(Color newColor)
+    {
+        foreach (var item in GetComponentsInChildren<SpriteRenderer>())
+        {
+            item.color = new Color(newColor.r, newColor.g, newColor.b, item.color.a);
+        }
+    }
+
     private void PlayerKilled()
     {
         _stopSpawn = true;
@@ -85,9 +95,10 @@ public class GameController : MonoBehaviour
         _endScreen.gameObject.SetActive(true);
     }
 
-    public GameObject SpawnBacteria(Vector2 position, float size, int vertices)
+    public GameObject SpawnBacteria(Vector2 position, float size, int vertices, Color color)
     {
         var go = (GameObject)Instantiate(_enemyPrefab, position, Quaternion.identity);
+        go.GetComponent<Bacteria>().Color = color;
         var body = go.GetComponent<CompoundSoftBody>();
         body.Size = size;
         body.Vertices = vertices;
@@ -111,6 +122,11 @@ public class GameController : MonoBehaviour
         return _spawnCurve.Evaluate(Time.time);
     }
 
+    private Color GetSpawnColor()
+    {
+        return Random.value < 0.5f ? Color.white : Random.ColorHSV(0, 1, 1, 1, 1.0f, 1.0f);
+    }
+
 	// Update is called once per frame
 	void Update () 
     {
@@ -128,7 +144,7 @@ public class GameController : MonoBehaviour
             _spawnTimer -= Time.deltaTime;
             if (_spawnTimer <= 0 || _enemies.Count == 0)
             {
-                SpawnBacteria(FindSpawnPos(), _startBacteriaSize, 4);
+                SpawnBacteria(FindSpawnPos(), _startBacteriaSize, 4, GetSpawnColor());
                 _spawnTimer = GetSpawnTime();
             }
         }
