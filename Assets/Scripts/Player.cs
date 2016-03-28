@@ -14,6 +14,13 @@ public class
     public float Energy { get { return _energy; } set { _energy = Mathf.Clamp(value, 0, _startingEnergy); } }
     public float MaxEnergy { get { return _startingEnergy; } }
 
+
+    [SerializeField]
+    private float _boostTimeout;
+    [SerializeField]
+    private float _noEnergyTimePenalty;
+    [SerializeField]
+    private float _noEnergyBonus;
     [SerializeField]
     private float _startingEnergy;
     [Space(10)]
@@ -37,10 +44,11 @@ public class
 
     private Rigidbody2D _rigidbody;
     private float _energy;
-
+    private float lastBoost = 0;
 	void Start () 
     {
         NoDNA = false;
+        lastBoost = Time.time;
         Force = 0;
         Angle = 0;
         Energy = _startingEnergy;
@@ -48,8 +56,12 @@ public class
 	}
     private IEnumerator NoDNARoutine()
     {
-        Energy += 30;
-        yield return new WaitForSeconds(0.7f);
+        if (Time.time - lastBoost > _boostTimeout)
+        {
+            Energy += _noEnergyBonus;
+            lastBoost = Time.time;
+        }
+        yield return new WaitForSeconds(_noEnergyTimePenalty);
         NoDNA = false;
     }
 	
@@ -67,38 +79,36 @@ public class
         Force = Mathf.Max(0, Input.GetAxis("Vertical"));
         Angle = Input.GetAxis("Horizontal");
 
-        if (Energy < EnergyThreshold)
+        if (Energy < EnergyThreshold && !NoDNA)
         {
-            if (!NoDNA)
-            {
-                StartCoroutine(NoDNARoutine());
-            }
             NoDNA = true;
+            StartCoroutine(NoDNARoutine());            
         }
 
-        if (NoDNA)
+        if (!NoDNA)
         {
-            Force = Angle = 0;            
-        }
+            if (Input.GetKeyDown(KeyCode.Space))
+            {
+                Instantiate(_projectilePrefab, transform.position + transform.up * 0.5f, transform.localRotation);
+                Energy -= _shootEnergyCost;
+            }
 
-        if (Force > 0)
-        {
-            _engineParticles.Emit(1);            
-        }
-
-        if (Input.GetKeyDown(KeyCode.Space) && !NoDNA)    
-        {
-            Instantiate(_projectilePrefab, transform.position + transform.up* 0.5f, transform.localRotation);
-            Energy -= _shootEnergyCost;
+            if (Force > 0)
+            {
+                _engineParticles.Emit(1);
+            }
         }
 	}
 
     void FixedUpdate()
     {
-        _rigidbody.AddForce(transform.up * Force * _forceMultiplier);
-        _rigidbody.AddTorque(-Angle * _torqueMultiplier);
+        if (!NoDNA)
+        {
+            _rigidbody.AddForce(transform.up * Force * _forceMultiplier);
+            _rigidbody.AddTorque(-Angle * _torqueMultiplier);
 
-        Energy -= Time.fixedDeltaTime * (Mathf.Abs(Force * _moveEnergyCost) + Mathf.Abs(Angle * _rotateEnergyCost));
+            Energy -= Time.fixedDeltaTime * (Mathf.Abs(Force * _moveEnergyCost) + Mathf.Abs(Angle * _rotateEnergyCost));
+        }
     }
 
     

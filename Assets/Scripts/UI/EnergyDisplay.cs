@@ -40,6 +40,8 @@ public class EnergyDisplay : MonoBehaviour
         }
         else
         {
+            _target.x = 0;
+            _energyBar.localScale = Vector3.SmoothDamp(_energyBar.localScale, _target, ref _velocity, _smoothTime);
             _player = FindObjectOfType<Player>();
         }
 	}

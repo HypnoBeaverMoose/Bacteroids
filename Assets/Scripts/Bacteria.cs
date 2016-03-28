@@ -5,8 +5,8 @@ using System.Collections.Generic;
 [RequireComponent(typeof(CompoundSoftBody))]
 public class Bacteria : MonoBehaviour 
 {
-    public static int EnergyMultiplier = 100;
-    public static int DamageMultiplier = 30;
+    public static int EnergyMultiplier = 200;
+    public static int DamageMultiplier = 60;
 
     
     [SerializeField]
