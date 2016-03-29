@@ -100,7 +100,7 @@ public class Player : MonoBehaviour
 
         Energy += _idleEnergyBonus * Time.deltaTime;
         Force = Mathf.Max(0, Input.GetAxis("Vertical"));
-        Angle = Input.GetAxis("Horizontal");
+        Angle = Input.GetAxis("Horizontal") * Time.fixedDeltaTime; ;
 
         if (Energy < EnergyThreshold && !NoDNA)
         {
@@ -129,7 +129,7 @@ public class Player : MonoBehaviour
         if (!NoDNA)
         {
             _rigidbody.AddForce(transform.up * Force * _forceMultiplier);
-            _rigidbody.AddTorque(-Angle * _torqueMultiplier);
+            _rigidbody.rotation += Angle * _torqueMultiplier;
 
             Energy -= Time.fixedDeltaTime * (Mathf.Abs(Force * _moveEnergyCost) + Mathf.Abs(Angle * _rotateEnergyCost));
         }

@@ -119,16 +119,13 @@ public class Bacteria : MonoBehaviour
         yield return new WaitForSeconds(0.1f);
         
         var bacteria = FindObjectOfType<GameController>().SpawnBacteria(collision.contacts[0].point, chunkSize, 4, Color);
-        var dir = Random.insideUnitCircle;
-        if (Vector3.Dot(dir, collision.relativeVelocity.normalized) < 0)
-        {
-            dir *= -1;
-        }
+        var dir = Random.insideUnitCircle.normalized;
         yield return null;
         if (bacteria != null)
         {
-            bacteria.GetComponent<Rigidbody2D>().AddForce(dir * 10, ForceMode2D.Impulse);
+            bacteria.GetComponent<Rigidbody2D>().AddForce(dir * 20, ForceMode2D.Impulse);
         }
+
     }
 
     private void Update()
