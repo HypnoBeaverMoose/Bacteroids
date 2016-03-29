@@ -3,7 +3,6 @@ using System.Collections;
 
 public class Projectile : MonoBehaviour
 {
-
     [SerializeField]
     private float _speed;
     [SerializeField]

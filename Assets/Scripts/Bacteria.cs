@@ -6,8 +6,7 @@ using System.Collections.Generic;
 public class Bacteria : MonoBehaviour 
 {
     public static int EnergyMultiplier = 200;
-    public static int DamageMultiplier = 60;
-
+    public static int DamageMultiplier = 50;
     
     [SerializeField]
     private AnimationCurve _thickness;
@@ -75,7 +74,6 @@ public class Bacteria : MonoBehaviour
                 collision.gameObject.GetComponent<Player>().Energy += Energy;
                 collision.gameObject.GetComponent<Player>().Color = Color;
                 Destroy(gameObject);
-
             }
             else
             {
@@ -84,7 +82,7 @@ public class Bacteria : MonoBehaviour
                 {
                     dir *=-1;
                 }
-
+                collision.gameObject.GetComponent<Player>().Color = Color;
                 collision.rigidbody.AddForceAtPosition(_hitbackForce * _softbody.Size * dir, collision.contacts[0].point, ForceMode2D.Impulse);
                 child.AddForceAtPosition(-_hitbackForce * _softbody.Size * dir, collision.contacts[0].point, ForceMode2D.Impulse);
 

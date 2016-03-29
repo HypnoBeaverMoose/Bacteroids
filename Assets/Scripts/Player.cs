@@ -15,7 +15,7 @@ public class Player : MonoBehaviour
     public float Force { get; private set; }
     public float Angle { get; private set; }
     public float Energy { get { return _energy; } set { _energy = Mathf.Clamp(value, 0, _startingEnergy); } }
-    public float MaxEnergy { get { return _startingEnergy; } }
+    public float MaxEnergy { get { return _startingEnergy; }  }
 
     public Color Color
     {
@@ -66,6 +66,7 @@ public class Player : MonoBehaviour
     private float _energy;
     private float _lastBoost = 0;
     private Color _color = Color.white;
+
 	void Start () 
     {
         NoDNA = false;
@@ -75,6 +76,7 @@ public class Player : MonoBehaviour
         Energy = _startingEnergy;
         _rigidbody = GetComponent<Rigidbody2D>();
 	}
+
     private IEnumerator NoDNARoutine()
     {
         if (Time.time - _lastBoost > _boostTimeout)

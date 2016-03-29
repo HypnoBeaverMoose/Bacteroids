@@ -11,6 +11,9 @@ public class GameController : MonoBehaviour
     public float Radius { get { return _radius; } }
 
     [SerializeField]
+    private Color[] _colors;
+
+    [SerializeField]
     private EndScreen _endScreen;
     [SerializeField]
     private HighScoreScreen _scoreScreen;
@@ -124,7 +127,7 @@ public class GameController : MonoBehaviour
 
     private Color GetSpawnColor()
     {
-        return Random.value < 0.5f ? Color.white : Random.ColorHSV(0, 1, 1, 1, 1.0f, 1.0f);
+        return Random.value < 0.3f ? Color.white : _colors[Random.Range(0, _colors.Length)];
     }
 
 	// Update is called once per frame
