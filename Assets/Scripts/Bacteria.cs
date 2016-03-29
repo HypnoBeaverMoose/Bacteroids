@@ -40,12 +40,13 @@ public class Bacteria : MonoBehaviour
     private Color _color;
     private List<Rigidbody2D> _childrenNearPlayer = new List<Rigidbody2D>();
     private bool _nearPlayer { get { return _childrenNearPlayer.Count > 0; } }
+
     private void Awake()
     {
         _softbody = gameObject.GetComponent<CompoundSoftBody>();
         _material = gameObject.GetComponent<Renderer>().material;        
         _growTimer = Random.Range(_growIntervalMin, _growIntervalMax);
-        _moveTimer = Random.Range(_growIntervalMin, _growIntervalMax) / 2;
+        //_moveTimer = Random.Range(_growIntervalMin, _growIntervalMax) / 2;
     }
 
     private void Start()
@@ -124,7 +125,10 @@ public class Bacteria : MonoBehaviour
             dir *= -1;
         }
         yield return null;
-        bacteria.GetComponent<Rigidbody2D>().AddForce(dir * 10, ForceMode2D.Impulse);
+        if (bacteria != null)
+        {
+            bacteria.GetComponent<Rigidbody2D>().AddForce(dir * 10, ForceMode2D.Impulse);
+        }
     }
 
     private void Update()

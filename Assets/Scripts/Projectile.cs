@@ -37,8 +37,8 @@ public class Projectile : MonoBehaviour
         GetComponent<Rigidbody2D>().angularVelocity = 0;
         var explosion = Instantiate(Resources.Load<ParticleSystem>("explosion"));
         explosion.transform.SetParent(transform, false);
-        explosion.Emit(30);
-        explosion.startColor = Color;
+        explosion.startColor = Color;        
+        explosion.Emit(30);        
         Destroy(explosion, 5);
         yield return new WaitForSeconds(1.0f);
         Destroy(gameObject);

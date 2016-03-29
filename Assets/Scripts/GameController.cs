@@ -33,6 +33,8 @@ public class GameController : MonoBehaviour
     private float _startBacteriaSize;
     [SerializeField]
     private int _startBacteriaVertices;
+    [SerializeField]
+    private int _maxBacterias;
 
     private List<GameObject> _enemies = new List<GameObject>();
     private Player _player;
@@ -145,7 +147,7 @@ public class GameController : MonoBehaviour
             }
 
             _spawnTimer -= Time.deltaTime;
-            if (_spawnTimer <= 0 || _enemies.Count == 0)
+            if ((_spawnTimer <= 0 && _enemies.Count < _maxBacterias) || _enemies.Count == 0)
             {
                 SpawnBacteria(FindSpawnPos(), _startBacteriaSize, 4, GetSpawnColor());
                 _spawnTimer = GetSpawnTime();
