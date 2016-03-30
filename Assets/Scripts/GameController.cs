@@ -129,7 +129,7 @@ public class GameController : MonoBehaviour
 
     private Color GetSpawnColor()
     {
-        return Random.value < 0.3f ? Color.white : _colors[Random.Range(0, _colors.Length)];
+        return _colors[Random.Range(0, _colors.Length)];
     }
 
 	// Update is called once per frame
