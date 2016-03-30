@@ -6,7 +6,7 @@ using System.Collections.Generic;
 public class Bacteria : MonoBehaviour 
 {
     public static int EnergyMultiplier = 200;
-    public static int DamageMultiplier = 50;
+    public static int DamageMultiplier = 20;
     
     [SerializeField]
     private AnimationCurve _thickness;
@@ -74,7 +74,8 @@ public class Bacteria : MonoBehaviour
             {
                 collision.gameObject.GetComponent<Player>().Energy += Energy;
                 collision.gameObject.GetComponent<Player>().Color = Color;
-                Destroy(gameObject);
+                Physics2D.IgnoreCollision(child.GetComponent<CircleCollider2D>(), collision.collider);
+                Destroy(gameObject);                              
             }
             else
             {
@@ -116,14 +117,14 @@ public class Bacteria : MonoBehaviour
 
         _softbody.ChildAtIndex(index).AddForceAtPosition(collision.relativeVelocity.magnitude * 
             collision.contacts[0].normal / 2, collision.contacts[0].point, ForceMode2D.Impulse);
-        yield return new WaitForSeconds(0.1f);
+        //yield return new WaitForSeconds(0.1f);
         
         var bacteria = FindObjectOfType<GameController>().SpawnBacteria(collision.contacts[0].point, chunkSize, 4, Color);
         var dir = Random.insideUnitCircle.normalized;
         yield return null;
         if (bacteria != null)
         {
-            bacteria.GetComponent<Rigidbody2D>().AddForce(dir * 20, ForceMode2D.Impulse);
+            bacteria.GetComponent<Rigidbody2D>().AddForce(dir * 10, ForceMode2D.Impulse);
         }
 
     }

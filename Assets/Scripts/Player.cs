@@ -11,6 +11,7 @@ public class Player : MonoBehaviour
     public event ColorChanged OnColorChanged;
 
     public float EnergyThreshold = 30;
+    public float ExplodeStatus { get { return 1.0f - _explodeTimer / _explodeCooldown; } }
     public bool NoDNA { get; private set; }
     public float Force { get; private set; }
     public float Angle { get; private set; }
@@ -31,7 +32,8 @@ public class Player : MonoBehaviour
             }
         }
     }
-
+    [SerializeField]
+    private float _explodeCooldown;
     [SerializeField]
     private float _boostTimeout;
     [SerializeField]
@@ -66,9 +68,10 @@ public class Player : MonoBehaviour
     private float _energy;
     private float _lastBoost = 0;
     private Color _color = Color.white;
-
+    private float _explodeTimer = 0;
 	void Start () 
     {
+        _explodeTimer = 0.25f * _explodeCooldown;
         NoDNA = false;
         _lastBoost = Time.time;
         Force = 0;
@@ -108,6 +111,10 @@ public class Player : MonoBehaviour
             StartCoroutine(NoDNARoutine());            
         }
 
+        //if (Input.GetKeyDown(KeyCode.LeftControl))
+        //{
+        //    Explode();
+        //}
         if (!NoDNA)
         {
             if (Input.GetKeyDown(KeyCode.Space))
@@ -122,6 +129,7 @@ public class Player : MonoBehaviour
                 _engineParticles.Emit(1);
             }
         }
+        _explodeTimer = Mathf.Max(_explodeTimer - Time.deltaTime, 0);
 	}
 
     void FixedUpdate()
@@ -135,5 +143,12 @@ public class Player : MonoBehaviour
         }
     }
 
-    
+    public void Explode()
+    {
+        _explodeTimer = _explodeCooldown;
+        var go = Instantiate<GameObject>(Resources.Load<GameObject>("colorsetter"));
+        go.transform.position = transform.position;
+        go.GetComponent<ColorSetter>().Color = Color;
+
+    }
 }
