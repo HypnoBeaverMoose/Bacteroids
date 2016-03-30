@@ -129,7 +129,7 @@ public class GameController : MonoBehaviour
 
     private Color GetSpawnColor()
     {
-        return Random.value < 0.3f ? Color.white : _colors[Random.Range(0, _colors.Length)];
+        return _colors[Random.Range(0, _colors.Length)];
     }
 
 	// Update is called once per frame
@@ -143,6 +143,10 @@ public class GameController : MonoBehaviour
                 {
                     _enemies.RemoveAt(i--);
                     Score += _scorePerKill;
+                }
+                else if (Vector2.Distance((Vector2)_enemies[i].transform.position, (Vector2)transform.position) > Radius + 2)
+                {
+                    Destroy(_enemies[i]);
                 }
             }
 

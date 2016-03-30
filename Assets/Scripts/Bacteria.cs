@@ -26,6 +26,8 @@ public class Bacteria : MonoBehaviour
     private float _growAmount = 0.1f;
     [SerializeField]
     private float _hitbackForce = 3;
+    [SerializeField]
+    private float _spawnProbability = 0.4f;
 
     public float Energy { get { return _softbody.Size * EnergyMultiplier; } }
     public Color Color { get { return _color; } set { _color = value; if (_material != null) _material.color = _color; } }
@@ -44,9 +46,8 @@ public class Bacteria : MonoBehaviour
     private void Awake()
     {
         _softbody = gameObject.GetComponent<CompoundSoftBody>();
-        _material = gameObject.GetComponent<Renderer>().material;        
-        _growTimer = Random.Range(_growIntervalMin, _growIntervalMax);
-        //_moveTimer = Random.Range(_growIntervalMin, _growIntervalMax) / 2;
+        _material = gameObject.GetComponent<Renderer>().material;
+        _growTimer = (_softbody.Size < 0.2f ? 2 : 1) * Random.Range(_growIntervalMin, _growIntervalMax);
     }
 
     private void Start()
@@ -67,8 +68,7 @@ public class Bacteria : MonoBehaviour
                 StartCoroutine(Split(child, collision));
             }
         }
-
-        if (collision.gameObject.CompareTag("Player"))
+        else if (collision.gameObject.CompareTag("Player"))
         {
             if (isEnergy)
             {
@@ -84,7 +84,6 @@ public class Bacteria : MonoBehaviour
                 {
                     dir *=-1;
                 }
-                collision.gameObject.GetComponent<Player>().Color = Color;
                 collision.rigidbody.AddForceAtPosition(_hitbackForce * _softbody.Size * dir, collision.contacts[0].point, ForceMode2D.Impulse);
                 child.AddForceAtPosition(-_hitbackForce * _softbody.Size * dir, collision.contacts[0].point, ForceMode2D.Impulse);
 
@@ -95,6 +94,12 @@ public class Bacteria : MonoBehaviour
                 collision.gameObject.GetComponent<Player>().Energy -= _softbody.Size * DamageMultiplier;
             }
         }
+        else if(collision.gameObject.layer == LayerMask.NameToLayer("Energy"))
+        {
+            Color = collision.gameObject.GetComponentInParent<Bacteria>().Color;
+            Destroy(collision.gameObject.GetComponentInParent<Bacteria>().gameObject);
+        }
+
     }
 
     private IEnumerator Split(Rigidbody2D child, Collision2D collision)
@@ -158,17 +163,38 @@ public class Bacteria : MonoBehaviour
             _moveTimer = Random.Range(_growIntervalMin, _growIntervalMax) / 2;
         }
 
-        if (_growTimer < 0.0f && _softbody.Vertices < _maxVertices)
+        if (_growTimer < 0.0f)
         {
-            if (_softbody.Size < _addThreshold)
+            if ((isEnergy || Random.value > _spawnProbability) && _softbody.Vertices < _maxVertices)
             {
-                _softbody.Grow(_growAmount);
+                if (_softbody.Size < _addThreshold)
+                {
+                    _softbody.Grow(_growAmount);
+                }
+                else
+                {
+                    _softbody.AddNode(_growAmount);
+                }
             }
             else
             {
-                _softbody.AddNode(_growAmount);
+                StartCoroutine(Spawn());
             }
-            _growTimer = Random.Range(_growIntervalMin, _growIntervalMax);
+            _growTimer = (_softbody.Size < 0.2f ? 2 : 1) * Random.Range(_growIntervalMin, _growIntervalMax);
+        }
+    }
+
+    private IEnumerator Spawn()
+    {
+        var child = _softbody.ChildAtIndex(1);
+        var chunkSize = 0.1f;
+        var dir = Random.insideUnitCircle.normalized;
+        var bacteria = FindObjectOfType<GameController>().SpawnBacteria(transform.position + (Vector3)(_softbody.Size * 2 * dir), chunkSize, 4, Color);
+        
+        yield return null;
+        if (bacteria != null)
+        {
+            bacteria.GetComponent<Rigidbody2D>().AddForce(dir * 20, ForceMode2D.Impulse);
         }
     }
 
