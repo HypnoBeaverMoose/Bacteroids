@@ -37,6 +37,9 @@ public static class SoftBodyHelper
         body.drag = prototype.drag;
         body.angularDrag = prototype.angularDrag;
         body.gravityScale = prototype.gravityScale;
+        body.interpolation = prototype.interpolation;
+        body.constraints = prototype.constraints;
+        body.collisionDetectionMode = prototype.collisionDetectionMode;
         go.AddComponent<CollisionHandler>();
         return body;
     }

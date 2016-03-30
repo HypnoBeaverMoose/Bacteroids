@@ -149,7 +149,7 @@ public class GameController : MonoBehaviour
             _spawnTimer -= Time.deltaTime;
             if ((_spawnTimer <= 0 && _enemies.Count < _maxBacterias) || _enemies.Count == 0)
             {
-                SpawnBacteria(FindSpawnPos(), _startBacteriaSize, 4, GetSpawnColor());
+                SpawnBacteria(FindSpawnPos(), _startBacteriaSize, _startBacteriaVertices, GetSpawnColor());
                 _spawnTimer = GetSpawnTime();
             }
         }

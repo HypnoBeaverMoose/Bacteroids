@@ -74,7 +74,7 @@ public class Bacteria : MonoBehaviour
             {
                 collision.gameObject.GetComponent<Player>().Energy += Energy;
                 collision.gameObject.GetComponent<Player>().Color = Color;
-                Physics2D.IgnoreCollision(child.GetComponent<CircleCollider2D>(), collision.collider);
+                //Physics2D.IgnoreCollision(child.GetComponent<CircleCollider2D>(), collision.collider);
                 Destroy(gameObject);                              
             }
             else
@@ -158,7 +158,7 @@ public class Bacteria : MonoBehaviour
             _moveTimer = Random.Range(_growIntervalMin, _growIntervalMax) / 2;
         }
 
-        if (_growTimer < 0.0f)
+        if (_growTimer < 0.0f && _softbody.Vertices < _maxVertices)
         {
             if (_softbody.Size < _addThreshold)
             {

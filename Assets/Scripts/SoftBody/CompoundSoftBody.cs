@@ -43,7 +43,6 @@ public class CompoundSoftBody : MonoBehaviour
         _transform = transform;
         CreateBody(Vertices);
         UpdateBody();
-
     }
     
 	void FixedUpdate () 
