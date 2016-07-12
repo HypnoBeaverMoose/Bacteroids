@@ -1,95 +1,117 @@
 ﻿using UnityEngine;
+using System;
 using System.Collections;
+using System.Collections.Generic;
 
-public class Node
+public class Node : MonoBehaviour
 {
+    public const float hitFrequency = 10;
+
     public enum JointType { Center = 0, Left, Right, TypeLength }
+    public delegate void CollisionEvent(Collision2D collision, Node node);
+    public delegate void TriggerEvent(Collider2D other, Node node);
 
-    public Rigidbody2D body;
-    public CircleCollider2D collider;
-    public Node NodeLeft;
-    public Node NodeRight;
-    public SpringJoint2D JointLeft;
-    public SpringJoint2D JointRight;
-    public SpringJoint2D JointCenter;
+    public event Action<Node> OnNodeUnstable;
+    public event CollisionEvent OnCollisionEnter;
+    public event TriggerEvent OnTriggerEnter;
+    public event TriggerEvent OnTriggerExit;
 
-    public void SetBody(JointType joint, Rigidbody2D rigidBody, float frequency, float damping)
+    public struct JointNode
     {
-        var spring = GetJoint(joint);
-        if (spring == null)
+        public SpringJoint2D Joint;
+        public Node Node;
+    }
+
+    [SerializeField]
+    private float _damping;
+    [SerializeField]
+    private float _frequency;
+    [SerializeField]
+    private Rigidbody2D _rigidbody;
+    [SerializeField]
+    private CircleCollider2D _collider;
+    [SerializeField]
+    private bool _constrain = false;
+
+    public JointNode this[JointType type] { get { return _nodes[type]; } }
+    public Rigidbody2D Body { get { return _rigidbody; } }
+    public CircleCollider2D Collider { get { return _collider; } }
+
+
+    private Transform _transform;
+    private Dictionary<JointType, JointNode> _nodes = new Dictionary<JointType, JointNode>();
+    private void Start()
+    {
+        _transform = transform;
+    }
+
+    public void Connect(JointType type, Node other)
+    {
+        if (_nodes.ContainsKey(type))
         {
-            SetJoint(joint, SoftBodyHelper.CreateSpringJoint(body.gameObject, rigidBody, frequency, damping));
+            Destroy(_nodes[type].Joint);
+            _nodes.Remove(type);
         }
-        else
+        var jointNode = new JointNode();
+        jointNode.Node = other;
+        jointNode.Joint = SoftBodyHelper.CreateSpringJoint(gameObject, other._rigidbody, _frequency, _damping);
+        _nodes.Add(type, jointNode);
+    }
+
+    private void FixedUpdate()
+    {
+        if (_constrain)
         {
-            SoftBodyHelper.SetSpringJointAnchor(spring, rigidBody, frequency, damping);
-            spring.enabled = true;
+            for (JointType type = JointType.Center; type < JointType.TypeLength; type++)
+            {
+                if (_nodes.ContainsKey(type))
+                {
+                    float distance = Vector2.Distance(_rigidbody.position, _nodes[type].Node.Body.position);
+
+                    if (distance < _nodes[type].Joint.distance * 0.5f || distance > _nodes[type].Joint.distance * 1.5f)
+                    {
+                        _nodes[type].Joint.frequency = hitFrequency;
+                        if (distance < _nodes[type].Joint.distance * 0.2f)
+                        {
+                            if (OnNodeUnstable != null)
+                            {
+                                OnNodeUnstable(this);
+                            }
+                        }
+                    }
+                    else
+                    {
+                        _nodes[type].Joint.frequency = _frequency;
+                    }
+                }
+            }
         }
     }
 
-    public void SetNode(JointType joint, Node node, float frequency, float damping)
+    #region Collision Handlers
+    private void OnCollisionEnter2D(Collision2D collision)
     {
-        if (joint == JointType.Left)
+        if (OnCollisionEnter != null)
         {
-            NodeLeft = node;
-        }
-        else if (joint == JointType.Right)
-        {
-            NodeRight = node;
-        }
-        SetBody(joint, node.body, frequency, damping);
-    }
-    public void ClearAll()
-    {
-        ClearNode(JointType.Right);
-        ClearNode(JointType.Left);
-        ClearNode(JointType.Center);       
-    }
-
-    public void ClearNode(JointType joint)
-    {
-        switch (joint)
-        {
-            case JointType.Left:
-                NodeLeft = null; break;
-            case JointType.Right:
-                NodeRight = null; break;
-            default:
-                break;
-        }
-
-        var spring = GetJoint(joint);
-        //spring.connectedBody = null;
-        //spring.distance = 0;
-        //spring.enabled = false;
-        GameObject.DestroyImmediate(spring);
-    }
-
-    public SpringJoint2D GetJoint(JointType joint)
-    {
-        switch (joint)
-        {
-            case JointType.Center:
-                return JointCenter;
-            case JointType.Left:
-                return JointLeft;
-            case JointType.Right:
-                return JointRight;
-            default:
-                return null;
+            OnCollisionEnter(collision, this);
         }
     }
 
-    public void SetJoint(JointType joint, SpringJoint2D spring)
+    private void OnTriggerEnter2D(Collider2D other)
     {
-        switch (joint)
+        if (OnTriggerEnter != null)
         {
-            case JointType.Center:
-                JointCenter = spring; break;
-            case JointType.Left:
-                JointLeft = spring; break;
-            case JointType.Right:
-                JointRight = spring; break;
+            OnTriggerEnter(other, this);
         }
     }
+
+
+    private void OnTriggerExit2D(Collider2D other)
+    {
+        if (OnTriggerExit != null)
+        {
+            OnTriggerExit(other, this);
+        }
+    }
+    #endregion
 }

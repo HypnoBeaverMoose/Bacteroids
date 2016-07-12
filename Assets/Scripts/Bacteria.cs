@@ -9,8 +9,6 @@ public class Bacteria : MonoBehaviour
     public static int DamageMultiplier = 20;
     
     [SerializeField]
-    private AnimationCurve _thickness;
-    [SerializeField]
     private float _moveForce;
     [SerializeField]
     private float _addThreshold = 0.6f;
@@ -43,6 +41,7 @@ public class Bacteria : MonoBehaviour
 
     private void Awake()
     {
+        _color = Color.black;
         _softbody = gameObject.GetComponent<CompoundSoftBody>();
         _material = gameObject.GetComponent<Renderer>().material;        
         _growTimer = Random.Range(_growIntervalMin, _growIntervalMax);
@@ -53,18 +52,21 @@ public class Bacteria : MonoBehaviour
     {
         _softbody.Init();
         _rigidbody = GetComponent<Rigidbody2D>();
-        SetLayer(_thickness.Evaluate(_softbody.Size) > 0 ? LayerMask.NameToLayer("Bacteria") : LayerMask.NameToLayer("Energy"));
+        //SetLayer(_thickness.Evaluate(_softbody.Size) > 0 ? LayerMask.NameToLayer("Bacteria") : LayerMask.NameToLayer("Energy"));
         _material.color = _color;
     }    
 
     public void OnCollisionEnterChild(Rigidbody2D child, Collision2D collision)
     {
         if (collision.gameObject.CompareTag("Projectile"))
-        {      
-            var color = collision.gameObject.GetComponent<Projectile>().Color;
-            if (Color == Color.white || color == Color || color == Color.white)
+        {
+            child.AddForceAtPosition(collision.relativeVelocity.magnitude *
+                collision.contacts[0].normal / 2, collision.contacts[0].point, ForceMode2D.Impulse);
+
+            //var color = collision.gameObject.GetComponent<Projectile>().Color;
+            //if (Color == Color.white || color == Color || color == Color.white)
             {
-                StartCoroutine(Split(child, collision));
+              //  StartCoroutine(Split(child, collision));
             }
         }
 
@@ -131,32 +133,32 @@ public class Bacteria : MonoBehaviour
 
     private void Update()
     {
-        float thickness = _thickness.Evaluate(_softbody.Size);
-        _material.SetFloat("_Thickness", thickness);
-        if (!_nearPlayer && isEnergy && thickness > 0)
-        {
-            SetLayer(LayerMask.NameToLayer("Bacteria"));
-        }
-        else if (isBacteria && thickness == 0)
-        {
-            SetLayer(LayerMask.NameToLayer("Energy"));
-        }
-        _moveTimer -= isEnergy ? 0 : Time.deltaTime;
-        _growTimer -= _softbody.Size < _maxSize ? Time.deltaTime : 0;
+        //float thickness = _thickness.Evaluate(_softbody.Size);
+        //_material.SetFloat("_Thickness", thickness);
+        //if (!_nearPlayer && isEnergy && thickness > 0)
+        //{
+        //    SetLayer(LayerMask.NameToLayer("Bacteria"));
+        //}
+        //else if (isBacteria && thickness == 0)
+        //{
+        //    SetLayer(LayerMask.NameToLayer("Energy"));
+        //}
+        //_moveTimer -= isEnergy ? 0 : Time.deltaTime;
+        //_growTimer -= _softbody.Size < _maxSize ? Time.deltaTime : 0;
 
-        if (_moveTimer < 0)
-        {
-            Vector3 direction = Random.insideUnitCircle.normalized;
-            float mult = 1;
-            if (_nearPlayer && FindObjectOfType<Player>() != null)
-            {
-                mult = 2;
-                direction = (FindObjectOfType<Player>().transform.position - transform.position).normalized;
-            }
-            var hit = Physics2D.Raycast(transform.position + direction * _softbody.Size, -direction, 100, LayerMask.GetMask("Bacteria"));
-            hit.rigidbody.AddForce(direction * _moveForce * mult, ForceMode2D.Impulse);
-            _moveTimer = Random.Range(_growIntervalMin, _growIntervalMax) / 2;
-        }
+        //if (_moveTimer < 0)
+        //{
+        //    Vector3 direction = Random.insideUnitCircle.normalized;
+        //    float mult = 1;
+        //    if (_nearPlayer && FindObjectOfType<Player>() != null)
+        //    {
+        //        mult = 2;
+        //        direction = (FindObjectOfType<Player>().transform.position - transform.position).normalized;
+        //    }
+        //    var hit = Physics2D.Raycast(transform.position + direction * _softbody.Size, -direction, 100, LayerMask.GetMask("Bacteria"));
+        //    hit.rigidbody.AddForce(direction * _moveForce * mult, ForceMode2D.Impulse);
+        //    _moveTimer = Random.Range(_growIntervalMin, _growIntervalMax) / 2;
+        //}
 
         if (_growTimer < 0.0f && _softbody.Vertices < _maxVertices)
         {

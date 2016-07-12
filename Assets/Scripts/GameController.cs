@@ -20,7 +20,9 @@ public class GameController : MonoBehaviour
     [SerializeField]
     private  StartScreen _startScreen;
     [SerializeField]
-    private GameObject _enemyPrefab;
+    private GameObject _bacteriaPrefab;
+    [SerializeField]
+    private GameObject _sporePrefab;
     [SerializeField]
     private GameObject _playerPrefab;
     [SerializeField]
@@ -102,12 +104,19 @@ public class GameController : MonoBehaviour
 
     public GameObject SpawnBacteria(Vector2 position, float size, int vertices, Color color)
     {
-        var go = (GameObject)Instantiate(_enemyPrefab, position, Quaternion.identity);
-        go.GetComponent<Bacteria>().Color = color;
-        var body = go.GetComponent<CompoundSoftBody>();
-        body.Size = size;
-        body.Vertices = vertices;
+        var go = (GameObject)Instantiate(_bacteriaPrefab, position, Quaternion.identity);
+        var bacteria = go.GetComponent<NewBacteria>();
+
+        bacteria.Radius = size;
+        bacteria.Vertices = vertices;
         _enemies.Add(go);
+        return go;
+    }
+    public GameObject SpawnSpore(Vector2 position, float size, Color color)
+    {
+        var go = (GameObject)Instantiate(_sporePrefab, position, Quaternion.identity);
+        go.transform.localScale = Vector3.one * size;
+        go.GetComponent<Energy>().Color = color;
         return go;
     }
 

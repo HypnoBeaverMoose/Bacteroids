@@ -4,20 +4,20 @@ using System.Collections.Generic;
 
 public class CompoundSoftBody : MonoBehaviour 
 {
-    [SerializeField]
-    private AnimationCurve _FrequencySize;
-    [SerializeField]
-    private AnimationCurve _DampingOverSize;
-    [SerializeField]
-    private AnimationCurve _DragOverSize;
+    //[SerializeField]
+    //private AnimationCurve _FrequencySize;
+    //[SerializeField]
+    //private AnimationCurve _DampingOverSize;
+    //[SerializeField]
+    //private AnimationCurve _DragOverSize;
 
  
-    [SerializeField]
-    private Rigidbody2D _prototype;
-    [SerializeField]
-    private float _damping;
-    [SerializeField] 
-    public float _frequency;
+    //[SerializeField]
+    //private Rigidbody2D _prototype;
+    //[SerializeField]
+    //private float _damping;
+    //[SerializeField] 
+    //public float _frequency;
     
     public int Vertices;
     public float Size { get { return _radius * 2; } set { _radius = value / 2; } }
@@ -25,10 +25,10 @@ public class CompoundSoftBody : MonoBehaviour
     
     private Mesh _mesh = null;
 
-    private float _radius = 0;
-    private List<Node> _nodes = new List<Node>();
-    private Rigidbody2D _center = null;
-    private Transform _transform = null;
+    private float               _radius = 0;
+    private List<Node>          _nodes = new List<Node>();
+    private Node                _center = null;
+    private Transform           _transform = null;
     private List<Vector3>       _vertices = new List<Vector3>();
     private List<Vector3>       _normals = new List<Vector3>();
     private List<Color>         _colors = new List<Color>();
@@ -37,7 +37,7 @@ public class CompoundSoftBody : MonoBehaviour
 
     public void Init()
     {
-        //Size = 1;
+        Size = 0.5f;
         _mesh = GetComponent<MeshFilter>().mesh;
         _mesh.MarkDynamic();
         _transform = transform;
@@ -47,39 +47,40 @@ public class CompoundSoftBody : MonoBehaviour
     
 	void FixedUpdate () 
     {
-        for (int i = 0; i < _nodes.Count; i++)
-        {
-            float freq = _FrequencySize.Evaluate(Size);
-            float damping = _DampingOverSize.Evaluate(Size);
-            float drag = _DragOverSize.Evaluate(Size);
-            _nodes[i].body.drag = drag;
-            _nodes[i].JointCenter.frequency = freq;
-            _nodes[i].JointLeft.frequency = freq;
-            _nodes[i].JointRight.frequency = freq;
+        //for (int i = 0; i < _nodes.Count; i++)
+        //{
+        //    float freq = _FrequencySize.Evaluate(Size);
+        //    float damping = _DampingOverSize.Evaluate(Size);
+        //    float drag = _DragOverSize.Evaluate(Size);
+        //    _nodes[i]._rigidbody.drag = drag;
+        //    _nodes[i].JointCenter.frequency = freq;
+        //    _nodes[i].JointLeft.frequency = freq;
+        //    _nodes[i].JointRight.frequency = freq;
 
 
 
-            _nodes[i].JointCenter.dampingRatio = damping;
-            _nodes[i].JointLeft.dampingRatio = damping;
-            _nodes[i].JointRight.dampingRatio = damping;
-        }
-        _center.drag = _DragOverSize.Evaluate(Size);
+        //    _nodes[i].JointCenter.dampingRatio = damping;
+        //    _nodes[i].JointLeft.dampingRatio = damping;
+        //    _nodes[i].JointRight.dampingRatio = damping;
+        //}
+        //_center.drag = _DragOverSize.Evaluate(Size);
         UpdateVertices();
 	}
 
     public void Grow(float by)
     {
-        StartCoroutine(GrowRoutine(by));
+        //StartCoroutine(GrowRoutine(by));
     }
 
     public void RemoveNode(Rigidbody2D body, float shrinkBy)
     {
+        return;
         var positions = new List<Vector3>();
         var velocities = new List<Vector3>();
         CachePositions(positions, _nodes);
         CacheVelocities(velocities, _nodes);
         Disassemble();
-        int index = _nodes.FindIndex(n => n.body.Equals(body));
+        int index = _nodes.FindIndex(n => n.Body.Equals(body));
         _nodes.RemoveAt(index);
         positions.RemoveAt(index);
         velocities.RemoveAt(index);
@@ -95,64 +96,63 @@ public class CompoundSoftBody : MonoBehaviour
 
     public void AddNode(float growBy)
     {
-        List<Vector3> oldPos = new List<Vector3>();
-        List<Vector3> velocities = new List<Vector3>();
+        return;
+        //List<Vector3> oldPos = new List<Vector3>();
+        //List<Vector3> velocities = new List<Vector3>();
 
-        CachePositions(oldPos, _nodes);
-        CacheVelocities(velocities, _nodes);
-        Disassemble();
-        int index = Random.Range(1, _nodes.Count - 1);
+        //CachePositions(oldPos, _nodes);
+        //CacheVelocities(velocities, _nodes);
+        //Disassemble();
+        //int index = Random.Range(1, _nodes.Count - 1);
 
-        int prev = index == 0 ? _nodes.Count - 1 : index - 1;
-        int next = (index + 1) % _nodes.Count;
-        _nodes.Insert(index, new Node());
-        _nodes[index].body = SoftBodyHelper.CreateRigidChild(new GameObject("New Node"), _transform, 
-            Vector3.zero, _prototype, 0.1f);
-        _nodes[index].collider = _nodes[index].body.GetComponent<CircleCollider2D>();
-        _radius += growBy * 0.5f;
-        _center.GetComponent<CircleCollider2D>().radius = _radius;
-        CreateVerticies(_nodes, _vertices);
-        oldPos.Insert(index, (_nodes[prev].body.position + _nodes[next].body.position) / 2);
-        velocities.Insert(index, Vector3.zero);
-        Assemble();
-        UpdateBody();
-        RevertPositions(oldPos, _nodes);
-        RestoreVelocities(velocities, _nodes);
+        //int prev = index == 0 ? _nodes.Count - 1 : index - 1;
+        //int next = (index + 1) % _nodes.Count;
+        //_nodes.Insert(index, new Node());
+        //_nodes[index].Body = SoftBodyHelper.CreateRigidChild(new GameObject("New Node"), _transform, 
+        //    Vector3.zero, _prototype, 0.1f);
+        //_nodes[index].Collider = _nodes[index].B.GetComponent<CircleCollider2D>();
+        //_radius += growBy * 0.5f;
+        //_center.GetComponent<CircleCollider2D>().radius = _radius;
+        //CreateVerticies(_nodes, _vertices);
+        //oldPos.Insert(index, (_nodes[prev]._rigidbody.position + _nodes[next]._rigidbody.position) / 2);
+        //velocities.Insert(index, Vector3.zero);
+        //Assemble();
+        //UpdateBody();
+        //RevertPositions(oldPos, _nodes);
+        //RestoreVelocities(velocities, _nodes);
     }
 
     private IEnumerator GrowRoutine(float by)
     {
-        Disassemble();
-        List<Vector3> velocities = new List<Vector3>();
-        CacheVelocities(velocities, _nodes);
-        _radius += by * 0.5f;
-        _center.GetComponent<CircleCollider2D>().radius = _radius;
-        CreateVerticies(_nodes, _vertices);
-        Assemble();
+        //Disassemble();
+        //List<Vector3> velocities = new List<Vector3>();
+        //CacheVelocities(velocities, _nodes);
+        //_radius += by * 0.5f;
+        //_center.GetComponent<CircleCollider2D>().radius = _radius;
+        //CreateVerticies(_nodes, _vertices);
+        //Assemble();
 
-        RestoreVelocities(velocities, _nodes);
-        for (int i = 0; i < _nodes.Count; i++)
-        {
-            _nodes[i].body.AddForce(_nodes[i].body.transform.localPosition, ForceMode2D.Impulse);
-        }
+        //RestoreVelocities(velocities, _nodes);
+        //for (int i = 0; i < _nodes.Count; i++)
+        //{
+        //    _nodes[i]._rigidbody.AddForce(_nodes[i]._rigidbody.transform.localPosition, ForceMode2D.Impulse);
+        //}
         yield return new WaitForSeconds(0.2f);
     }
     public int ChildIndex(Rigidbody2D child)
     {
-        return _nodes.FindIndex(n => n.body.Equals(child));
+        return _nodes.FindIndex(n => n.Body.Equals(child));
     }
+
     public Rigidbody2D ChildAtIndex(int index)
     {
         ///Debug.Log(_nodes.Count + "    " + index);        
-        return index > (_nodes.Count - 1) ? _nodes[_nodes.Count - 1].body : _nodes[index].body;
+        return index > (_nodes.Count - 1) ? _nodes[_nodes.Count - 1].Body : _nodes[index].Body;
     }
-
 
     #region creation
     private void CreateBody(int vertexCount)
     {
-        _center = SoftBodyHelper.CreateRigidChild(gameObject, transform, Vector3.zero, _prototype, _radius, false);
-
         // add rigid bodies
         CreateNodes(_nodes, vertexCount);
         // set verticies
@@ -163,13 +163,11 @@ public class CompoundSoftBody : MonoBehaviour
 
     private void CreateNodes(List<Node> nodes, int count)
     {
-        for (int i = 0; i < count; i++)
-        {
-            Node node = new Node();
-            node.body = SoftBodyHelper.CreateRigidChild(new GameObject("Node" + i.ToString()), _transform, Vector3.zero, _prototype, .1f);
-            node.collider = node.body.GetComponent<CircleCollider2D>();
-            nodes.Add(node);
-        }
+        //_center = SoftBodyHelper.CreateNode(gameObject, transform, Vector3.zero, _prototype, _radius, false);
+        //for (int i = 0; i < count; i++)
+        //{
+        //    nodes.Add(SoftBodyHelper.CreateNode(new GameObject("Node" + i.ToString()), _transform, Vector3.zero, _prototype, _radius));
+        //}
     }
 
     private void CreateVerticies(List<Node> nodes, List<Vector3> verticies)
@@ -184,7 +182,7 @@ public class CompoundSoftBody : MonoBehaviour
             float randomOffset = Random.Range(-angle, angle) * randomOffsetSize;
             float angleOffset = initialOffset - i * angle + randomOffset;
             Vector3 position = new Vector3(Mathf.Cos(angleOffset), Mathf.Sin(angleOffset), 0) * _radius;
-            nodes[i].body.position = _transform.TransformPoint(position);
+            nodes[i].Body.position = _transform.TransformPoint(position);
             _vertices.Add(position * 2);
         }
     }
@@ -194,7 +192,7 @@ public class CompoundSoftBody : MonoBehaviour
     {
         foreach (var node in nodes)
         {
-            positoins.Add(node.body.position);
+            positoins.Add(node.Body.position);
         }
 
     }
@@ -202,25 +200,25 @@ public class CompoundSoftBody : MonoBehaviour
     {
         for (int i = 0; i < nodes.Count; i++)
         {
-            nodes[i].body.position = positoins[i];
+            nodes[i].Body.position = positoins[i];
         }
     }
 
     private void Assemble()
     {
-        //add spring joints
-        for (int i = 0; i < _nodes.Count; i++)
-        {
-            Node node = _nodes[i];
-            node.SetNode(Node.JointType.Left, _nodes[i == 0 ? _nodes.Count - 1 : i - 1], _frequency, _damping);
-            node.SetNode(Node.JointType.Right, _nodes[(i + 1) % _nodes.Count], _frequency, _damping);
-            node.SetBody(Node.JointType.Center, _center, _frequency, _damping);
-            node.collider.radius = Mathf.Min(
-                                                Vector3.Distance(node.body.position, _center.position),
-                                                Vector3.Distance(node.body.position, _nodes[i == 0 ? _nodes.Count - 1 : i - 1].body.position),
-                                                Vector3.Distance(node.body.position, _nodes[(i + 1) % _nodes.Count].body.position)
-                                            );
-        }
+        ////add spring joints
+        //for (int i = 0; i < _nodes.Count; i++)
+        //{
+        //    Node node = _nodes[i];
+        //    node.Connect(Node.JointType.Left, _nodes[i == 0 ? _nodes.Count - 1 : i - 1], _frequency, _damping);
+        //    node.Connect(Node.JointType.Right, _nodes[(i + 1) % _nodes.Count], _frequency, _damping);
+        //    node.Connect(Node.JointType.Center, _center, _frequency, _damping);
+        //    node.Collider.radius = Mathf.Min(
+        //                                        Vector3.Distance(node.Body.position, _transform.position),
+        //                                        Vector3.Distance(node.Body.position, _nodes[i == 0 ? _nodes.Count - 1 : i - 1].Body.position),
+        //                                        Vector3.Distance(node.Body.position, _nodes[(i + 1) % _nodes.Count].Body.position)
+        //                                    );
+        //}
     }
 
     private void Disassemble()
@@ -229,7 +227,7 @@ public class CompoundSoftBody : MonoBehaviour
         {
             for (var type = Node.JointType.Center; type <= Node.JointType.Right; type++)
             {
-                _nodes[i].ClearNode(type);
+                //_nodes[i].ClearNode(type);
             }
         }
     }
@@ -238,10 +236,9 @@ public class CompoundSoftBody : MonoBehaviour
     {
         foreach (var node in _nodes)
         {
-            node.JointCenter.distance = Vector3.Distance(node.body.position, _center.position);
-            node.JointLeft.distance = Vector3.Distance(node.NodeLeft.body.position, node.body.position);
-            node.JointRight.distance = Vector3.Distance(node.NodeRight.body.position, node.body.position);
-            
+            //node.JointCenter.distance = Vector3.Distance(node._rigidbody.position, _center.position);
+            //node.JointLeft.distance = Vector3.Distance(node.NodeLeft._rigidbody.position, node._rigidbody.position);
+            //node.JointRight.distance = Vector3.Distance(node.NodeRight._rigidbody.position, node._rigidbody.position);            
         }
         yield return null;
     }
@@ -249,7 +246,7 @@ public class CompoundSoftBody : MonoBehaviour
     {
         foreach (var node in _nodes)
         {
-            velocities.Add(node.body.velocity);
+            velocities.Add(node.Body.velocity);
         }
     }
 
@@ -257,11 +254,12 @@ public class CompoundSoftBody : MonoBehaviour
     {
         for (int i = 0; i < nodes.Count; i++)
         {
-            nodes[i].body.velocity = velocities[i];
+            nodes[i].Body.velocity = velocities[i];
         }
 
     }
     #endregion
+
     #region drawing
     public void UpdateBody()
     {
@@ -293,13 +291,45 @@ public class CompoundSoftBody : MonoBehaviour
 
     private void UpdateVertices()
     {
+        var lineR = GetComponent<LineRenderer>();
         for (int i = 0; i < _nodes.Count; i++)
         {
-            var pos = _nodes[i].body.transform.localPosition;
-            _vertices[i + 1] = pos + pos.normalized * (_nodes[i].collider.radius);
+            var pos = _nodes[i].Body.transform.localPosition;
+            _vertices[i + 1] = pos + pos.normalized * (_nodes[i].Collider.radius);
         }
+
+        lineR.SetVertexCount((_nodes.Count + 1) * 3);
+        for (int i = 0; i < (_nodes.Count + 1); i++)
+        {
+            int index = i % _nodes.Count;
+            var node = _nodes[index];
+            var prev = _nodes[index == 0 ? _nodes.Count - 1 : index - 1];
+            var next = _nodes[(index + 1) % _nodes.Count];
+            var pos = node.Body.transform.position + (node.Body.transform.position - transform.position).normalized * node.Collider.radius;
+            var prev_pos = prev.Body.transform.position + (prev.Body.transform.position - transform.position).normalized * prev.Collider.radius;
+            var next_pos = next.Body.transform.position + (next.Body.transform.position - transform.position).normalized * next.Collider.radius;
+
+            lineR.SetPosition(i * 3, pos + (prev_pos - pos).normalized * 0.01f);
+            lineR.SetPosition(i * 3 + 1, pos);
+            lineR.SetPosition(i * 3 + 2, pos + (next_pos - pos).normalized * 0.01f);
+        }
+
+        //lineR.SetVertexCount(_vertices.Count);
+        //for (int i = 1; i < _vertices.Count; i++)
+        //{
+        //    lineR.SetPosition(i - 1, _transform.TransformPoint(_vertices[i]));
+        //    //lineR.SetPosition(i * 2 + 1, _transform.TransformPoint(_vertices[i]) - (_transform.TransformPoint(_vertices[i]) - _transform.TransformPoint(_vertices[i + 1])) * 0.1f);
+        //}
+        //lineR.SetPosition(_vertices.Count - 1, _transform.TransformPoint(_vertices[1]));
+        //lineR.SetPosition(0, _transform.TransformPoint(_vertices[0]) - (_transform.TransformPoint(_vertices[0]) - _transform.TransformPoint(_vertices[_vertices.Count - 1])) * 0.1f);
+        //lineR.SetPosition(1, _transform.TransformPoint(_vertices[0]) - (_transform.TransformPoint(_vertices[0]) - _transform.TransformPoint(_vertices[1])) * 0.1f);
+
+        //lineR.SetPosition(_vertices.Count - 2, _transform.TransformPoint(_vertices[_vertices.Count - 2]) - (_transform.TransformPoint(_vertices[_vertices.Count - 2]) - _transform.TransformPoint(_vertices[_vertices.Count - 3])) * 0.1f);
+        //lineR.SetPosition(_vertices.Count - 1, _transform.TransformPoint(_vertices[_vertices.Count - 1]) - (_transform.TransformPoint(_vertices[_vertices.Count - 1]) - _transform.TransformPoint(_vertices[0])) * 0.1f);
+
         _mesh.SetVertices(_vertices);
         Vertices = _vertices.Count - 1;
     }
     #endregion
 }
+

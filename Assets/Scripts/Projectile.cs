@@ -46,12 +46,10 @@ public class Projectile : MonoBehaviour
 
     void OnCollisionEnter2D(Collision2D collision)
     {
-        //if (Color == Color.white || (collision.gameObject.CompareTag("Bacteria") && (collision.gameObject.GetComponent<Bacteria>().Color == Color
-        //    || collision.gameObject.GetComponent<Bacteria>().Color == Color.white)))
-        //{
-             
-        //}
-        Kill();   
-        
+//        if (collision.rigidbody != null)
+//        {
+//            collision.rigidbody.AddForce( -collision.contacts[0].normal , ForceMode2D.Impulse);
+//        }
+        Kill();           
     }
 }

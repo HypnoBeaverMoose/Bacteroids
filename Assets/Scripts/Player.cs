@@ -134,11 +134,11 @@ public class Player : MonoBehaviour
 
     void FixedUpdate()
     {
+        _rigidbody.AddForce(transform.up * Force * _forceMultiplier);
+        _rigidbody.rotation += Angle * _torqueMultiplier;
+
         if (!NoDNA)
         {
-            _rigidbody.AddForce(transform.up * Force * _forceMultiplier);
-            _rigidbody.rotation += Angle * _torqueMultiplier;
-
             Energy -= Time.fixedDeltaTime * (Mathf.Abs(Force * _moveEnergyCost) + Mathf.Abs(Angle * _rotateEnergyCost));
         }
     }
@@ -149,6 +149,7 @@ public class Player : MonoBehaviour
         var go = Instantiate<GameObject>(Resources.Load<GameObject>("colorsetter"));
         go.transform.position = transform.position;
         go.GetComponent<ColorSetter>().Color = Color;
-
     }
+
+
 }

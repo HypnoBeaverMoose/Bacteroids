@@ -20,6 +20,14 @@ public static class SoftBodyHelper
         spring.autoConfigureDistance = false;
     }
 
+    public static Node CreateNode(GameObject go, Transform parent, Vector3 position, Rigidbody2D prototype, float radius, bool setPos = true)
+    {
+        var body = CreateRigidChild(go, parent, position, prototype, radius, setPos);
+        var node = body.gameObject.AddComponent<Node>();
+        //node.Init(body, body.GetComponent<CircleCollider2D>());
+        return node;
+    }
+
     public static Rigidbody2D CreateRigidChild(GameObject go, Transform parent, Vector3 position, Rigidbody2D prototype, float radius, bool setPos = true)
     {
         go.layer = LayerMask.NameToLayer("Bacteria");
