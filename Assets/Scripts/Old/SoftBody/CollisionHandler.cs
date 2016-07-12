@@ -4,11 +4,11 @@ using System.Collections;
 public class CollisionHandler : MonoBehaviour 
 {
 
-    private Bacteria _bacteria;
+    private OldBacteria _bacteria;
 
 	private void Start () 
     {
-        _bacteria = GetComponentInParent<Bacteria>();
+        _bacteria = GetComponentInParent<OldBacteria>();
 	}
 
     private void OnCollisionEnter2D(Collision2D collision)

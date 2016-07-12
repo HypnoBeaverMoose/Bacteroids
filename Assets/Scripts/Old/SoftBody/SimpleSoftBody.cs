@@ -55,7 +55,7 @@ public class SimpleSoftBody : MonoBehaviour//, ISoftBody
             _originalVerticies[i] = transform.TransformPoint(_startVertices[i]);            
             //_worldVertices[i] = transform.TransformPoint(_vertices[i]);
             Vector3 velocity = _vertexVelocities[i];
-            Vector3 displacement = (_worldVertices[i] - _originalVerticies[i]) / Time.deltaTime;
+            //Vector3 displacement = (_worldVertices[i] - _originalVerticies[i]) / Time.deltaTime;
             //velocity -= displacement * springForce * Time.fixedDeltaTime;
             //velocity *= 1f - damping * Time.fixedDeltaTime;            
             _vertexVelocities[i] = velocity + (_worldVertices[i] - _originalVerticies[i]) / Time.deltaTime;

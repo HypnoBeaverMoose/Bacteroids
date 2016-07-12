@@ -32,7 +32,6 @@ public class CompoundSoftBody : MonoBehaviour
     private List<Vector3>       _vertices = new List<Vector3>();
     private List<Vector3>       _normals = new List<Vector3>();
     private List<Color>         _colors = new List<Color>();
-    private List<float>         _offsets = new List<float>();
     private List<int>           _triangles = new List<int>();
 
     public void Init()
@@ -74,7 +73,6 @@ public class CompoundSoftBody : MonoBehaviour
 
     public void RemoveNode(Rigidbody2D body, float shrinkBy)
     {
-        return;
         var positions = new List<Vector3>();
         var velocities = new List<Vector3>();
         CachePositions(positions, _nodes);
@@ -234,12 +232,12 @@ public class CompoundSoftBody : MonoBehaviour
 
     private IEnumerator UpdateDistances()
     {
-        foreach (var node in _nodes)
-        {
-            //node.JointCenter.distance = Vector3.Distance(node._rigidbody.position, _center.position);
-            //node.JointLeft.distance = Vector3.Distance(node.NodeLeft._rigidbody.position, node._rigidbody.position);
-            //node.JointRight.distance = Vector3.Distance(node.NodeRight._rigidbody.position, node._rigidbody.position);            
-        }
+//        foreach (var node in _nodes)
+//        {
+//            //node.JointCenter.distance = Vector3.Distance(node._rigidbody.position, _center.position);
+//            //node.JointLeft.distance = Vector3.Distance(node.NodeLeft._rigidbody.position, node._rigidbody.position);
+//            //node.JointRight.distance = Vector3.Distance(node.NodeRight._rigidbody.position, node._rigidbody.position);            
+//        }
         yield return null;
     }
     public void CacheVelocities(List<Vector3> velocities, List<Node> nodes)

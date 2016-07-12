@@ -12,7 +12,6 @@ public class ColorSetter : MonoBehaviour {
     [SerializeField]
     private float _force;
 
-    private float _size = 1.0f;
     private Vector3 _scale;
     private Vector3 _velocity;
     void Start () 
@@ -39,9 +38,9 @@ public class ColorSetter : MonoBehaviour {
     {
         if (other.gameObject.layer == LayerMask.NameToLayer("Bacteria"))
         {
-            if (other.GetComponent<Bacteria>() != null)
+            if (other.GetComponent<OldBacteria>() != null)
             {
-                other.GetComponent<Bacteria>().Color = Color;
+                other.GetComponent<OldBacteria>().Color = Color;
             }
             else if (other.GetComponent<Rigidbody2D>() != null)
             {

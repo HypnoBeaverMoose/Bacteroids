@@ -17,10 +17,10 @@ public class ScoreDisplay : MonoBehaviour
 
     private void OnColorChanged(Color newColor)
     {
-        foreach (var item in GetComponentsInChildren<Graphic>())
-        {
-           // item.color = new Color(newColor.r, newColor.g, newColor.b, item.color.a);
-        }
+//        foreach (var item in GetComponentsInChildren<Graphic>())
+//        {
+//           // item.color = new Color(newColor.r, newColor.g, newColor.b, item.color.a);
+//        }
     }
 
 	void Update () 

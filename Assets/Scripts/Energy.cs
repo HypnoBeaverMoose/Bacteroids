@@ -13,13 +13,11 @@ public class Energy : MonoBehaviour
 
     public float Amount { get; set; }
     public Color Color { get { return _renderer.color; } set { _renderer.color = value; } }
-    private float _size;
-    
+
 	private void Start () 
     {
         Invoke("SpawnBacteria", _spawnBacteriaTimeout);
-        _size = transform.localScale.x; 
-	}
+    }
 
     private void FixedUpdate()
     {

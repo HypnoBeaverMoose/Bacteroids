@@ -2,28 +2,26 @@
 using System.Collections;
 using System.Collections.Generic;
 
-public class BacteriaAI : MonoBehaviour 
+public class BacteriaAI : MonoBehaviour
 {
 
-    public bool NearPlayer { get { return _nodesNearPlayer > 0; } }    
-    
+    public bool NearPlayer { get { return _nodesNearPlayer > 0; } }
+
     [SerializeField]
     private float _moveTimeot;
     [SerializeField]
     private float _moveForce;
 
-    private List<Node> _nodes;
     private int _nodesNearPlayer = 0;
     private Player _player;
 
-	void Start () 
+    void Start()
     {
         InvokeRepeating("Move", _moveTimeot, _moveTimeot);
-	}
+    }
 
     public void Init(List<Node> nodes)
     {
-        _nodes = new List<Node>(nodes);
     }
 
     private void NodeNearPlayer(Collider2D other, Node node)
@@ -58,7 +56,7 @@ public class BacteriaAI : MonoBehaviour
 //        int maxIndex = 0;
 //        float maxValue = -1;
 //        for (int i = 0; i < _nodes.Count; i++)
-//        { 
+//        {
 //            float dot = Vector3.Dot((_nodes[i].transform.position - transform.position).normalized, direction);
 //            if (dot > maxValue)
 //            {

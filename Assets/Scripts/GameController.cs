@@ -105,7 +105,7 @@ public class GameController : MonoBehaviour
     public GameObject SpawnBacteria(Vector2 position, float size, int vertices, Color color)
     {
         var go = (GameObject)Instantiate(_bacteriaPrefab, position, Quaternion.identity);
-        var bacteria = go.GetComponent<NewBacteria>();
+        var bacteria = go.GetComponent<Bacteria>();
 
         bacteria.Radius = size;
         bacteria.Vertices = vertices;

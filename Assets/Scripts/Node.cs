@@ -7,9 +7,18 @@ public class Node : MonoBehaviour
 {
     public const float hitFrequency = 10;
 
-    public enum JointType { Center = 0, Left, Right, TypeLength }
-    public delegate void CollisionEvent(Collision2D collision, Node node);
-    public delegate void TriggerEvent(Collider2D other, Node node);
+    public enum JointType
+    {
+        Center = 0,
+        Left,
+        Right,
+        TypeLength
+
+    }
+
+    public delegate void CollisionEvent(Collision2D collision,Node node);
+
+    public delegate void TriggerEvent(Collider2D other,Node node);
 
     public event Action<Node> OnNodeUnstable;
     public event CollisionEvent OnCollisionEnter;
@@ -33,13 +42,16 @@ public class Node : MonoBehaviour
     [SerializeField]
     private bool _constrain = false;
 
-    public JointNode this[JointType type] { get { return _nodes[type]; } }
+    public JointNode this [JointType type] { get { return _nodes[type]; } }
+
     public Rigidbody2D Body { get { return _rigidbody; } }
+
     public CircleCollider2D Collider { get { return _collider; } }
 
 
     private Transform _transform;
     private Dictionary<JointType, JointNode> _nodes = new Dictionary<JointType, JointNode>();
+
     private void Start()
     {
         _transform = transform;
@@ -89,6 +101,7 @@ public class Node : MonoBehaviour
     }
 
     #region Collision Handlers
+
     private void OnCollisionEnter2D(Collision2D collision)
     {
         if (OnCollisionEnter != null)
@@ -113,5 +126,6 @@ public class Node : MonoBehaviour
             OnTriggerExit(other, this);
         }
     }
+
     #endregion
 }
