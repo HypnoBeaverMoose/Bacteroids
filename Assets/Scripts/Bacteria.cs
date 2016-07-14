@@ -55,11 +55,12 @@ public class Bacteria : MonoBehaviour
         {
             Node node = _nodes[i];
 
-            node.Connect(Node.JointType.Left, _nodes[i == 0 ? _nodes.Count - 1 : i - 1]);
-            node.Connect(Node.JointType.Right, _nodes[(i + 1) % _nodes.Count]);
-            node.Connect(Node.JointType.Center, _center);
-
+            node.ConnectSpring(Node.JointType.Left, _nodes[i == 0 ? _nodes.Count - 1 : i - 1]);
+            node.ConnectSpring(Node.JointType.Right, _nodes[(i + 1) % _nodes.Count]);
+            node.ConnectSpring(Node.JointType.Center, _center);
+            node.ConnectSlider(Node.JointType.Center, _center);
             node.Collider.radius = _radius;
+
             node.Collider.radius = Mathf.Min(
                 Vector3.Distance(node.Body.position, transform.position),
                 Vector3.Distance(node.Body.position, _nodes[i == 0 ? _nodes.Count - 1 : i - 1].Body.position),
@@ -67,16 +68,16 @@ public class Bacteria : MonoBehaviour
             );
         }
 
-//        for (int i = 0; i < _nodes.Count; i++)
-//        {
-//            for (int j = 0; j < _nodes.Count; j++)
-//            {
-//                if (i != j)
-//                {
-//                    Physics2D.IgnoreCollision(_nodes[i].Collider, _nodes[j].Collider);
-//                }
-//            }
-//        }
+        for (int i = 0; i < _nodes.Count; i++)
+        {
+            for (int j = 0; j < _nodes.Count; j++)
+            {
+                if (i != j)
+                {
+                    Physics2D.IgnoreCollision(_nodes[i].Collider, _nodes[j].Collider);
+                }
+            }
+        }
     }
 
     //    public void TakeHit(Vector2 position, float damage)

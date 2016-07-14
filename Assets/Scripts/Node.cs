@@ -27,7 +27,7 @@ public class Node : MonoBehaviour
 
     public struct JointNode
     {
-        public SpringJoint2D Joint;
+        public Joint2D Joint;
         public Node Node;
     }
 
@@ -36,68 +36,83 @@ public class Node : MonoBehaviour
     [SerializeField]
     private float _frequency;
     [SerializeField]
+    private float _minDistance;
+    [SerializeField]
+    private float _maxDistance;
+
+    [SerializeField]
     private Rigidbody2D _rigidbody;
     [SerializeField]
     private CircleCollider2D _collider;
     [SerializeField]
     private bool _constrain = false;
 
-    public JointNode this [JointType type] { get { return _nodes[type]; } }
+    public JointNode this [JointType type] { get { return _springs[type]; } }
 
     public Rigidbody2D Body { get { return _rigidbody; } }
 
     public CircleCollider2D Collider { get { return _collider; } }
 
-
     private Transform _transform;
-    private Dictionary<JointType, JointNode> _nodes = new Dictionary<JointType, JointNode>();
+    private Dictionary<JointType, JointNode> _springs = new Dictionary<JointType, JointNode>();
+    private Dictionary<JointType, JointNode> _sliders = new Dictionary<JointType, JointNode>();
 
     private void Start()
     {
         _transform = transform;
     }
 
-    public void Connect(JointType type, Node other)
+    public void ConnectSlider(JointType type, Node other)
     {
-        if (_nodes.ContainsKey(type))
+        Connect(_sliders, type, other, SoftBodyHelper.CreateSliderJoint(gameObject, other.Body, _minDistance, _maxDistance));
+    }
+
+    public void ConnectSpring(JointType type, Node other)
+    {
+        Connect(_springs,type, other, SoftBodyHelper.CreateSpringJoint(gameObject, other.Body, _frequency, _damping));
+    }
+
+    private static void Connect(Dictionary<JointType, JointNode> dict, JointType type, Node other, Joint2D joint)
+    {
+        if (dict.ContainsKey(type))
         {
-            Destroy(_nodes[type].Joint);
-            _nodes.Remove(type);
+            Destroy(dict[type].Joint);
+            dict.Remove(type);
         }
-        var jointNode = new JointNode();
+        var jointNode = new JointNode(); 
         jointNode.Node = other;
-        jointNode.Joint = SoftBodyHelper.CreateSpringJoint(gameObject, other._rigidbody, _frequency, _damping);
-        _nodes.Add(type, jointNode);
+        jointNode.Joint = joint;
+        dict.Add(type, jointNode);
     }
 
     private void FixedUpdate()
     {
-        if (_constrain)
-        {
-            for (JointType type = JointType.Center; type < JointType.TypeLength; type++)
-            {
-                if (_nodes.ContainsKey(type))
-                {
-                    float distance = Vector2.Distance(_rigidbody.position, _nodes[type].Node.Body.position);
-
-                    if (distance < _nodes[type].Joint.distance * 0.5f || distance > _nodes[type].Joint.distance * 1.5f)
-                    {
-                        _nodes[type].Joint.frequency = hitFrequency;
-                        if (distance < _nodes[type].Joint.distance * 0.2f)
-                        {
-                            if (OnNodeUnstable != null)
-                            {
-                                OnNodeUnstable(this);
-                            }
-                        }
-                    }
-                    else
-                    {
-                        _nodes[type].Joint.frequency = _frequency;
-                    }
-                }
-            }
-        }
+//        if (_constrain)
+//        {
+//            for (JointType type = JointType.Center; type < JointType.TypeLength; type++)
+//            {
+//                if (_nodes.ContainsKey(type))
+//                {
+//                    float distance = Vector2.Distance(_rigidbody.position, _nodes[type].Node.Body.position);
+//
+//                    if (distance < _nodes[type].Joint.distance * 0.5f || distance > _nodes[type].Joint.distance * 1.5f)
+//                    {
+//                        _nodes[type].Joint.frequency = hitFrequency;
+//                        if (distance < _nodes[type].Joint.distance * 0.2f)
+//                        {
+//                            if (OnNodeUnstable != null)
+//                            {
+//                                OnNodeUnstable(this);
+//                            }
+//                        }
+//                    }
+//                    else
+//                    {
+//                        _nodes[type].Joint.frequency = _frequency;
+//                    }
+//                }
+//            }
+//        }
     }
 
     #region Collision Handlers

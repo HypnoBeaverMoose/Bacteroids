@@ -10,6 +10,20 @@ public static class SoftBodyHelper
         return spring;
     }
 
+    public static SliderJoint2D CreateSliderJoint(GameObject obj, Rigidbody2D anchor, float minDistance, float maxDistance)
+    {
+        var slider = obj.AddComponent<SliderJoint2D>();
+        slider.connectedBody = anchor;
+        slider.autoConfigureAngle = false;
+        slider.autoConfigureConnectedAnchor = true;
+        slider.useLimits = true;
+        var limits = slider.limits;
+        limits.min = minDistance;
+        limits.max = maxDistance;
+        slider.limits = limits;
+        return slider;
+    }
+
     public static void SetSpringJointAnchor(SpringJoint2D spring, Rigidbody2D anchor, float frequency, float damping)
     {
         spring.connectedBody = anchor;
