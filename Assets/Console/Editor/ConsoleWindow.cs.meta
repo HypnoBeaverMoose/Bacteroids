@@ -1,0 +1,13 @@
+fileFormatVersion: 2
+guid: 525e793761a1c2142bf0f98a5b84cbb1
+timeCreated: 1464355485
+licenseType: Free
+MonoImporter:
+  serializedVersion: 2
+  defaultReferences:
+  - Grayscale: {fileID: 2100000, guid: 5f3a4fb4ec4b48a4e9636eb0febb877e, type: 2}
+  executionOrder: 0
+  icon: {instanceID: 0}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
