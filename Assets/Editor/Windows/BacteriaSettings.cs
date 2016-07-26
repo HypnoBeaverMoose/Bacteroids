@@ -13,7 +13,7 @@ public class BacteriaSettings : EditorWindow {
     }
 
     private const string nodePath = "Assets/Prefabs/node.prefab";
-    private const string bacteriaPath = "Assets/Prefabs/bacteria2.prefab";
+    private const string bacteriaPath = "Assets/Prefabs/bacteria.prefab";
 
     private List<Node> _nodes = new List<Node>();
     private List<Bacteria> _bacteria = new List<Bacteria>();
@@ -126,6 +126,9 @@ public class BacteriaSettings : EditorWindow {
         bacteria.GetComponent<Rigidbody2D>().mass = _pivotMass;
         bacteria.GetComponent<Rigidbody2D>().drag = _pivotDrag;
         bacteria.GetComponent<Rigidbody2D>().angularDrag = _pivotAngularDrag;
+        bacteria.Vertices = _verticies;
+        bacteria.Radius = _radius;
+        bacteria.Collisions = _collision;
     }
 
     private void GatherAndApply()
@@ -283,11 +286,12 @@ public class BacteriaSettings : EditorWindow {
         SetNodeSettings(node);
         node.EditMode = false;
         var bacteria = AssetDatabase.LoadAssetAtPath<GameObject>(bacteriaPath).GetComponent<Bacteria>();
-        SetBacteriaSettings(bacteria);
         SetNodeSettings(bacteria.gameObject.GetComponent<Node>());
+        SetBacteriaSettings(bacteria);
         EditorUtility.SetDirty(node.gameObject);
         EditorUtility.SetDirty(bacteria.gameObject);
     }
+
     private void UpdateBacterias()
     {
         if (_nodes.Contains(null) || _bacteria.Contains(null))
