@@ -60,6 +60,11 @@ public class Node : MonoBehaviour
     private Dictionary<JointType, JointNode> _springs = new Dictionary<JointType, JointNode>();
     private Dictionary<JointType, JointNode> _sliders = new Dictionary<JointType, JointNode>();
 
+    public SliderJoint2D GetSlider()
+    {
+        return _sliders[0].GetJoint<SliderJoint2D>();
+    }
+
     private void Start()
     {
         _transform = transform;
@@ -70,21 +75,31 @@ public class Node : MonoBehaviour
         Connect(_sliders, type, other, SoftBodyHelper.CreateSliderJoint(gameObject, other.Body, MinDistance, MaxDistance));
     }
 
+    public void Disconnect()
+    {
+        for (JointType type = JointType.Center; type < JointType.TypeLength; type++)
+        {
+            Disconnect(type);
+        }
+    }
+
     public void Disconnect(JointType type)
     {
         if (_springs.ContainsKey(type))
         {
             _springs[type].Joint.connectedBody = null;
+            _springs[type].Joint.enabled = false;
         }
         if (_sliders.ContainsKey(type))
         {
             _sliders[type].Joint.connectedBody = null;
+            _sliders[type].Joint.enabled = false;
         }
     }
 
     public void ConnectSpring(JointType type, Node other)
     {
-        Connect(_springs,type, other, SoftBodyHelper.CreateSpringJoint(gameObject, other.Body, Frequency, Damping));
+        Connect(_springs,type, other, SoftBodyHelper.CreateSpringJoint(gameObject, other.Body, type == JointType.Center ? PivotFrequency : Frequency, type == JointType.Center ? PivotDamping : Damping));
     }
 
     private static void Connect(Dictionary<JointType, JointNode> dict, JointType type, Node other, Joint2D joint)
