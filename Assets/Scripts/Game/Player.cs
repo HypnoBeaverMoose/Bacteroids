@@ -2,9 +2,8 @@
 using System.Collections;
 using UnityEngine.UI;
 
-public class Player : MonoBehaviour 
+public class Player : MonoBehaviour
 {
-
     public delegate void PlayerKilled();
     public event PlayerKilled OnPlayerKilled;
     public delegate void ColorChanged(Color newColor);
@@ -71,6 +70,11 @@ public class Player : MonoBehaviour
     private float _explodeTimer = 0;
 	void Start () 
     {
+        if (GetComponent<Wrappable>() != null)
+        {
+            GetComponent<Wrappable>().Size = 0.3f;
+        }
+
         _explodeTimer = 0.25f * _explodeCooldown;
         NoDNA = false;
         _lastBoost = Time.time;
@@ -150,6 +154,4 @@ public class Player : MonoBehaviour
         go.transform.position = transform.position;
         go.GetComponent<ColorSetter>().Color = Color;
     }
-
-
 }

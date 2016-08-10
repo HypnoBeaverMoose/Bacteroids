@@ -117,51 +117,51 @@ public class Node : MonoBehaviour
 
     private void FixedUpdate()
     {
-        if (_constrain)
-        {
-            for (JointType type = JointType.Center; type < JointType.TypeLength; type++)
-            {
-                if (_springs.ContainsKey(type))
-                {
-                    float distance = Vector2.Distance(_rigidbody.position, _springs[type].Node.Body.position);
-
-                    if (distance < _springs[type].GetJoint<SpringJoint2D>().distance * 0.5f || distance > _springs[type].GetJoint<SpringJoint2D>().distance * 1.5f)
-                    {
-                        _springs[type].GetJoint<SpringJoint2D>().frequency = hitFrequency;
-                        if (distance < _springs[type].GetJoint<SpringJoint2D>().distance * 0.2f)
-                        {
-                            if (OnNodeUnstable != null)
-                            {
-                                OnNodeUnstable(this);
-                            }
-                        }
-                    }
-                    else
-                    {
-                        _springs[type].GetJoint<SpringJoint2D>().frequency = type == JointType.Center ? PivotFrequency : Frequency;
-                    }
-                }
-            }
-        }
-        if (EditMode)
-        {
-            for (JointType type = JointType.Center; type < JointType.TypeLength; type++)
-            {
-                if (_springs.ContainsKey(type))
-                {
-                    _springs[type].GetJoint<SpringJoint2D>().frequency = type == JointType.Center ? PivotFrequency : Frequency;
-                    _springs[type].GetJoint<SpringJoint2D>().dampingRatio = type == JointType.Center ? PivotDamping : Damping;
-                }
-
-                if (_sliders.ContainsKey(type))
-                {
-                    var limits = _sliders[type].GetJoint<SliderJoint2D>().limits;
-                    limits.max = MaxDistance;
-                    limits.min = MinDistance;
-                    _sliders[type].GetJoint<SliderJoint2D>().limits = limits;
-                }
-            }
-        }
+//        if (_constrain)
+//        {
+//            for (JointType type = JointType.Center; type < JointType.TypeLength; type++)
+//            {
+//                if (_springs.ContainsKey(type))
+//                {
+//                    float distance = Vector2.Distance(_rigidbody.position, _springs[type].Node.Body.position);
+//
+//                    if (distance < _springs[type].GetJoint<SpringJoint2D>().distance * 0.5f || distance > _springs[type].GetJoint<SpringJoint2D>().distance * 1.5f)
+//                    {
+//                        _springs[type].GetJoint<SpringJoint2D>().frequency = hitFrequency;
+//                        if (distance < _springs[type].GetJoint<SpringJoint2D>().distance * 0.2f)
+//                        {
+//                            if (OnNodeUnstable != null)
+//                            {
+//                                OnNodeUnstable(this);
+//                            }
+//                        }
+//                    }
+//                    else
+//                    {
+//                        _springs[type].GetJoint<SpringJoint2D>().frequency = type == JointType.Center ? PivotFrequency : Frequency;
+//                    }
+//                }
+//            }
+//        }
+//        if (EditMode)
+//        {
+//            for (JointType type = JointType.Center; type < JointType.TypeLength; type++)
+//            {
+//                if (_springs.ContainsKey(type))
+//                {
+//                    _springs[type].GetJoint<SpringJoint2D>().frequency = type == JointType.Center ? PivotFrequency : Frequency;
+//                    _springs[type].GetJoint<SpringJoint2D>().dampingRatio = type == JointType.Center ? PivotDamping : Damping;
+//                }
+//
+//                if (_sliders.ContainsKey(type))
+//                {
+//                    var limits = _sliders[type].GetJoint<SliderJoint2D>().limits;
+//                    limits.max = MaxDistance;
+//                    limits.min = MinDistance;
+//                    _sliders[type].GetJoint<SliderJoint2D>().limits = limits;
+//                }
+//            }
+//        }
 
 
 
