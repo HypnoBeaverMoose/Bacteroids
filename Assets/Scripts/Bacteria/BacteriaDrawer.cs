@@ -94,7 +94,7 @@ public class BacteriaDrawer : MonoBehaviour
             var next_pos = next.Body.transform.position + (next.Body.transform.position - transform.position).normalized * next.Collider.radius;
 
             _renderer.SetPosition(i * 3, pos + (prev_pos - pos).normalized * 0.01f);
-            _renderer.SetPosition(i * 3 + 1, pos);
+            _renderer.SetPosition(i * 3 + 1, node.Body.transform.position + (node.Body.transform.position - transform.position).normalized * node.Collider.radius * 2);
             _renderer.SetPosition(i * 3 + 2, pos + (next_pos - pos).normalized * 0.01f);
         }
     }
