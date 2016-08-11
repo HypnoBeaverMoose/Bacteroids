@@ -9,6 +9,7 @@ public class Projectile : MonoBehaviour
     private SpriteRenderer _sprite;
     public Color Color { get { return _sprite.color; } set { _sprite.color = value; } }
     private bool _destructionStarted = false;
+
 	void Start () 
     {
         GetComponent<Rigidbody2D>().AddForce(transform.up * _speed);
@@ -16,8 +17,12 @@ public class Projectile : MonoBehaviour
 	}
 	
 	// Update is called once per frame
-	void FixedUpdate () {
-        
+	void FixedUpdate () 
+    {
+        if (!_sprite.isVisible)
+        {
+            Destroy(gameObject);
+        }
 	}
 
     public void Kill()
