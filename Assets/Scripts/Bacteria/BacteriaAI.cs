@@ -7,6 +7,13 @@ public class BacteriaAI : MonoBehaviour
 
     public bool NearPlayer { get { return _nodesNearPlayer > 0; } }
 
+
+    [SerializeField]
+    private float _blobIntensity;
+
+    [SerializeField]
+    private float _blobSpeed;
+
     [SerializeField]
     private float _moveTimeot;
     [SerializeField]
@@ -14,14 +21,17 @@ public class BacteriaAI : MonoBehaviour
 
     private int _nodesNearPlayer = 0;
     private Player _player;
+    private List<Node> _nodes;
 
     void Start()
     {
-        InvokeRepeating("Move", _moveTimeot, _moveTimeot);
+        //InvokeRepeating("Move", _moveTimeot, _moveTimeot);
+        StartCoroutine(Blob());
     }
 
     public void Init(List<Node> nodes)
     {
+        _nodes = nodes;
     }
 
     private void NodeNearPlayer(Collider2D other, Node node)
@@ -42,6 +52,16 @@ public class BacteriaAI : MonoBehaviour
             _nodesNearPlayer = 0;
         }
 
+    }
+
+    private IEnumerator Blob()
+    {
+        while (true)
+        {
+            var body = _nodes[Random.Range(0, _nodes.Count)].Body;
+            body.AddForce((body.position - (Vector2)transform.position).normalized * Random.Range(0.01f, 0.1f) *_blobIntensity, ForceMode2D.Impulse);
+            yield return new WaitForSeconds(Random.Range(0.1f, 0.3f) * _blobSpeed);
+        }
     }
 
     private void Move()
