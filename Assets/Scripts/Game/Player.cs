@@ -127,12 +127,13 @@ public class Player : MonoBehaviour
                 go.GetComponent<Projectile>().Color = Color;
                 Energy -= _shootEnergyCost;
             }
-
-            if (Force > 0)
-            {
-                _engineParticles.Emit(1);
-            }
         }
+
+        if (Force > 0)
+        {
+            _engineParticles.Emit(1);
+        }
+
         _explodeTimer = Mathf.Max(_explodeTimer - Time.deltaTime, 0);
 	}
 
