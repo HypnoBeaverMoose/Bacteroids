@@ -36,9 +36,14 @@ public class BacteriaDrawer : MonoBehaviour
     private LineRenderer _renderer;
     private List<Node> _nodes;
     [SerializeField]
+    private float _attachableFrquency = 20;
+
+    [SerializeField]
     private Color _color = new Color();
     [SerializeField]
     private float _width = 0.1f;
+    [SerializeField]
+    private GameObject _energyPrefab;
 
     private void Awake()
     {
@@ -60,7 +65,19 @@ public class BacteriaDrawer : MonoBehaviour
         {
             _renderer.SetVertexCount((_nodes.Count + 1) * 3);
             DrawOutline();
+            foreach (var node in _nodes)
+            {
+                if (node.Collider.radius > 0.1f)
+                {
+                    var energy = ((GameObject)Instantiate(_energyPrefab, node.Body.position + (Random.insideUnitCircle * node.Collider.radius * 0.5f), Quaternion.identity)).GetComponent<Energy>();
+                    SoftBodyHelper.CreateSpringJoint(energy.gameObject,  node.Body, _attachableFrquency, 1.0f);
+                    energy.transform.localScale = Vector3.one * node.Collider.radius * Random.Range(0.3f, 0.6f);
+                    energy.transform.parent = node.gameObject.transform;
+                }
+
+            }
         }
+
     }
 
     private void DrawOutline()

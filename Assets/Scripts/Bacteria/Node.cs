@@ -2,6 +2,7 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using Random = UnityEngine.Random;
 
 public class Node : MonoBehaviour
 {
@@ -60,13 +61,9 @@ public class Node : MonoBehaviour
     private Dictionary<JointType, JointNode> _springs = new Dictionary<JointType, JointNode>();
     private Dictionary<JointType, JointNode> _sliders = new Dictionary<JointType, JointNode>();
 
-    public SliderJoint2D GetSlider()
-    {
-        return _sliders[0].GetJoint<SliderJoint2D>();
-    }
 
     private void Start()
-    {
+    {        
         _transform = transform;
     }
         
@@ -74,6 +71,12 @@ public class Node : MonoBehaviour
     {
         Connect(_sliders, type, other, SoftBodyHelper.CreateSliderJoint(gameObject, other.Body, MinDistance, MaxDistance));
     }
+
+    public SliderJoint2D GetSlider()
+    {
+        return _sliders[0].GetJoint<SliderJoint2D>();
+    }
+
 
     public void Disconnect()
     {

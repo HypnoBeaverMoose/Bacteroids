@@ -21,7 +21,7 @@ public class Projectile : MonoBehaviour
     {
         if (!_sprite.isVisible)
         {
-            Destroy(gameObject);
+            Kill();
         }
 	}
 
