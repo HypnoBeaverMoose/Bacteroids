@@ -21,7 +21,7 @@ public class BacteriaAI : MonoBehaviour
 
     private int _nodesNearPlayer = 0;
     private Player _player;
-    private List<Node> _nodes;
+    private Bacteria _bacteria;
 
     void Start()
     {
@@ -29,9 +29,9 @@ public class BacteriaAI : MonoBehaviour
         StartCoroutine(Blob());
     }
 
-    public void Init(List<Node> nodes)
+    public void Init(Bacteria bacteria)
     {
-        _nodes = nodes;
+        _bacteria = bacteria;
     }
 
     private void NodeNearPlayer(Collider2D other, Node node)
@@ -58,7 +58,7 @@ public class BacteriaAI : MonoBehaviour
     {
         while (true)
         {
-            var body = _nodes[Random.Range(0, _nodes.Count)].Body;
+            var body = _bacteria[Random.Range(0, _bacteria.Vertices)].Body;
             body.AddForce((body.position - (Vector2)transform.position).normalized * Random.Range(0.01f, 0.1f) *_blobIntensity, ForceMode2D.Impulse);
             yield return new WaitForSeconds(Random.Range(0.1f, 0.3f) * _blobSpeed);
         }

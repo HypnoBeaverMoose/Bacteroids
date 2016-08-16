@@ -33,8 +33,8 @@ public class BacteriaDrawer : MonoBehaviour
         }
     }
         
+    private Bacteria _bacteria;
     private LineRenderer _renderer;
-    private List<Node> _nodes;
     [SerializeField]
     private float _attachableFrquency = 20;
 
@@ -51,22 +51,24 @@ public class BacteriaDrawer : MonoBehaviour
         _renderer.SetColors(Color, Color);       
         _renderer.SetWidth(_width, _width);
         _renderer.useWorldSpace = true;
-        if (_nodes != null)
+        if (_bacteria != null)
         {
-            _renderer.SetVertexCount((_nodes.Count + 1) * 3);
+            _renderer.SetVertexCount((_bacteria.Vertices + 1) * 3);
             DrawOutline();
         }
     }
 
-    public void Init(List<Node> nodes)
+    public void Init(Bacteria bacteria)
     {
-        _nodes = new List<Node>(nodes);
+        _bacteria = bacteria;
+        //_nodes = new List<Node>(nodes);
         if (_renderer != null)
         {
-            _renderer.SetVertexCount((_nodes.Count + 1) * 3);
+            _renderer.SetVertexCount((_bacteria.Vertices + 1) * 3);
             DrawOutline();
-            foreach (var node in _nodes)
+            for(int i = 0; i < _bacteria.Vertices; i++)
             {
+                var node = _bacteria[i];
                 if (node.Collider.radius > 0.1f)
                 {
                     var energy = ((GameObject)Instantiate(_energyPrefab, node.Body.position + (Random.insideUnitCircle * node.Collider.radius * 0.5f), Quaternion.identity)).GetComponent<Energy>();
@@ -83,12 +85,12 @@ public class BacteriaDrawer : MonoBehaviour
     private void DrawOutline()
     {
         
-        for (int i = 0; i < (_nodes.Count + 1); i++)
+        for (int i = 0; i < (_bacteria.Vertices + 1); i++)
         {
-            int index = i % _nodes.Count;
-            var node = _nodes[index];
-            var prev = _nodes[index == 0 ? _nodes.Count - 1 : index - 1];
-            var next = _nodes[(index + 1) % _nodes.Count];
+            int index = i % _bacteria.Vertices;
+            var node = _bacteria[index];
+            var prev = _bacteria[index == 0 ? _bacteria.Vertices - 1 : index - 1];
+            var next = _bacteria[(index + 1) % _bacteria.Vertices];
             var pos = node.Body.transform.position + (node.Body.transform.position - transform.position).normalized * node.Collider.radius;
             var prev_pos = prev.Body.transform.position + (prev.Body.transform.position - transform.position).normalized * prev.Collider.radius;
             var next_pos = next.Body.transform.position + (next.Body.transform.position - transform.position).normalized * next.Collider.radius;
@@ -101,7 +103,7 @@ public class BacteriaDrawer : MonoBehaviour
 
 	private void Update () 
     {
-        if (_nodes != null && _renderer != null)
+        if (_bacteria != null && _renderer != null)
         {
             DrawOutline();
         }

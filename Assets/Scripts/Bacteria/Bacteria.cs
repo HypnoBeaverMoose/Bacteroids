@@ -4,6 +4,8 @@ using System.Collections.Generic;
 
 public class Bacteria : MonoBehaviour
 {
+
+    public const int MinVertexCount = 5;
     public enum CollisionType
     {
         None = 0,
@@ -55,6 +57,12 @@ public class Bacteria : MonoBehaviour
         }
     }
 
+    public Node this[int index] 
+    {
+        get  { return _nodes[index]; }
+        set  { _nodes[index] = value; }
+    }
+
     [SerializeField]
     private Node _node;
     [SerializeField]
@@ -76,15 +84,14 @@ public class Bacteria : MonoBehaviour
     private CollisionType _collisionType = CollisionType.None;
     private bool _initialized = false;
 
+
     private void Start()
     {
         _drawer = GetComponent<BacteriaDrawer>();
         _ai = GetComponent<BacteriaAI>();
-        _center = GetComponent<Node>();
-        _center.Collider.radius = _radius;
         Generate();
-        _drawer.Init(_nodes);
-        _ai.Init(_nodes);
+        _drawer.Init(this);
+        _ai.Init(this);       
     }
 
     public void Regenerate()
@@ -100,12 +107,14 @@ public class Bacteria : MonoBehaviour
         }
         _nodes.Clear();
         Generate();
-        _drawer.Init(_nodes);
-        _ai.Init(_nodes);
+        _drawer.Init(this);
+        _ai.Init(this);
     }
    
     private void Generate()
     {        
+        _center = GetComponent<Node>();
+        _center.Collider.radius = _radius;
         float angle = (2 * Mathf.PI) / _vertices;
         float initialOffset = Random.Range(0, Mathf.PI);
         float randomOffsetSize = 0.25f;
@@ -120,6 +129,7 @@ public class Bacteria : MonoBehaviour
             _nodes[i].transform.SetParent(transform, true);
             _nodes[i].Body.position = transform.TransformPoint(position);
             _nodes[i].Collider.radius = _radius * Random.Range(_lowerRandomBound, _upperRandomBound);
+            _nodes[i].OnCollisionEnter += OnBacteriaHit; 
         }
 
         Reconnect();
@@ -132,7 +142,21 @@ public class Bacteria : MonoBehaviour
         }
 
     }
+    private void OnBacteriaHit(Collision2D collision,Node node)
+    {
+        if (collision.collider.CompareTag("Projectile"))
+        {
+            SplitController.HandleHit(this, collision.gameObject.GetComponent<Projectile>(), collision.contacts[0].point, collision.relativeVelocity);
+        }            
+    }
 
+    private void OnDestroy()
+    {
+        foreach (var node in _nodes)
+        {
+            node.OnCollisionEnter -= OnBacteriaHit;
+        }
+    }
     #region realtime update
     private void UpdateRadius(float radius)
     {
@@ -237,8 +261,8 @@ public class Bacteria : MonoBehaviour
         }
         Reconnect();
         UpdateCollisions(_collisionType);
-        _drawer.Init(_nodes);
-        _ai.Init(_nodes);
+        _drawer.Init(this);
+        _ai.Init(this);
 
     }
     #endregion
