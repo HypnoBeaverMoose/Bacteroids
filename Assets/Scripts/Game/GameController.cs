@@ -106,8 +106,7 @@ public class GameController : MonoBehaviour
     {
         var go = (GameObject)Instantiate(_bacteriaPrefab, position, Quaternion.identity);
         var bacteria = go.GetComponent<Bacteria>();
-
-        bacteria.Radius = size;
+       
         bacteria.Vertices = vertices;
         _enemies.Add(go);
         return go;

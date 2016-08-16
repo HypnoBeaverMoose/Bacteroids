@@ -21,8 +21,6 @@ public class BacteriaSettings : EditorWindow {
     [SerializeField]
     private int _verticies;
     [SerializeField]
-    private float _radius;
-    [SerializeField]
     private Bacteria.CollisionType _collision;
 
 
@@ -97,7 +95,6 @@ public class BacteriaSettings : EditorWindow {
 
 
         _verticies = bacteria.Vertices;
-        _radius = bacteria.Radius;
         _autoAnchor = false;
         _autoDistance = false;
         _collision = bacteria.Collisions;
@@ -127,7 +124,6 @@ public class BacteriaSettings : EditorWindow {
         bacteria.GetComponent<Rigidbody2D>().drag = _pivotDrag;
         bacteria.GetComponent<Rigidbody2D>().angularDrag = _pivotAngularDrag;
         bacteria.Vertices = _verticies;
-        bacteria.Radius = _radius;
         bacteria.Collisions = _collision;
     }
 
@@ -239,7 +235,6 @@ public class BacteriaSettings : EditorWindow {
             GUILayout.Space(10);
             EditorGUILayout.LabelField("Bacteria Settings");
             EditorGUILayout.PropertyField(serObj.FindProperty("_verticies"), true);
-            EditorGUILayout.PropertyField(serObj.FindProperty("_radius"));
             EditorGUILayout.PropertyField(serObj.FindProperty("_collision"));
 
             GUILayout.Space(10);
@@ -269,7 +264,6 @@ public class BacteriaSettings : EditorWindow {
 
         serObj.ApplyModifiedProperties();
         _verticies = Mathf.Max(4, _verticies);
-        _radius = Mathf.Max(0.01f, _radius);
         serObj.Update();
     }
     private void Regenerate()
@@ -322,7 +316,6 @@ public class BacteriaSettings : EditorWindow {
 
             foreach (var bacteria in _bacteria)
             {
-                bacteria.Radius = _radius;
                 bacteria.Vertices = _verticies;
                 bacteria.Collisions = _collision;
                 bacteria.GetComponent<Rigidbody2D>().mass = _pivotMass;

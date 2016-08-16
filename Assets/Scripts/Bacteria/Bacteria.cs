@@ -4,8 +4,9 @@ using System.Collections.Generic;
 
 public class Bacteria : MonoBehaviour
 {
-
     public const int MinVertexCount = 5;
+    public const float RadiusPerVertex = 0.018f;
+    private const float randomOffsetSize = 0.25f;
     public enum CollisionType
     {
         None = 0,
@@ -17,15 +18,13 @@ public class Bacteria : MonoBehaviour
 
     public float Radius
     {
-        get { return _radius; }
-        set
-        {            
-            if (_radius !=value &&_initialized)
-            {
-                _radius = value;
-                UpdateRadius(_radius);
-            }
-            _radius = value;
+        get { return RadiusPerVertex * _vertices ; }
+    }
+    public float MaxSize
+    {
+        get
+        { 
+            return _maxSize;
         }
     }
 
@@ -70,12 +69,9 @@ public class Bacteria : MonoBehaviour
     [SerializeField]
     private float _health;
     [SerializeField]
-    private float _radius;
-    [SerializeField]
     private float _lowerRandomBound;
     [SerializeField]
     private float _upperRandomBound;
-
 
     private Node _center;
     private BacteriaDrawer _drawer;
@@ -84,61 +80,62 @@ public class Bacteria : MonoBehaviour
     private CollisionType _collisionType = CollisionType.None;
     private bool _initialized = false;
 
-
+    private float _angle = 0;
+    private float _initialOffset = 0;
+    private float _maxSize = 0;
     private void Start()
     {
         _drawer = GetComponent<BacteriaDrawer>();
         _ai = GetComponent<BacteriaAI>();
-        Generate();
-        _drawer.Init(this);
-        _ai.Init(this);       
-    }
-
-    public void Regenerate()
-    {
-        for (int i = 0; i < _nodes.Count; i++)
+        if (_vertices > MinVertexCount)
         {
-            _nodes[i].transform.parent = null;
-            foreach (var joint in _nodes[i].GetComponentsInChildren<Joint2D>())
-            {
-                DestroyImmediate(joint);
-            }
-            DestroyImmediate(_nodes[i].gameObject);
+            Generate();   
         }
-        _nodes.Clear();
-        Generate();
-        _drawer.Init(this);
-        _ai.Init(this);
     }
-   
-    private void Generate()
+          
+    public void Generate()
     {        
-        _center = GetComponent<Node>();
-        _center.Collider.radius = _radius;
-        float angle = (2 * Mathf.PI) / _vertices;
-        float initialOffset = Random.Range(0, Mathf.PI);
-        float randomOffsetSize = 0.25f;
+        if (_vertices <= MinVertexCount)
+        {
+            return;
+        }
 
+        _center = GetComponent<Node>();
+        _center.Collider.radius = Radius;
+        _angle = (2 * Mathf.PI) / _vertices;
+        _initialOffset = Random.Range(0, Mathf.PI);
+
+        Vector3[] outerPoints = new Vector3[_vertices];
         for (int i = 0; i < _vertices; i++)
         {
             _nodes.Add(Instantiate(_node.gameObject).GetComponent<Node>());
-            float randomOffset = Random.Range(-angle, angle) * randomOffsetSize;
-            float angleOffset = initialOffset - i * angle + randomOffset;
-            Vector3 position = new Vector3(Mathf.Cos(angleOffset), Mathf.Sin(angleOffset), 0) * _radius * Random.Range(_lowerRandomBound, _upperRandomBound);
+            float randomOffset = Random.Range(-_angle, _angle) * randomOffsetSize;
+            float angleOffset = _initialOffset - i * _angle + randomOffset;
+            Vector3 position = new Vector3(Mathf.Cos(angleOffset), Mathf.Sin(angleOffset), 0) * Radius * Random.Range(_lowerRandomBound, _upperRandomBound);
+
 
             _nodes[i].transform.SetParent(transform, true);
             _nodes[i].Body.position = transform.TransformPoint(position);
-            _nodes[i].Collider.radius = _radius * Random.Range(_lowerRandomBound, _upperRandomBound);
+            _nodes[i].Collider.radius = Radius * Random.Range(_lowerRandomBound, _upperRandomBound);
             _nodes[i].OnCollisionEnter += OnBacteriaHit; 
-        }
 
+            outerPoints[i] = position + position.normalized * _nodes[i].Collider.radius;
+        }
+        _maxSize = outerPoints[0].magnitude;
+        foreach (var point in outerPoints)
+        {
+            _maxSize = Mathf.Max(_maxSize, point.magnitude);
+        }
+        _maxSize *= 2;
         Reconnect();
         UpdateCollisions(_collisionType);
         _initialized = true;
+        _drawer.Init(this);
+        _ai.Init(this);    
 
         if (GetComponent<Wrappable>() != null)
         {
-            GetComponent<Wrappable>().Size = _radius * 1.5f;
+            GetComponent<Wrappable>().Size = _maxSize;
         }
 
     }
@@ -158,6 +155,23 @@ public class Bacteria : MonoBehaviour
         }
     }
     #region realtime update
+
+    public void Regenerate()
+    {
+        for (int i = 0; i < _nodes.Count; i++)
+        {
+            _nodes[i].transform.parent = null;
+            foreach (var joint in _nodes[i].GetComponentsInChildren<Joint2D>())
+            {
+                DestroyImmediate(joint);
+            }
+            DestroyImmediate(_nodes[i].gameObject);
+        }
+        _nodes.Clear();
+
+        Generate();
+    }
+
     private void UpdateRadius(float radius)
     {
         _center.Collider.radius = radius;
@@ -247,15 +261,14 @@ public class Bacteria : MonoBehaviour
             _nodes.RemoveRange(_vertices, _nodes.Count - _vertices);
         }
 
-        float angle = (2 * Mathf.PI) / _vertices;
-        float initialOffset = Random.Range(0, Mathf.PI);
-        float randomOffsetSize = 0.25f;
+        _angle = (2 * Mathf.PI) / _vertices;
+        _initialOffset = Random.Range(0, Mathf.PI);
         for (int i = 0; i < _vertices; i++)
         {            
-            float randomOffset = Random.Range(-angle, angle) * randomOffsetSize;
-            float angleOffset = initialOffset - i * angle + randomOffset;
-            Vector3 position = new Vector3(Mathf.Cos(angleOffset), Mathf.Sin(angleOffset), 0) * _radius * Random.Range(_lowerRandomBound, _upperRandomBound);
-            _nodes[i].Collider.radius = _radius * Random.Range(_lowerRandomBound, _upperRandomBound);;
+            float randomOffset = Random.Range(-_angle, _angle) * randomOffsetSize;
+            float angleOffset = _initialOffset - i * _angle + randomOffset;
+            Vector3 position = new Vector3(Mathf.Cos(angleOffset), Mathf.Sin(angleOffset), 0) * Radius * Random.Range(_lowerRandomBound, _upperRandomBound);
+            _nodes[i].Collider.radius = Radius * Random.Range(_lowerRandomBound, _upperRandomBound);;
             _nodes[i].transform.SetParent(transform, true);
             _nodes[i].Body.position = transform.TransformPoint(position);
         }

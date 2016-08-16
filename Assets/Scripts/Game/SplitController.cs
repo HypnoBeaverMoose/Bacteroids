@@ -73,7 +73,7 @@ public class SplitController : MonoBehaviour
 
     private IEnumerator HandleHitRoutine(Bacteria bacteria, Projectile projectile, Vector2 hit, Vector2 velocity)
     {
-        Bacteria newbac = SpawnBacteria(bacteria.transform.position, bacteria.transform.rotation, bacteria.Vertices - 1, bacteria.Radius);
+        Bacteria newbac = SpawnBacteria(bacteria.transform.position, bacteria.transform.rotation, bacteria.Vertices - 1);
         Destroy(bacteria.gameObject);
 
         yield return null;
@@ -100,14 +100,14 @@ public class SplitController : MonoBehaviour
         Destroy(bacteria.gameObject);
         SpawnExplosion(position);
         yield return null;
-        var bac = SpawnBacteria(position + normal * radius * 1.5f, rotation, verticies - 1, radius);
+        SpawnBacteria(position + normal * radius * 1.5f, rotation, verticies - 1);
         yield return null;
         var  raycastHit = Physics2D.Raycast(position, normal.normalized);
         if (raycastHit.collider != null && raycastHit.collider.GetComponent<Node>() != null)
         {
             raycastHit.collider.GetComponent<Node>().Body.AddForce(normal.normalized * 10, ForceMode2D.Impulse);
         }
-        SpawnBacteria(position - normal * radius * 1.5f, rotation, verticies - 1, radius);
+        SpawnBacteria(position - normal * radius * 1.5f, rotation, verticies - 1);
         yield return null;
         raycastHit = Physics2D.Raycast(position, -normal.normalized);
         if (raycastHit.collider != null && raycastHit.collider.GetComponent<Node>() != null)
@@ -116,11 +116,10 @@ public class SplitController : MonoBehaviour
         }
     }
 
-    private Bacteria SpawnBacteria(Vector3 position, Quaternion rotation,  int verticies, float radius)
+    private Bacteria SpawnBacteria(Vector3 position, Quaternion rotation,  int verticies)
     {
         var newbac = Instantiate(bacteriaPrefab, position, rotation) as GameObject;
         newbac.GetComponent<Bacteria>().Vertices = verticies - 1;
-        newbac.GetComponent<Bacteria>().Radius = radius;
         return newbac.GetComponent<Bacteria>();
     }
 }
