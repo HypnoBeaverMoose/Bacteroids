@@ -22,7 +22,7 @@ public class BacteriaAI : MonoBehaviour
     private int _nodesNearPlayer = 0;
     private Player _player;
     private Bacteria _bacteria;
-
+    private bool _blob = false;
     void Start()
     {
         //InvokeRepeating("Move", _moveTimeot, _moveTimeot);
@@ -32,6 +32,11 @@ public class BacteriaAI : MonoBehaviour
     public void Init(Bacteria bacteria)
     {
         _bacteria = bacteria;
+    }
+
+    public void Clear()
+    {
+        StopCoroutine(Blob());
     }
 
     private void NodeNearPlayer(Collider2D other, Node node)
@@ -56,7 +61,7 @@ public class BacteriaAI : MonoBehaviour
 
     private IEnumerator Blob()
     {
-        while (true)
+        while (true && _bacteria != null)
         {
             var body = _bacteria[Random.Range(0, _bacteria.Vertices)].Body;
             body.AddForce((body.position - (Vector2)transform.position).normalized * Random.Range(0.01f, 0.1f) *_blobIntensity, ForceMode2D.Impulse);

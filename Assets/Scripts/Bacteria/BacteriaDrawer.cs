@@ -108,4 +108,7 @@ public class BacteriaDrawer : MonoBehaviour
             DrawOutline();
         }
 	}
+
+    public void Clear()
+    {}
 }

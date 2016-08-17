@@ -4,6 +4,8 @@ using System.Collections;
 public class Projectile : MonoBehaviour
 {
     [SerializeField]
+    private GameObject _explosionPrefab;
+    [SerializeField]
     private float _speed;
     [SerializeField]
     private SpriteRenderer _sprite;
@@ -40,10 +42,11 @@ public class Projectile : MonoBehaviour
         GetComponent<Collider2D>().enabled = false;
         GetComponent<Rigidbody2D>().velocity = Vector2.zero;
         GetComponent<Rigidbody2D>().angularVelocity = 0;
-        var explosion = Instantiate(Resources.Load<ParticleSystem>("explosion"));
-        explosion.transform.SetParent(transform, false);
-        explosion.startColor = Color;        
-        explosion.Emit(30);        
+        var explosion = Instantiate(_explosionPrefab);
+
+        explosion.transform.position = transform.position;
+        explosion.GetComponent<ParticleSystem>().startColor = Color;
+        explosion.GetComponent<ParticleSystem>().Emit(30);
         Destroy(explosion.gameObject, 5);
         yield return new WaitForSeconds(1.0f);
         Destroy(gameObject);
@@ -55,6 +58,6 @@ public class Projectile : MonoBehaviour
 //        {
 //            collision.rigidbody.AddForce( -collision.contacts[0].normal , ForceMode2D.Impulse);
 //        }
-        Kill();           
+        Kill();
     }
 }

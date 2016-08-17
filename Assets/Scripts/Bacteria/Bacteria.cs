@@ -4,7 +4,7 @@ using System.Collections.Generic;
 
 public class Bacteria : MonoBehaviour
 {
-    public const int MinVertexCount = 5;
+    public const int MinVertexCount = 6;
     public const float RadiusPerVertex = 0.018f;
     private const float randomOffsetSize = 0.25f;
     public enum CollisionType
@@ -87,21 +87,18 @@ public class Bacteria : MonoBehaviour
     {
         _drawer = GetComponent<BacteriaDrawer>();
         _ai = GetComponent<BacteriaAI>();
-        if (_vertices > MinVertexCount)
-        {
-            Generate();   
-        }
+        Generate();
     }
           
     public void Generate()
     {        
-        if (_vertices <= MinVertexCount)
+        if (_vertices < MinVertexCount)
         {
             return;
         }
-
         _center = GetComponent<Node>();
         _center.Collider.radius = Radius;
+        _center.Collider.enabled = false;
         _angle = (2 * Mathf.PI) / _vertices;
         _initialOffset = Random.Range(0, Mathf.PI);
 
@@ -117,7 +114,7 @@ public class Bacteria : MonoBehaviour
             _nodes[i].transform.SetParent(transform, true);
             _nodes[i].Body.position = transform.TransformPoint(position);
             _nodes[i].Collider.radius = Radius * Random.Range(_lowerRandomBound, _upperRandomBound);
-            _nodes[i].OnCollisionEnter += OnBacteriaHit; 
+            _nodes[i].OnCollisionEnter += OnBacteriaHit;
 
             outerPoints[i] = position + position.normalized * _nodes[i].Collider.radius;
         }
@@ -149,11 +146,19 @@ public class Bacteria : MonoBehaviour
 
     private void OnDestroy()
     {
+        _drawer.Clear();
+        _ai.Clear();
         foreach (var node in _nodes)
         {
             node.OnCollisionEnter -= OnBacteriaHit;
         }
     }
+
+    public bool ContainsNode(Node node)
+    {
+        return _nodes.Contains(node);
+    }
+
     #region realtime update
 
     public void Regenerate()
@@ -276,7 +281,6 @@ public class Bacteria : MonoBehaviour
         UpdateCollisions(_collisionType);
         _drawer.Init(this);
         _ai.Init(this);
-
     }
     #endregion
 
