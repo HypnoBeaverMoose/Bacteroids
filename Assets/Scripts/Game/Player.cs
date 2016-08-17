@@ -32,6 +32,8 @@ public class Player : MonoBehaviour
         }
     }
     [SerializeField]
+    private float _invincibleTimeout;
+    [SerializeField]
     private float _explodeCooldown;
     [SerializeField]
     private float _boostTimeout;
@@ -68,6 +70,7 @@ public class Player : MonoBehaviour
     private float _lastBoost = 0;
     private Color _color = Color.white;
     private float _explodeTimer = 0;
+    private bool _invincible = false;
 	void Start () 
     {
         if (GetComponent<Wrappable>() != null)
@@ -82,6 +85,7 @@ public class Player : MonoBehaviour
         Angle = 0;
         Energy = _startingEnergy;
         _rigidbody = GetComponent<Rigidbody2D>();
+        StartCoroutine(Invincibility());
 	}
 
     private IEnumerator NoDNARoutine()
@@ -97,14 +101,6 @@ public class Player : MonoBehaviour
 	
 	void Update () 
     {
-        if (Energy <= 0)
-        {
-            if (OnPlayerKilled != null)
-            {
-                OnPlayerKilled();
-            }
-        }
-
         Energy += _idleEnergyBonus * Time.deltaTime;
         Force = Mathf.Max(0, Input.GetAxis("Vertical"));
         Angle = Input.GetAxis("Horizontal") * Time.fixedDeltaTime; ;
@@ -114,18 +110,17 @@ public class Player : MonoBehaviour
             NoDNA = true;
             StartCoroutine(NoDNARoutine());            
         }
-
-        //if (Input.GetKeyDown(KeyCode.LeftControl))
-        //{
-        //    Explode();
-        //}
+            
         if (!NoDNA)
         {
             if (Input.GetKeyDown(KeyCode.Space))
             {
                 var go = Instantiate(_projectilePrefab, transform.position + transform.up * 0.5f, transform.localRotation) as GameObject;
                 go.GetComponent<Projectile>().Color = Color;
-                Energy -= _shootEnergyCost;
+                if (!_invincible)
+                {
+                    Energy -= _shootEnergyCost;
+                }
             }
         }
 
@@ -148,11 +143,30 @@ public class Player : MonoBehaviour
         }
     }
 
-    public void Explode()
+    public void Damage(Bacteria bacteria)
     {
-        _explodeTimer = _explodeCooldown;
-        var go = Instantiate<GameObject>(Resources.Load<GameObject>("colorsetter"));
-        go.transform.position = transform.position;
-        go.GetComponent<ColorSetter>().Color = Color;
+        if (!_invincible)
+        {
+            if (OnPlayerKilled != null)
+            {
+                OnPlayerKilled();
+            }
+        }
+    }
+
+    private IEnumerator Invincibility()
+    {
+        _invincible = true;
+        float timer = _invincibleTimeout;
+        while (timer > 0)
+        {
+            var color = _playerSprite.color;
+            color.a = 0.5f + 0.5f * Mathf.Sin(Time.time * 10);
+            _playerSprite.color = color;
+            timer -= Time.deltaTime;
+            yield return null;
+        }
+        _playerSprite.color = new Color(Color.r, Color.g, Color.b, 1.0f);
+        _invincible = false;
     }
 }

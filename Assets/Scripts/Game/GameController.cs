@@ -6,7 +6,7 @@ using UnityEngine.UI;
 
 public class GameController : MonoBehaviour 
 {
-
+    public int Lives { get; private set; }
     public float Score { get; set; }
     public float Radius { get { return _radius; } }
 
@@ -37,6 +37,8 @@ public class GameController : MonoBehaviour
     private int _startBacteriaVertices;
     [SerializeField]
     private int _maxBacterias;
+    [SerializeField]
+    private int _startLives;
 
     private List<GameObject> _enemies = new List<GameObject>();
     private Player _player;
@@ -50,6 +52,8 @@ public class GameController : MonoBehaviour
         _endScreen.OnEndGame += EndGame;
         _scoreScreen.OnSkipScores += SkipScores;
         _stopSpawn = true;
+
+        Lives = _startLives;
         HighScores.Load();
     }
 
@@ -96,10 +100,19 @@ public class GameController : MonoBehaviour
 
     private void PlayerKilled()
     {
-        _stopSpawn = true;
-       
+        _player.OnPlayerKilled += PlayerKilled;
         Destroy(_player.gameObject);
-        _endScreen.gameObject.SetActive(true);
+        if (Lives == 0)
+        {
+            _stopSpawn = true;       
+            _endScreen.gameObject.SetActive(true);
+        }
+        else
+        {
+            _player = Instantiate<GameObject>(_playerPrefab).GetComponent<Player>();
+            _player.OnPlayerKilled += PlayerKilled;
+            Lives--;
+        }
     }
 
     public GameObject SpawnBacteria(Vector2 position, float size, int vertices, Color color)
