@@ -66,18 +66,18 @@ public class BacteriaDrawer : MonoBehaviour
         {
             _renderer.SetVertexCount((_bacteria.Vertices + 1) * 3);
             DrawOutline();
-            for(int i = 0; i < _bacteria.Vertices; i++)
-            {
-                var node = _bacteria[i];
-                if (node.Collider.radius > 0.1f)
-                {
-                    var energy = ((GameObject)Instantiate(_energyPrefab, node.Body.position + (Random.insideUnitCircle * node.Collider.radius * 0.5f), Quaternion.identity)).GetComponent<Energy>();
-                    SoftBodyHelper.CreateSpringJoint(energy.gameObject,  node.Body, _attachableFrquency, 1.0f);
-                    energy.transform.localScale = Vector3.one * node.Collider.radius * Random.Range(0.3f, 0.6f);
-                    energy.transform.parent = node.gameObject.transform;
-                }
-
-            }
+//            for(int i = 0; i < _bacteria.Vertices; i++)
+//            {
+//                var node = _bacteria[i];
+//                if (node.Collider.radius > 0.1f)
+//                {
+//                    var energy = ((GameObject)Instantiate(_energyPrefab, node.Body.position + (Random.insideUnitCircle * node.Collider.radius * 0.5f), Quaternion.identity)).GetComponent<Energy>();
+//                    SoftBodyHelper.CreateSpringJoint(energy.gameObject,  node.Body, _attachableFrquency, 1.0f);
+//                    energy.transform.localScale = Vector3.one * node.Collider.radius * Random.Range(0.3f, 0.6f);
+//                    energy.transform.parent = node.gameObject.transform;
+//                }
+//
+//            }
         }
 
     }

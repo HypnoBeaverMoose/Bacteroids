@@ -108,7 +108,11 @@ public class Player : MonoBehaviour
         if (Energy < EnergyThreshold && !NoDNA)
         {
             NoDNA = true;
-            StartCoroutine(NoDNARoutine());            
+            //StartCoroutine(NoDNARoutine());            
+        }
+        if (Energy > EnergyThreshold && NoDNA)
+        {
+            NoDNA = false;
         }
             
         if (!NoDNA)
@@ -152,6 +156,11 @@ public class Player : MonoBehaviour
                 OnPlayerKilled();
             }
         }
+    }
+
+    public void Consume(Energy energy)
+    {
+        Energy += energy.Amount;
     }
 
     private IEnumerator Invincibility()

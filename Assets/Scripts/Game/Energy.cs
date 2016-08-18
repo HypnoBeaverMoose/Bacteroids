@@ -5,21 +5,27 @@ public class Energy : MonoBehaviour
 {
 
     [SerializeField]
+    private float _amount;
+    [SerializeField]
     private ParticleSystem _explosion;
     [SerializeField]
     private SpriteRenderer _renderer;
     [SerializeField]
     private float _spawnBacteriaTimeout;
 
-    public float Amount { get; set; }
+    private GameController _controller;
+    public float Amount { get { return _amount; } }
     public Color Color { get { return _renderer.color; } set { _renderer.color = value; } }
 //    private Vector3 _originalScale;
 //    private float _offset = 0;
+
 	private void Start () 
     {
 //        _originalScale = transform.localScale;
 //        _offset = Random.value * 100;
         //Invoke("SpawnBacteria", _spawnBacteriaTimeout);
+        GetComponent<Wrappable>().Size = transform.localScale.x;
+        _controller = FindObjectOfType<GameController>();
     }
 
     private void FixedUpdate()
@@ -53,7 +59,15 @@ public class Energy : MonoBehaviour
     {
         if (collision.collider.CompareTag("Player"))
         {
+            collision.collider.GetComponent<Player>().Consume(this);
+            _controller.Score += Amount;
             Explode(10);
+        }
+        else if (collision.collider.CompareTag("Enemy"))
+        {
+            collision.collider.GetComponentInParent<Bacteria>().Consume(this);
+            Explode(10);
+
         }
     }
 }
