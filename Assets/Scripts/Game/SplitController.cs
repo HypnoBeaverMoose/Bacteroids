@@ -58,7 +58,8 @@ public class SplitController : MonoBehaviour
         Bacteria newbac = SpawnBacteria(position, rotation, verticies - 1);
         yield return null;
         FindNearestNode(projectile.transform.position, projectile.transform.up, newbac).Body.AddForce(projectile.transform.up * 10, ForceMode2D.Impulse);
-        SpawnEnergy(hit, -projectile.transform.up);
+        var energy = SpawnEnergy(hit, -projectile.transform.up);
+        IgnoreCollision(energy.GetComponent<Collider2D>(), newbac);
     }
 
     private IEnumerator SplitCoroutine(Bacteria bacteria, Projectile projectile, Vector2 hit, Vector2 velocity)
@@ -75,13 +76,23 @@ public class SplitController : MonoBehaviour
         SpawnEnergy(position, -projectile.transform.up);
         yield return null;
 
-        var newbacteria = SpawnBacteria(position + normal * radius * 1.5f, rotation, verticies - 1);
+        var leftBacteira = SpawnBacteria(position + normal * radius * 1.5f, rotation, verticies - 1);
         yield return null;
-        FindNearestNode(position, normal, newbacteria).Body.AddForce(normal.normalized * 10, ForceMode2D.Impulse);
+        FindNearestNode(position, normal, leftBacteira).Body.AddForce(normal.normalized * 10, ForceMode2D.Impulse);
 
-        newbacteria = SpawnBacteria(position - normal * radius * 1.5f, rotation, verticies - 1);
+
+        var rightBacteira = SpawnBacteria(position - normal * radius * 1.5f, rotation, verticies - 1);
         yield return null;
-        FindNearestNode(position, -normal, newbacteria).Body.AddForce(-normal.normalized * 10, ForceMode2D.Impulse);
+        FindNearestNode(position, -normal, rightBacteira).Body.AddForce(-normal.normalized * 10, ForceMode2D.Impulse);
+
+        var energy = SpawnEnergy(position, projectile.transform.up);
+        IgnoreCollision(energy.GetComponent<Collider2D>(), leftBacteira);
+        IgnoreCollision(energy.GetComponent<Collider2D>(), rightBacteira);
+
+        energy = SpawnEnergy(position, -projectile.transform.up);
+        IgnoreCollision(energy.GetComponent<Collider2D>(), leftBacteira);
+        IgnoreCollision(energy.GetComponent<Collider2D>(), rightBacteira);
+
     }
 
     public Bacteria SpawnBacteria(Vector3 position, Quaternion rotation,  int verticies)
@@ -91,13 +102,14 @@ public class SplitController : MonoBehaviour
         return newbac.GetComponent<Bacteria>();
     }
 
-    public void SpawnEnergy(Vector3 position, Vector3 initialDirection)
+    public Energy SpawnEnergy(Vector3 position, Vector3 initialDirection)
     {
         var obj = Instantiate(_energyPrefab, position, Quaternion.identity) as GameObject;
         var energy = obj.GetComponent<Energy>();
         energy.transform.localScale = Vector3.one * 0.12f;
         var random = Random.insideUnitCircle.normalized;
         energy.GetComponent<Rigidbody2D>().AddForce((Vector3.Dot(random, initialDirection) < 0 ? -random : random) * 8);
+        return energy;
     }
 
     private void SpawnExplosion(Vector3 position)
@@ -105,6 +117,15 @@ public class SplitController : MonoBehaviour
         var exp = Instantiate(_pariclePrefab, position, Quaternion.identity) as GameObject;
         exp.GetComponent<ParticleSystem>().Emit(200);
         Destroy(exp, 5);
+    }
+
+
+    private void IgnoreCollision(Collider2D collider, Bacteria bacteria)
+    {
+        for (int i = 0; i < bacteria.Vertices; i++)
+        {
+            Physics2D.IgnoreCollision(collider, bacteria[i].Collider, true);
+        }
     }
 
 
