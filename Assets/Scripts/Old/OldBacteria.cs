@@ -117,13 +117,13 @@ public class OldBacteria : MonoBehaviour
             collision.contacts[0].normal / 2, collision.contacts[0].point, ForceMode2D.Impulse);
         //yield return new WaitForSeconds(0.1f);
         
-        var bacteria = FindObjectOfType<GameController>().SpawnBacteria(collision.contacts[0].point, chunkSize, 4, Color);
-        var dir = Random.insideUnitCircle.normalized;
-        yield return null;
-        if (bacteria != null)
-        {
-            bacteria.GetComponent<Rigidbody2D>().AddForce(dir * 10, ForceMode2D.Impulse);
-        }
+//        var bacteria = FindObjectOfType<GameController>().SpawnBacteria(collision.contacts[0].point, 4, Color);
+//        var dir = Random.insideUnitCircle.normalized;
+//        yield return null;
+//        if (bacteria != null)
+//        {
+//            bacteria.GetComponent<Rigidbody2D>().AddForce(dir * 10, ForceMode2D.Impulse);
+//        }
 
     }
 

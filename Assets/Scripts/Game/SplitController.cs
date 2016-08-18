@@ -1,38 +1,24 @@
 ﻿using UnityEngine;
 using System.Collections;
+using System.Collections.Generic;
 
 public class SplitController : MonoBehaviour 
 {
-    private static SplitController _instance = null;
-	
-    [SerializeField]
-    private GameObject bacteriaPrefab;
-    [SerializeField]
-    private GameObject energyPrefab;
-    [SerializeField]
-    private GameObject pariclePrefab;
 
-	void Awake ()
-    {
-        if (_instance != null)
-        {
-            Destroy(this);
-        }
-        else
-        {
-            _instance = this;
-        }
-	}
-	
-    public static void HandleHit(Bacteria bacteria, Projectile projectile, Vector2 hit, Vector2 velocity)
-    {
-        if (_instance != null)
-        {
-            _instance.HandleBacteriaHit(bacteria, projectile, hit, velocity);
-        }
-    }
+    public event System.Action OnBacteriaKilled;
 
-    private void HandleBacteriaHit(Bacteria bacteria, Projectile projectile, Vector2 hit, Vector2 velocity)
+    [SerializeField]
+    private GameObject _bacteriaPrefab;
+    [SerializeField]
+    private GameObject _energyPrefab;
+    [SerializeField]
+    private GameObject _pariclePrefab;
+
+ 	void Awake ()
+    {
+ 	}
+ 
+    public void HandleHit(Bacteria bacteria, Projectile projectile, Vector2 hit, Vector2 velocity)
     {
         if (bacteria.Vertices <= Bacteria.MinVertexCount)
         {
@@ -45,6 +31,10 @@ public class SplitController : MonoBehaviour
                 {
                     SpawnEnergy(pos, Random.insideUnitCircle);
                 }
+            }
+            if (OnBacteriaKilled != null)
+            {
+                OnBacteriaKilled();
             }
         }
         else if (Random.value > 0.5f)
@@ -61,7 +51,7 @@ public class SplitController : MonoBehaviour
     {
         Vector3 position = bacteria.transform.position;
         Quaternion rotation = bacteria.transform.rotation;
-        int verticies = bacteria.Vertices;
+        int verticies = bacteria.Vertices;      
         Destroy(bacteria.gameObject);
         yield return null;
 
@@ -94,25 +84,25 @@ public class SplitController : MonoBehaviour
         FindNearestNode(position, -normal, newbacteria).Body.AddForce(-normal.normalized * 10, ForceMode2D.Impulse);
     }
 
-    private Bacteria SpawnBacteria(Vector3 position, Quaternion rotation,  int verticies)
+    public Bacteria SpawnBacteria(Vector3 position, Quaternion rotation,  int verticies)
     {
-        var newbac = Instantiate(bacteriaPrefab, position, rotation) as GameObject;
+        var newbac = Instantiate(_bacteriaPrefab, position, rotation) as GameObject;
         newbac.GetComponent<Bacteria>().Vertices = verticies;
         return newbac.GetComponent<Bacteria>();
     }
 
-    private void SpawnEnergy(Vector3 position, Vector3 initialDirection)
+    public void SpawnEnergy(Vector3 position, Vector3 initialDirection)
     {
-        var obj = Instantiate(energyPrefab, position, Quaternion.identity) as GameObject;
+        var obj = Instantiate(_energyPrefab, position, Quaternion.identity) as GameObject;
         var energy = obj.GetComponent<Energy>();
         energy.transform.localScale = Vector3.one * 0.12f;
         var random = Random.insideUnitCircle.normalized;
-        energy.GetComponent<Rigidbody2D>().AddForce((Vector3.Dot(random, initialDirection) < 0 ? -random : random) * 5);
+        energy.GetComponent<Rigidbody2D>().AddForce((Vector3.Dot(random, initialDirection) < 0 ? -random : random) * 8);
     }
 
     private void SpawnExplosion(Vector3 position)
     {
-        var exp = Instantiate(pariclePrefab, position, Quaternion.identity) as GameObject;
+        var exp = Instantiate(_pariclePrefab, position, Quaternion.identity) as GameObject;
         exp.GetComponent<ParticleSystem>().Emit(200);
         Destroy(exp, 5);
     }

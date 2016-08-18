@@ -22,7 +22,6 @@ public class BacteriaAI : MonoBehaviour
     private int _nodesNearPlayer = 0;
     private Player _player;
     private Bacteria _bacteria;
-    private bool _blob = false;
     void Start()
     {
         //InvokeRepeating("Move", _moveTimeot, _moveTimeot);

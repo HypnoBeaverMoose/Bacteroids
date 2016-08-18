@@ -140,13 +140,17 @@ public class Bacteria : MonoBehaviour
     {
         if (collision.collider.CompareTag("Projectile"))
         {
-            SplitController.HandleHit(this, collision.gameObject.GetComponent<Projectile>(), collision.contacts[0].point, collision.relativeVelocity);
+            GameController.Instance.Spawn.HandleHit(this, collision.gameObject.GetComponent<Projectile>(), collision.contacts[0].point, collision.relativeVelocity);
         }
 
         if (collision.collider.CompareTag("Player"))
         {
             collision.collider.GetComponent<Player>().Damage(this);
         }
+    }
+
+    public void Consume(Energy Energy)
+    {
     }
 
     private void OnDestroy()

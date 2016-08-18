@@ -6,13 +6,34 @@ using UnityEngine.UI;
 
 public class GameController : MonoBehaviour 
 {
+
+    public static GameController Instance 
+    {
+        get
+        { 
+            if (_instance == null)
+            {
+                _instance = FindObjectOfType<GameController>();
+                if (_instance == null)
+                {
+                    var go = new GameObject("GameController");
+                    _instance = go.AddComponent<GameController>();
+                }
+            }
+            return _instance;
+        }
+    }
+    private static GameController _instance = null;
+
     public int Lives { get; private set; }
     public float Score { get; set; }
-    public float Radius { get { return _radius; } }
 
     [SerializeField]
     private Color[] _colors;
-
+    [SerializeField]
+    private SpawnStrategy _spawnType;
+    [SerializeField]
+    private Camera _camera;
     [SerializeField]
     private EndScreen _endScreen;
     [SerializeField]
@@ -22,17 +43,11 @@ public class GameController : MonoBehaviour
     [SerializeField]
     private GameObject _bacteriaPrefab;
     [SerializeField]
-    private GameObject _sporePrefab;
-    [SerializeField]
     private GameObject _playerPrefab;
     [SerializeField]
     private AnimationCurve _spawnCurve;
     [SerializeField]
-    private float _radius;
-    [SerializeField]
     private float _scorePerKill;
-    [SerializeField]
-    private float _startBacteriaSize;
     [SerializeField]
     private int _startBacteriaVertices;
     [SerializeField]
@@ -40,17 +55,39 @@ public class GameController : MonoBehaviour
     [SerializeField]
     private int _startLives;
 
-    private List<GameObject> _enemies = new List<GameObject>();
     private Player _player;
     private float _spawnTimer = 0;
     private bool _stopSpawn = false;
+    private ISpawnStrategy _strategy;
+    private SplitController _spawn;
+    public SplitController Spawn { get { return _spawn; } }
 
 	void Awake () 
     {
+
+        if (_instance != null)
+        {
+            Destroy(this);
+        }
+        else
+        {
+            _instance = this;
+        }       
+        _spawn = gameObject.GetComponent<SplitController>();
+        if (_spawnType == SpawnStrategy.SpawnAvoid)
+        {
+            _strategy = new SpawnStrategyAvoid(_camera, 10);
+        }
+        else
+        {
+            _strategy = new SpawnStrategyGrid(_camera, 5,5, 10);
+        }
+
         _startScreen.gameObject.SetActive(true);
         _startScreen.OnStartGame += StartGame;
         _endScreen.OnEndGame += EndGame;
         _scoreScreen.OnSkipScores += SkipScores;
+        _spawn.OnBacteriaKilled += EnemyKilled;
         _stopSpawn = true;
 
         Lives = _startLives;
@@ -82,12 +119,13 @@ public class GameController : MonoBehaviour
         {
             Destroy(energy.gameObject);
         }
-        foreach (var enemy in _enemies)
+        var enemies = FindObjectsOfType<Bacteria>();
+        foreach (var enemy in enemies)
         {
             Destroy(enemy);
         }
-        _enemies.Clear();
-        Score = 0;        
+        Score = 0;
+        Spawn.SpawnBacteria(GetSpawnPosition(new Bacteria[]{}), Quaternion.identity, _startBacteriaVertices);
     }
 
     private void OnColorChanged(Color newColor)
@@ -115,64 +153,41 @@ public class GameController : MonoBehaviour
         }
     }
 
-    public GameObject SpawnBacteria(Vector2 position, float size, int vertices, Color color)
+    private void EnemyKilled()
     {
-        var go = (GameObject)Instantiate(_bacteriaPrefab, position, Quaternion.identity);
-        var bacteria = go.GetComponent<Bacteria>();
-       
-        bacteria.Vertices = vertices;
-        _enemies.Add(go);
-        return go;
-    }
-    public GameObject SpawnSpore(Vector2 position, float size, Color color)
-    {
-        var go = (GameObject)Instantiate(_sporePrefab, position, Quaternion.identity);
-        go.transform.localScale = Vector3.one * size;
-        go.GetComponent<Energy>().Color = color;
-        return go;
+        Score += _scorePerKill;
     }
 
-    private Vector2 FindSpawnPos()
-    {
-        var pos =  Random.insideUnitCircle * _radius;
-        while (Vector2.Distance(pos, _player.transform.position) < 2.0f)
-        {
-            pos = Random.insideUnitCircle * _radius; ;
-        }
-
-        return pos;
+    private Vector2 GetSpawnPosition(Bacteria[] enemies)
+    {        
+        return _strategy.GetSpawnPosition(enemies);
     }
 
     private float GetSpawnTime()
     {
-        return _spawnCurve.Evaluate(Time.time);
+        return 20.0f;// _spawnCurve.Evaluate(Time.time);
     }
 
     private Color GetSpawnColor()
     {
-        return Random.value < 0.3f ? Color.white : _colors[Random.Range(0, _colors.Length)];
+        return Color.white;//Random.value < 0.3f ? : _colors[Random.Range(0, _colors.Length)];
     }
 
-	// Update is called once per frame
 	void Update () 
     {
         if (!_stopSpawn)
         {
-            for (int i = 0; i < _enemies.Count; i++)
-            {
-                if (_enemies[i] == null)
-                {
-                    _enemies.RemoveAt(i--);
-                    Score += _scorePerKill;
-                }
-            }
-
             _spawnTimer -= Time.deltaTime;
-            if ((_spawnTimer <= 0 && _enemies.Count < _maxBacterias) || _enemies.Count == 0)
+            if (_spawnTimer <= 0 )
             {
-                SpawnBacteria(FindSpawnPos(), _startBacteriaSize, _startBacteriaVertices, GetSpawnColor());
+                var enemies = FindObjectsOfType<Bacteria>();
+                if (enemies.Length < _maxBacterias)
+                {
+                    Spawn.SpawnBacteria(GetSpawnPosition(enemies), Quaternion.identity, _startBacteriaVertices);
+                }
                 _spawnTimer = GetSpawnTime();
             }
+
         }
     }
 }
