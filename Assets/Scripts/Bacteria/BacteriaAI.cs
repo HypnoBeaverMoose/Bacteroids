@@ -5,9 +5,6 @@ using System.Collections.Generic;
 public class BacteriaAI : MonoBehaviour
 {
 
-    public bool NearPlayer { get { return _nodesNearPlayer > 0; } }
-
-
     [SerializeField]
     private float _blobIntensity;
 
@@ -19,47 +16,36 @@ public class BacteriaAI : MonoBehaviour
     [SerializeField]
     private float _moveForce;
 
-    private int _nodesNearPlayer = 0;
+
     private Player _player;
     private Bacteria _bacteria;
+    private Vector3 _direction;
+
+    public Vector3 Direction { get { return _direction; } set { _direction = value; } }
+
     void Start()
     {
-        //InvokeRepeating("Move", _moveTimeot, _moveTimeot);
+        _direction = Random.insideUnitCircle.normalized;
+        InvokeRepeating("Move", 0, _moveTimeot);
         StartCoroutine(Blob());
     }
 
     public void Init(Bacteria bacteria)
     {
         _bacteria = bacteria;
+        for (int i = 0; i < _bacteria.Vertices; i++)
+        {
+            _bacteria[i].OnCollisionEnter += NodeCollision;
+        }
     }
 
     public void Clear()
     {
-        StopCoroutine(Blob());
-    }
-
-    private void NodeNearPlayer(Collider2D other, Node node)
-    {
-        if (_player == null)
-        {
-            _player = other.GetComponent<Player>();
-        }
-        _nodesNearPlayer++;
-    }
-
-    private void NodeAwayFromPlayer(Collider2D other, Node node)
-    {
-        _nodesNearPlayer--;
-        if (_nodesNearPlayer < 0)
-        {
-            Debug.LogError("Nodes Near Player is Negative, Setting to 0");
-            _nodesNearPlayer = 0;
-        }
-
+        StopAllCoroutines();
     }
 
     private IEnumerator Blob()
-    {
+    {        
         while (true && _bacteria != null)
         {
             var body = _bacteria[Random.Range(0, _bacteria.Vertices)].Body;
@@ -68,26 +54,23 @@ public class BacteriaAI : MonoBehaviour
         }
     }
 
-    private void Move()
+    private void NodeCollision(Collision2D collision, Node node)
     {
-//        Vector3 direction = Random.insideUnitCircle.normalized;
-//        float mult = 1;
-//        if (NearPlayer && _player != null)
-//        {
-//            mult = 2;
-//            direction = (_player.transform.position - transform.position).normalized;
-//        }
-//        int maxIndex = 0;
-//        float maxValue = -1;
-//        for (int i = 0; i < _nodes.Count; i++)
-//        {
-//            float dot = Vector3.Dot((_nodes[i].transform.position - transform.position).normalized, direction);
-//            if (dot > maxValue)
-//            {
-//                maxValue = dot;
-//                maxIndex = i;
-//            }
-//        }
-//        _nodes[maxIndex].Body.AddForce(direction * _moveForce * mult, ForceMode2D.Impulse);
+        _direction = Random.insideUnitCircle;
+        Vector2 normal = ((Vector2)collision.transform.position - node.Body.position).normalized;
+        if (Vector2.Dot(_direction, normal) > 0)
+        {
+            _direction *= -1;
+        }
+
+        if (collision.collider.CompareTag("Energy"))
+        {
+            node.Body.AddForce(normal * 5, ForceMode2D.Impulse);
+        }
+    }
+
+    private void Move()
+    {        
+        _bacteria.GetComponent<Node>().Body.AddForce(_direction * _moveForce, ForceMode2D.Impulse);
     }
 }

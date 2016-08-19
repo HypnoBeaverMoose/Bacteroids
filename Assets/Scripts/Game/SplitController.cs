@@ -51,7 +51,8 @@ public class SplitController : MonoBehaviour
     {
         Vector3 position = bacteria.transform.position;
         Quaternion rotation = bacteria.transform.rotation;
-        int verticies = bacteria.Vertices;      
+        Vector3 direction = bacteria.GetComponent<BacteriaAI>().Direction;
+        int verticies = bacteria.Vertices;
         Destroy(bacteria.gameObject);
         yield return null;
 
@@ -60,6 +61,7 @@ public class SplitController : MonoBehaviour
         FindNearestNode(projectile.transform.position, projectile.transform.up, newbac).Body.AddForce(projectile.transform.up * 10, ForceMode2D.Impulse);
         var energy = SpawnEnergy(hit, -projectile.transform.up);
         IgnoreCollision(energy.GetComponent<Collider2D>(), newbac);
+        newbac.GetComponent<BacteriaAI>().Direction = direction;
     }
 
     private IEnumerator SplitCoroutine(Bacteria bacteria, Projectile projectile, Vector2 hit, Vector2 velocity)
@@ -71,9 +73,6 @@ public class SplitController : MonoBehaviour
         int verticies = bacteria.Vertices;
         Destroy(bacteria.gameObject);
         SpawnExplosion(position);
-
-        SpawnEnergy(position, projectile.transform.up);
-        SpawnEnergy(position, -projectile.transform.up);
         yield return null;
 
         var leftBacteira = SpawnBacteria(position + normal * radius * 1.5f, rotation, verticies - 1);
@@ -127,7 +126,6 @@ public class SplitController : MonoBehaviour
             Physics2D.IgnoreCollision(collider, bacteria[i].Collider, true);
         }
     }
-
 
     private Node FindNearestNode(Vector2 position, Vector2 direction, Bacteria bacteria)
     {
