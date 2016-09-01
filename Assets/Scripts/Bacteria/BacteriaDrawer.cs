@@ -35,16 +35,14 @@ public class BacteriaDrawer : MonoBehaviour
         
     private Bacteria _bacteria;
     private LineRenderer _renderer;
-    [SerializeField]
-    private float _attachableFrquency = 20;
 
     [SerializeField]
     private Color _color = new Color();
     [SerializeField]
     private float _width = 0.1f;
     [SerializeField]
-    private GameObject _energyPrefab;
-
+    private GameObject _attachablePrefab;
+        
     private void Awake()
     {
         _renderer = GetComponent<LineRenderer>();
@@ -58,28 +56,29 @@ public class BacteriaDrawer : MonoBehaviour
         }
     }
 
+    private void InitAttachables()
+    {        
+        for (int i = 0; i < _bacteria.Vertices; i++)
+        {
+            var node = _bacteria[i];
+            if (node.Collider.radius > 0.17f)
+            {
+                var attachable = ((GameObject)Instantiate(_attachablePrefab, node.Body.position, Quaternion.identity)).GetComponent<Attachable>();
+                attachable.AttachTo(node.Body, Vector2.zero);
+                attachable.transform.parent = transform;
+            }
+        }
+    }
+
     public void Init(Bacteria bacteria)
     {
         _bacteria = bacteria;
-        //_nodes = new List<Node>(nodes);
+        InitAttachables();
         if (_renderer != null)
         {
             _renderer.SetVertexCount((_bacteria.Vertices + 1) * 3);
             DrawOutline();
-//            for(int i = 0; i < _bacteria.Vertices; i++)
-//            {
-//                var node = _bacteria[i];
-//                if (node.Collider.radius > 0.1f)
-//                {
-//                    var energy = ((GameObject)Instantiate(_energyPrefab, node.Body.position + (Random.insideUnitCircle * node.Collider.radius * 0.5f), Quaternion.identity)).GetComponent<Energy>();
-//                    SoftBodyHelper.CreateSpringJoint(energy.gameObject,  node.Body, _attachableFrquency, 1.0f);
-//                    energy.transform.localScale = Vector3.one * node.Collider.radius * Random.Range(0.3f, 0.6f);
-//                    energy.transform.parent = node.gameObject.transform;
-//                }
-//
-//            }
         }
-
     }
 
     private void DrawOutline()
@@ -101,7 +100,7 @@ public class BacteriaDrawer : MonoBehaviour
         }
     }
 
-	private void Update () 
+	private void Update ()
     {
         if (_bacteria != null && _renderer != null)
         {

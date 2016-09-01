@@ -168,6 +168,11 @@ public class Bacteria : MonoBehaviour
         return _nodes.Contains(node);
     }
 
+    public Node[] GetNodes()
+    {
+        return _nodes.ToArray();
+    }
+
     #region realtime update
 
     public void Regenerate()

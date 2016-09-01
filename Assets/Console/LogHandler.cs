@@ -38,7 +38,7 @@ public class LogHandler : ILogHandler
     {
 		DefaultHandler = Debug.logger.logHandler;
         handler = new LogHandler();
-		Debug.logger.logHandler = handler;
+		//Debug.logger.logHandler = handler;
     }
 
     public bool SaveTrace = true;

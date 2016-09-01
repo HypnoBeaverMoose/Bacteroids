@@ -16,23 +16,11 @@ public class Energy : MonoBehaviour
     private GameController _controller;
     public float Amount { get { return _amount; } }
     public Color Color { get { return _renderer.color; } set { _renderer.color = value; } }
-//    private Vector3 _originalScale;
-//    private float _offset = 0;
 
 	private void Start () 
     {
-//        _originalScale = transform.localScale;
-//        _offset = Random.value * 100;
-        //Invoke("SpawnBacteria", _spawnBacteriaTimeout);
         GetComponent<Wrappable>().Size = transform.localScale.x;
         _controller = FindObjectOfType<GameController>();
-    }
-
-    private void FixedUpdate()
-    {
-//        transform.localScale = _originalScale * 0.8f +
-//            _originalScale * 0.2f * Mathf.Sin(Time.unscaledTime * 5 + _offset);              
-
     }
 
     private void Explode(int particleAmount)
@@ -44,16 +32,6 @@ public class Energy : MonoBehaviour
         Destroy(exp.gameObject, 5);
         Destroy(gameObject);
     }
-
-//    private void SpawnBacteria()
-//    {
-//        if (gameObject != null && Physics2D.OverlapCircle(transform.position, 0.1f, LayerMask.GetMask("Bacteria")) == null)
-//        {            
-//            FindObjectOfType<GameController>().SpawnBacteria(transform.position, 0.1f, 5, Color);
-//            Explode(50);            
-//            DestroyImmediate(gameObject);
-//        }
-//    }
 
     private void OnCollisionEnter2D(Collision2D collision)
     {
