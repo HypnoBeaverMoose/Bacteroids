@@ -223,10 +223,10 @@ public class CompoundSoftBody : MonoBehaviour
     {
         for (int i = 0; i < _nodes.Count; i++)
         {
-            for (var type = Node.JointType.Center; type <= Node.JointType.Right; type++)
-            {
-                //_nodes[i].ClearNode(type);
-            }
+//            for (var type = Node.JointType.Center; type <= Node.JointType.Right; type++)
+//            {
+//                //_nodes[i].ClearNode(type);
+//            }
         }
     }
 

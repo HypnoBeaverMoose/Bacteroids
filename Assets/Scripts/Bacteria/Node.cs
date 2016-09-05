@@ -6,120 +6,195 @@ using Random = UnityEngine.Random;
 
 public class Node : MonoBehaviour
 {
-    public const float hitFrequency = 0;
+    public delegate void CollisionEvent(Collision2D collision, Node node);
 
-    public enum JointType
-    {
-        Center = 0,
-        Left,
-        Right,
-        TypeLength
-
-    }
-
-    public delegate void CollisionEvent(Collision2D collision,Node node);
-
-    public delegate void TriggerEvent(Collider2D other,Node node);
+    public delegate void TriggerEvent(Collider2D other, Node node);
 
     public event Action<Node> OnNodeUnstable;
     public event CollisionEvent OnCollisionEnter;
     public event TriggerEvent OnTriggerEnter;
     public event TriggerEvent OnTriggerExit;
 
-    public struct JointNode
-    {
-        public Joint2D Joint;
-        public Node Node;
-        public T GetJoint<T>() where T : class { return Joint as T; }
-    }
-    public bool EditMode = false;
-
-
-    public float Damping;
-    public float Frequency;
-
-    public float PivotFrequency;
-    public float PivotDamping;
-
-    public float MinDistance;
-    public float MaxDistance;
-
+    private List<SpringJoint2D> _joints = new List<SpringJoint2D>();
     [SerializeField]
     private Rigidbody2D _rigidbody;
     [SerializeField]
     private CircleCollider2D _collider;
     [SerializeField]
-    private bool _constrain = false;
+    private SpringJoint2D _joint;
+    [SerializeField]
 
-    public JointNode this [JointType type] { get { return _springs[type]; } }
+    public int JointsCount { get { return _joints.Count; } }
+    public float Frequency { get { return _joint.frequency; } set { _joint.frequency = value; } }
+    public float Damping { get { return _joint.dampingRatio; } set { _joint.dampingRatio = value; } }
+    public Vector2 TargetPosition { get { return _joint.connectedAnchor; } set { _joint.connectedAnchor = value; } }
+    public Rigidbody2D TargetBody { get { return _joint.connectedBody; } set { _joint.connectedBody = value; } }
 
+    public SpringJoint2D TargetJoint { get { return _joint; } }
+    public SpringJoint2D this[int index] { get { return _joints[index]; } }
     public Rigidbody2D Body { get { return _rigidbody; } }
-
     public CircleCollider2D Collider { get { return _collider; } }
 
     private Transform _transform;
-    private Dictionary<JointType, JointNode> _springs = new Dictionary<JointType, JointNode>();
-    private Dictionary<JointType, JointNode> _sliders = new Dictionary<JointType, JointNode>();
-
 
     private void Start()
-    {        
+    {
         _transform = transform;
     }
-        
-    public void ConnectSlider(JointType type, Node other)
-    {
-        Connect(_sliders, type, other, SoftBodyHelper.CreateSliderJoint(gameObject, other.Body, MinDistance, MaxDistance));
-    }
-
-    public SliderJoint2D GetSlider()
-    {
-        return _sliders[0].GetJoint<SliderJoint2D>();
-    }
-
 
     public void Disconnect()
     {
-        for (JointType type = JointType.Center; type < JointType.TypeLength; type++)
+        foreach (var joint in _joints)
         {
-            Disconnect(type);
+            Disconnect(joint);
         }
     }
 
-    public void Disconnect(JointType type)
+    public void Disconnect(SpringJoint2D joint)
     {
-        if (_springs.ContainsKey(type))
+        if (_joints.Contains(joint))
         {
-            _springs[type].Joint.connectedBody = null;
-            _springs[type].Joint.enabled = false;
+            joint.connectedBody = null;
+            joint.enabled = false;
         }
-        if (_sliders.ContainsKey(type))
+        else
         {
-            _sliders[type].Joint.connectedBody = null;
-            _sliders[type].Joint.enabled = false;
+            Debug.LogError("Trying to disconnect a joint that is not a part of this node");
         }
     }
 
-    public void ConnectSpring(JointType type, Node other)
+    public Joint2D ConnectSpring(Node other, Vector2 connectedAnchor, float frequency, float damping)
     {
-        Connect(_springs,type, other, SoftBodyHelper.CreateSpringJoint(gameObject, other.Body, type == JointType.Center ? PivotFrequency : Frequency, type == JointType.Center ? PivotDamping : Damping));
-    }
+        SpringJoint2D joint = _joints.Find(jnt => jnt.connectedBody == other.Body);
 
-    private static void Connect(Dictionary<JointType, JointNode> dict, JointType type, Node other, Joint2D joint)
-    {
-        if (dict.ContainsKey(type))
+        if (joint == null)
         {
-            DestroyImmediate(dict[type].Joint);
-            dict.Remove(type);
+            joint = _joints.Find(jnt => !jnt.enabled);
         }
-        var jointNode = new JointNode(); 
-        jointNode.Node = other;
-        jointNode.Joint = joint;
-        dict.Add(type, jointNode);
+
+        if (joint != null)
+        {
+            joint.enabled = true;
+            SoftBodyHelper.ConfigureSpringJoint(joint, other.Body, frequency, damping, connectedAnchor);
+            return joint;
+        }
+
+        joint = SoftBodyHelper.CreateSpringJoint(gameObject, other.Body, frequency, damping, connectedAnchor);
+        _joints.Add(joint);
+        return joint;
     }
 
-    private void FixedUpdate()
+    #region Collision Handlers
+
+    private void OnCollisionEnter2D(Collision2D collision)
     {
+        if (OnCollisionEnter != null)
+        {
+            OnCollisionEnter(collision, this);
+        }
+    }
+
+    private void OnTriggerEnter2D(Collider2D other)
+    {
+        if (OnTriggerEnter != null)
+        {
+            OnTriggerEnter(other, this);
+        }
+    }
+
+
+    private void OnTriggerExit2D(Collider2D other)
+    {
+        if (OnTriggerExit != null)
+        {
+            OnTriggerExit(other, this);
+        }
+    }
+
+    #endregion
+}
+//    public struct JointNode
+//    {
+//        public Joint2D Joint;
+//        public Node Node;
+//        public T GetJoint<T>() where T : class { return Joint as T; }
+//    }
+//    public bool EditMode = false;
+//    [SerializeField]
+//    private bool _constrain = false;
+//    private Dictionary<JointType, JointNode> _springs = new Dictionary<JointType, JointNode>();
+//    private Dictionary<JointType, JointNode> _sliders = new Dictionary<JointType, JointNode>();
+//    public const float hitFrequency = 0;
+//    public enum JointType
+//    {
+//        Center = 0,
+//        Left,
+//        Right,
+//        TypeLength
+//
+//    }
+//    private float _damping;
+//    [SerializeField]
+//    private float _frequency;
+//
+//    public float Damping
+//    {
+//        get
+//        {
+//            return _damping;
+//        }
+//        set
+//        {
+//            _damping = value;
+//            foreach (var joint in _joints)
+//            {
+//                joint.dampingRatio = _damping;
+//            }
+//        }
+//    }
+//    public float Frequency
+//    {
+//        get
+//        {
+//            return _frequency;
+//        }
+//        set
+//        {
+//            _frequency = value;
+//            foreach (var joint in _joints)
+//            {
+//                joint.frequency = _frequency;
+//            }
+//        }
+//    }
+//
+//    public float PivotFrequency;
+//    public float PivotDamping;
+//
+//    public float MinDistance;
+//    public float MaxDistance;
+//    public SliderJoint2D GetSlider()
+//    {
+//        return _sliders[0].GetJoint<SliderJoint2D>();
+//    }
+//    private static void Connect(Dictionary<JointType, JointNode> dict, JointType type, Node other, Joint2D joint)
+//    {
+//        if (dict.ContainsKey(type))
+//        {
+//            DestroyImmediate(dict[type].Joint);
+//            dict.Remove(type);
+//        }
+//        var jointNode = new JointNode();
+//        jointNode.Node = other;
+//        jointNode.Joint = joint;
+//        dict.Add(type, jointNode);
+//    }
+//    public void ConnectSlider(JointType type, Node other)
+//    {
+//        Connect(_sliders, type, other, SoftBodyHelper.CreateSliderJoint(gameObject, other.Body, MinDistance, MaxDistance));
+//    }
+//    private void FixedUpdate()
+//    {
 //        if (_constrain)
 //        {
 //            for (JointType type = JointType.Center; type < JointType.TypeLength; type++)
@@ -165,37 +240,4 @@ public class Node : MonoBehaviour
 //                }
 //            }
 //        }
-
-
-
-    }
-
-    #region Collision Handlers
-
-    private void OnCollisionEnter2D(Collision2D collision)
-    {
-        if (OnCollisionEnter != null)
-        {
-            OnCollisionEnter(collision, this);
-        }
-    }
-
-    private void OnTriggerEnter2D(Collider2D other)
-    {
-        if (OnTriggerEnter != null)
-        {
-            OnTriggerEnter(other, this);
-        }
-    }
-
-
-    private void OnTriggerExit2D(Collider2D other)
-    {
-        if (OnTriggerExit != null)
-        {
-            OnTriggerExit(other, this);
-        }
-    }
-
-    #endregion
-}
+//    }

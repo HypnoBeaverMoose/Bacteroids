@@ -18,10 +18,9 @@ public class SpawnStrategyAvoid : ISpawnStrategy
         do
         {
             pos = new Vector2(Random.Range(-1.0f, 1.0f) * _camera.orthographicSize * _camera.aspect, Random.Range(-1.0f, 1.0f) * _camera.orthographicSize);
-
             foreach (var bacteria in enemies)
             {
-                if (Vector2.Distance((Vector2)bacteria.transform.position, pos) > bacteria.MaxSize * 2)
+                if (Vector2.Distance((Vector2)bacteria.transform.position, pos) > bacteria.Radius * 4)
                 {
                     break;
                 }

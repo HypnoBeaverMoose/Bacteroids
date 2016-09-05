@@ -3,10 +3,10 @@ using System.Collections;
 
 public static class SoftBodyHelper
 {
-    public static SpringJoint2D CreateSpringJoint(GameObject obj, Rigidbody2D anchor, float frequency, float damping)
+    public static SpringJoint2D CreateSpringJoint(GameObject obj, Rigidbody2D anchor, float frequency, float damping, Vector2 connectedAnchor)
     {
         var spring = obj.AddComponent<SpringJoint2D>();
-        SetSpringJointAnchor(spring, anchor, frequency, damping);
+        ConfigureSpringJoint(spring, anchor, frequency, damping, connectedAnchor);
         return spring;
     }
 
@@ -24,13 +24,14 @@ public static class SoftBodyHelper
         return slider;
     }
 
-    public static void SetSpringJointAnchor(SpringJoint2D spring, Rigidbody2D anchor, float frequency, float damping)
+    public static void ConfigureSpringJoint(SpringJoint2D spring, Rigidbody2D anchor, float frequency, float damping, Vector2 connectedAnchor)
     {
+        spring.autoConfigureDistance = true;
+        spring.autoConfigureConnectedAnchor = false;
         spring.connectedBody = anchor;
-        spring.distance = (anchor.transform.position - spring.transform.position).magnitude;
+        spring.connectedAnchor = connectedAnchor;
         spring.frequency = frequency;
         spring.dampingRatio = damping;
-        spring.autoConfigureConnectedAnchor = false;
         spring.autoConfigureDistance = false;
     }
 

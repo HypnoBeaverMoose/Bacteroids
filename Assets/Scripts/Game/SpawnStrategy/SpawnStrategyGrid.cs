@@ -56,7 +56,7 @@ public class SpawnStrategyGrid : ISpawnStrategy
         {
             foreach (var bacteria in enemies)
             {
-                if (Vector2.Distance((Vector2)bacteria.transform.position, pos) > bacteria.MaxSize * 2)
+                if (Vector2.Distance(bacteria.transform.position, pos) > bacteria.Radius * 4)
                 {
                     break;
                 }

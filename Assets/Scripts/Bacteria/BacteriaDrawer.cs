@@ -73,7 +73,7 @@ public class BacteriaDrawer : MonoBehaviour
     public void Init(Bacteria bacteria)
     {
         _bacteria = bacteria;
-        InitAttachables();
+        //InitAttachables();
         if (_renderer != null)
         {
             _renderer.SetVertexCount((_bacteria.Vertices + 1) * 3);
@@ -83,19 +83,19 @@ public class BacteriaDrawer : MonoBehaviour
 
     private void DrawOutline()
     {
-        
+        Vector2 com = _bacteria.CenterOfMass;
         for (int i = 0; i < (_bacteria.Vertices + 1); i++)
         {
             int index = i % _bacteria.Vertices;
             var node = _bacteria[index];
             var prev = _bacteria[index == 0 ? _bacteria.Vertices - 1 : index - 1];
             var next = _bacteria[(index + 1) % _bacteria.Vertices];
-            var pos = node.Body.transform.position + (node.Body.transform.position - transform.position).normalized * node.Collider.radius;
-            var prev_pos = prev.Body.transform.position + (prev.Body.transform.position - transform.position).normalized * prev.Collider.radius;
-            var next_pos = next.Body.transform.position + (next.Body.transform.position - transform.position).normalized * next.Collider.radius;
+            var pos = node.Body.position + (node.Body.position - com).normalized * node.Collider.radius;
+            var prev_pos = prev.Body.position + (prev.Body.position - com).normalized * prev.Collider.radius;
+            var next_pos = next.Body.position + (next.Body.position - com).normalized * next.Collider.radius;
 
             _renderer.SetPosition(i * 3, pos + (prev_pos - pos).normalized * 0.01f);
-            _renderer.SetPosition(i * 3 + 1, node.Body.transform.position + (node.Body.transform.position - transform.position).normalized * node.Collider.radius * 2);
+            _renderer.SetPosition(i * 3 + 1, node.Body.position + (node.Body.position - com).normalized * node.Collider.radius * 1.5f);
             _renderer.SetPosition(i * 3 + 2, pos + (next_pos - pos).normalized * 0.01f);
         }
     }

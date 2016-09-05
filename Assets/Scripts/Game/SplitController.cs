@@ -129,12 +129,12 @@ public class SplitController : MonoBehaviour
 
     private Node FindNearestNode(Vector2 position, Vector2 direction, Bacteria bacteria)
     {
-        var hit = Physics2D.Raycast(position, direction, Vector3.Distance(bacteria.transform.position, position) + bacteria.MaxSize, LayerMask.GetMask("Bacteria"));
+        var hit = Physics2D.Raycast(position, direction, Vector3.Distance(bacteria.transform.position, position) + bacteria.Radius * 4, LayerMask.GetMask("Bacteria"));
 
         if (hit.collider != null)
         {
             Node node = hit.collider.GetComponent<Node>();
-            if (bacteria.ContainsNode(node))
+            if (bacteria.Contains(node))
             {
                 return node;
             }

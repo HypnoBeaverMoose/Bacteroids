@@ -6,7 +6,6 @@ using UnityEngine.UI;
 
 public class GameController : MonoBehaviour 
 {
-
     public static GameController Instance 
     {
         get
@@ -83,7 +82,7 @@ public class GameController : MonoBehaviour
             _strategy = new SpawnStrategyGrid(_camera, 5,5, 10);
         }
 
-        _startScreen.gameObject.SetActive(true);
+//        _startScreen.gameObject.SetActive(true);
         _startScreen.OnStartGame += StartGame;
         _endScreen.OnEndGame += EndGame;
         _scoreScreen.OnSkipScores += SkipScores;

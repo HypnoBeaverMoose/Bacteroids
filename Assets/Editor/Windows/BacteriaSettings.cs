@@ -1,7 +1,5 @@
 ﻿using UnityEngine;
 using UnityEditor;
-using System.Reflection;
-using System.Collections;
 using System.Collections.Generic;
 
 public class BacteriaSettings : EditorWindow {
@@ -20,9 +18,6 @@ public class BacteriaSettings : EditorWindow {
 
     [SerializeField]
     private int _verticies;
-    [SerializeField]
-    private Bacteria.CollisionType _collision;
-
 
     [SerializeField]
     private float _frequency;
@@ -83,108 +78,105 @@ public class BacteriaSettings : EditorWindow {
 
     private void LoadSettings(Node node, Bacteria bacteria)
     {
-        _frequency = node.Frequency;
-        _damping = node.Damping;
-        _minDistance = node.MinDistance;
-        _maxDistance = node.MaxDistance;
-        _maxDistance = node.MaxDistance;
-        _mass = node.Body.mass;
-        _drag = node.Body.drag;
-        _pivotFrequency = node.PivotFrequency;
-        _pivotDamping = node.PivotDamping;
-
-
-        _verticies = bacteria.Vertices;
-        _autoAnchor = false;
-        _autoDistance = false;
-        _collision = bacteria.Collisions;
-        _pivotMass = bacteria.GetComponent<Rigidbody2D>().mass;
-        _pivotDrag = bacteria.GetComponent<Rigidbody2D>().drag;
-        _pivotAngularDrag = bacteria.GetComponent<Rigidbody2D>().angularDrag;
-        Repaint();
-        serObj.Update();
+//        _frequency = node.Frequency;
+//        _damping = node.Damping;
+//        _minDistance = node.MinDistance;
+//        _maxDistance = node.MaxDistance;
+//        _maxDistance = node.MaxDistance;
+//        _mass = node.Body.mass;
+//        _drag = node.Body.drag;
+//        _pivotFrequency = node.PivotFrequency;
+//        _pivotDamping = node.PivotDamping;
+//
+//
+//        _verticies = bacteria.Vertices;
+//        _autoAnchor = false;
+//        _autoDistance = false;
+//        _pivotMass = bacteria.GetComponent<Rigidbody2D>().mass;
+//        _pivotDrag = bacteria.GetComponent<Rigidbody2D>().drag;
+//        _pivotAngularDrag = bacteria.GetComponent<Rigidbody2D>().angularDrag;
+//        Repaint();
+//        serObj.Update();
     }
 
     private void SetNodeSettings(Node node)
     {
-        node.Frequency = _frequency;
-        node.Damping = _damping;
-        node.MinDistance = _minDistance;
-        node.MaxDistance = _maxDistance;
-        node.MaxDistance = _maxDistance;
-        node.Body.mass = _mass;
-        node.Body.drag = _drag;
-        node.PivotFrequency = _pivotFrequency;
-        node.PivotDamping = _pivotDamping;
+//        node.Frequency = _frequency;
+//        node.Damping = _damping;
+//        node.MinDistance = _minDistance;
+//        node.MaxDistance = _maxDistance;
+//        node.MaxDistance = _maxDistance;
+//        node.Body.mass = _mass;
+//        node.Body.drag = _drag;
+//        node.PivotFrequency = _pivotFrequency;
+//        node.PivotDamping = _pivotDamping;
     }
 
     private void SetBacteriaSettings(Bacteria bacteria)
     {
-        bacteria.GetComponent<Rigidbody2D>().mass = _pivotMass;
-        bacteria.GetComponent<Rigidbody2D>().drag = _pivotDrag;
-        bacteria.GetComponent<Rigidbody2D>().angularDrag = _pivotAngularDrag;
-        bacteria.Vertices = _verticies;
-        bacteria.Collisions = _collision;
+//        bacteria.GetComponent<Rigidbody2D>().mass = _pivotMass;
+//        bacteria.GetComponent<Rigidbody2D>().drag = _pivotDrag;
+//        bacteria.GetComponent<Rigidbody2D>().angularDrag = _pivotAngularDrag;
+//        bacteria.Vertices = _verticies;
     }
 
     private void GatherAndApply()
     {
-        if (useSelection)
-        {
-            var obj = Selection.activeGameObject;
-            if (obj == null)
-            {
-                return;
-            }
-            _bacteria = new List<Bacteria>();
-            _bacteria.Add(obj.GetComponent<Bacteria>());
-            _nodes = new List<Node>(obj.GetComponentsInChildren<Node>());
-            if (_bacteria.Count == 0 || _bacteria[0] == null || _nodes.Count == 0)
-            {
-                _bacteria.Clear();
-                _nodes.Clear();
-                return;
-            }
-        }
-        else
-        {
-            _nodes = new List<Node>(FindObjectsOfType<Node>());
-            _bacteria = new List<Bacteria>();
-            foreach (var node in _nodes.FindAll( n=> n.GetComponent<Bacteria>() != null))
-            {
-                _bacteria.Add(node.GetComponent<Bacteria>());
-            }
-
-        }   
-        foreach (var node in _nodes)
-        {
-            node.EditMode = true;
-            if (_frequency != node.Frequency ||
-                _damping != node.Damping ||
-                _minDistance != node.MinDistance ||
-                _maxDistance != node.MaxDistance ||
-                _maxDistance != node.MaxDistance ||
-                _mass != node.Body.mass ||
-                _drag != node.Body.drag ||
-                _pivotFrequency != node.PivotFrequency ||
-                _pivotDamping != node.PivotDamping)
-            {
-                SetNodeSettings(node);
-            }
-        }
-
-        foreach (var bacteria in _bacteria)
-        {
-            if (_pivotMass != bacteria.GetComponent<Rigidbody2D>().mass ||
-                _pivotDrag != bacteria.GetComponent<Rigidbody2D>().drag ||
-                _pivotAngularDrag != bacteria.GetComponent<Rigidbody2D>().angularDrag)
-            {
-                bacteria.GetComponent<Rigidbody2D>().mass = _pivotMass;
-                bacteria.GetComponent<Rigidbody2D>().drag = _pivotDrag;
-                bacteria.GetComponent<Rigidbody2D>().angularDrag = _pivotAngularDrag;
-            }
-        }
-        serObj.Update();
+//        if (useSelection)
+//        {
+//            var obj = Selection.activeGameObject;
+//            if (obj == null)
+//            {
+//                return;
+//            }
+//            _bacteria = new List<Bacteria>();
+//            _bacteria.Add(obj.GetComponent<Bacteria>());
+//            _nodes = new List<Node>(obj.GetComponentsInChildren<Node>());
+//            if (_bacteria.Count == 0 || _bacteria[0] == null || _nodes.Count == 0)
+//            {
+//                _bacteria.Clear();
+//                _nodes.Clear();
+//                return;
+//            }
+//        }
+//        else
+//        {
+//            _nodes = new List<Node>(FindObjectsOfType<Node>());
+//            _bacteria = new List<Bacteria>();
+//            foreach (var node in _nodes.FindAll( n=> n.GetComponent<Bacteria>() != null))
+//            {
+//                _bacteria.Add(node.GetComponent<Bacteria>());
+//            }
+//
+//        }
+//        foreach (var node in _nodes)
+//        {
+//            if (_frequency != node.Frequency ||
+//                _damping != node.Damping ||
+//                _minDistance != node.MinDistance ||
+//                _maxDistance != node.MaxDistance ||
+//                _maxDistance != node.MaxDistance ||
+//                _mass != node.Body.mass ||
+//                _drag != node.Body.drag ||
+//                _pivotFrequency != node.PivotFrequency ||
+//                _pivotDamping != node.PivotDamping)
+//            {
+//                SetNodeSettings(node);
+//            }
+//        }
+//
+//        foreach (var bacteria in _bacteria)
+//        {
+//            if (_pivotMass != bacteria.GetComponent<Rigidbody2D>().mass ||
+//                _pivotDrag != bacteria.GetComponent<Rigidbody2D>().drag ||
+//                _pivotAngularDrag != bacteria.GetComponent<Rigidbody2D>().angularDrag)
+//            {
+//                bacteria.GetComponent<Rigidbody2D>().mass = _pivotMass;
+//                bacteria.GetComponent<Rigidbody2D>().drag = _pivotDrag;
+//                bacteria.GetComponent<Rigidbody2D>().angularDrag = _pivotAngularDrag;
+//            }
+//        }
+//        serObj.Update();
     }
 
     private void OnGUI()
@@ -235,7 +227,6 @@ public class BacteriaSettings : EditorWindow {
             GUILayout.Space(10);
             EditorGUILayout.LabelField("Bacteria Settings");
             EditorGUILayout.PropertyField(serObj.FindProperty("_verticies"), true);
-            EditorGUILayout.PropertyField(serObj.FindProperty("_collision"));
 
             GUILayout.Space(10);
             EditorGUILayout.LabelField("Node Settings"); 
@@ -268,62 +259,60 @@ public class BacteriaSettings : EditorWindow {
     }
     private void Regenerate()
     {
-        foreach (var bacteria in _bacteria)
-        {
-            bacteria.Regenerate();
-        }
+//        foreach (var bacteria in _bacteria)
+//        {
+//            bacteria.Regenerate();
+//        }
     }
 
     public void SaveSettings()
     {
-        var node = AssetDatabase.LoadAssetAtPath<GameObject>(nodePath).GetComponent<Node>();
-        SetNodeSettings(node);
-        node.EditMode = false;
-        var bacteria = AssetDatabase.LoadAssetAtPath<GameObject>(bacteriaPath).GetComponent<Bacteria>();
-        SetNodeSettings(bacteria.gameObject.GetComponent<Node>());
-        SetBacteriaSettings(bacteria);
-        EditorUtility.SetDirty(node.gameObject);
-        EditorUtility.SetDirty(bacteria.gameObject);
+//        var node = AssetDatabase.LoadAssetAtPath<GameObject>(nodePath).GetComponent<Node>();
+//        SetNodeSettings(node);
+//        var bacteria = AssetDatabase.LoadAssetAtPath<GameObject>(bacteriaPath).GetComponent<Bacteria>();
+//        SetNodeSettings(bacteria.gameObject.GetComponent<Node>());
+//        SetBacteriaSettings(bacteria);
+//        EditorUtility.SetDirty(node.gameObject);
+//        EditorUtility.SetDirty(bacteria.gameObject);
     }
 
     private void UpdateBacterias()
     {
-        if (_nodes.Contains(null) || _bacteria.Contains(null))
-        {
-            _nodes.Clear();
-            _bacteria.Clear();
-        }
-
-        if (_nodes != null)
-        {
-            foreach (var node in _nodes)
-            {
-                node.Frequency = _frequency;
-                node.Damping = _damping;
-                node.MinDistance = _minDistance;
-                node.MaxDistance = _maxDistance;
-                node.MaxDistance = _maxDistance;
-                node.Body.mass = _mass;
-                node.Body.drag = _drag;
-                node.PivotFrequency = _pivotFrequency;
-                node.PivotDamping = _pivotDamping;
-                foreach (var joint in node.GetComponentsInChildren<SpringJoint2D>())
-                {
-                    joint.autoConfigureConnectedAnchor = _autoAnchor;
-                    joint.autoConfigureDistance = _autoDistance;
-                }
-            }
-
-            foreach (var bacteria in _bacteria)
-            {
-                bacteria.Vertices = _verticies;
-                bacteria.Collisions = _collision;
-                bacteria.GetComponent<Rigidbody2D>().mass = _pivotMass;
-                bacteria.GetComponent<Rigidbody2D>().drag = _pivotDrag;
-                bacteria.GetComponent<Rigidbody2D>().angularDrag = _pivotAngularDrag;
-
-            }
-        }
+//        if (_nodes.Contains(null) || _bacteria.Contains(null))
+//        {
+//            _nodes.Clear();
+//            _bacteria.Clear();
+//        }
+//
+//        if (_nodes != null)
+//        {
+//            foreach (var node in _nodes)
+//            {
+//                node.Frequency = _frequency;
+//                node.Damping = _damping;
+//                node.MinDistance = _minDistance;
+//                node.MaxDistance = _maxDistance;
+//                node.MaxDistance = _maxDistance;
+//                node.Body.mass = _mass;
+//                node.Body.drag = _drag;
+//                node.PivotFrequency = _pivotFrequency;
+//                node.PivotDamping = _pivotDamping;
+//                foreach (var joint in node.GetComponentsInChildren<SpringJoint2D>())
+//                {
+//                    joint.autoConfigureConnectedAnchor = _autoAnchor;
+//                    joint.autoConfigureDistance = _autoDistance;
+//                }
+//            }
+//
+//            foreach (var bacteria in _bacteria)
+//            {
+//                bacteria.Vertices = _verticies;
+//                bacteria.GetComponent<Rigidbody2D>().mass = _pivotMass;
+//                bacteria.GetComponent<Rigidbody2D>().drag = _pivotDrag;
+//                bacteria.GetComponent<Rigidbody2D>().angularDrag = _pivotAngularDrag;
+//
+//            }
+//        }
     }
 
 
