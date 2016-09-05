@@ -3,7 +3,8 @@ using System.Collections;
 
 public class Hammer : MonoBehaviour
 {
-
+    bool hit = false;
+    public float force;
     // Use this for initialization
     void Start()
     {
@@ -14,9 +15,7 @@ public class Hammer : MonoBehaviour
     {
         if (Input.GetMouseButtonDown(0))
         {
-            var vector = (FindObjectOfType<Bacteria>().transform.position - transform.position).normalized;
-            Physics2D.Raycast(transform.position, vector, 100, LayerMask.GetMask("Bacteria")).rigidbody.AddForce(vector * 100, ForceMode2D.Impulse);
-            Debug.DrawRay(transform.position, vector);
+            hit = true;
         }
 
     }
@@ -24,5 +23,12 @@ public class Hammer : MonoBehaviour
     void FixedUpdate()
     {
         GetComponent<Rigidbody2D>().position = Camera.main.ScreenToWorldPoint(Input.mousePosition);
+        if (hit)
+        {
+            var vector = (FindObjectOfType<Bacteria>().transform.position - transform.position).normalized;
+            Physics2D.Raycast(transform.position, vector, 100, LayerMask.GetMask("Bacteria")).rigidbody.AddForce(vector * force, ForceMode2D.Force);
+            Debug.DrawRay(transform.position, vector);
+            hit = false;
+        }
     }
 }

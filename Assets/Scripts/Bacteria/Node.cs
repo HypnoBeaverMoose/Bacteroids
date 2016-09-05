@@ -35,11 +35,8 @@ public class Node : MonoBehaviour
     public Rigidbody2D Body { get { return _rigidbody; } }
     public CircleCollider2D Collider { get { return _collider; } }
 
-    private Transform _transform;
-
     private void Start()
     {
-        _transform = transform;
     }
 
     public void Disconnect()

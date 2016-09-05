@@ -12,8 +12,8 @@ public class Bacteria : MonoBehaviour
         public bool AutoDistance;
     }
 
-    [SerializeField]
-    private NodeConnection[] nodeConnections;
+    public NodeConnection[] nodeConnections;
+
 
     public const int MinVertexCount = 6;
     private const float randomOffsetSize = 0.25f;
@@ -104,7 +104,6 @@ public class Bacteria : MonoBehaviour
     private bool _initialized = false;
     private float _angle = 0;
     private float _initialOffset = 0;
-    private float _maxSize = 0;
 
     private void Start()
     {
@@ -214,7 +213,6 @@ public class Bacteria : MonoBehaviour
     private void UpdateRadius()
     {
         _center.Collider.radius = _radius;
-        var newPositions = new List<Vector2>();
         for (int i = 0; i < _nodes.Count; i++)
         {
             _nodes[i].Collider.radius = _radius * Random.Range(_lowerRandomBound, _upperRandomBound);
@@ -223,7 +221,7 @@ public class Bacteria : MonoBehaviour
         Reconnect();
     }
 
-    private void Reconnect()
+    public void Reconnect()
     {
         for (int i = 0; i < _nodes.Count; i++)
         {

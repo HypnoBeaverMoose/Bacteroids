@@ -3,8 +3,6 @@
 public class Attachable : MonoBehaviour
 {
     [SerializeField]
-    private float _smoothDampTime = 0.1f;
-    [SerializeField]
     private float _pulseAmount = 0.2f;
     [SerializeField]
     private float _pulseSpeed = 5;

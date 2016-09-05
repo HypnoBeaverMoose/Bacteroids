@@ -7,7 +7,7 @@ public class BacteriaSettings : EditorWindow {
     [MenuItem("Bacteria/Settings")]
     public static void ShowWindow()
     {
-        EditorWindow.GetWindow<BacteriaSettings>("Settings");
+        GetWindow<BacteriaSettings>("Settings");
     }
 
     private const string nodePath = "Assets/Prefabs/node.prefab";
@@ -18,43 +18,29 @@ public class BacteriaSettings : EditorWindow {
 
     [SerializeField]
     private int _verticies;
-
+    [SerializeField]
+    private float _radius;
     [SerializeField]
     private float _frequency;
     [SerializeField]
     private float _damping;
-    [SerializeField]
-    private bool _constrain;
-
-    [SerializeField]
-    private float _minDistance;
-    [SerializeField]
-    private float _maxDistance;
-
     [SerializeField]
     private float _mass;
     [SerializeField]
     private float _drag;
 
     [SerializeField]
-    private float _pivotMass;
+    private float _centerMass;
     [SerializeField]
-    private float _pivotDrag;
+    private float _centerDrag;
     [SerializeField]
-    private float _pivotAngularDrag;
-    [SerializeField]
-    private float _pivotFrequency;
-    [SerializeField]
-    private float _pivotDamping;
-   
-    [SerializeField]
-    private bool _autoAnchor;
-    [SerializeField]
-    private bool _autoDistance;
+    private float _centerAngularDrag;
 
-    private bool _convergent = true;
+    [SerializeField]
+    private Bacteria.NodeConnection[] _connections;
+
     private float _lastUpdate;
-    private float _upateTime = 1.0f;
+    private float _upateTime = 0.2f;
     private bool _needsUpdate;
     [SerializeField]
     private bool useSelection = false;
@@ -78,105 +64,106 @@ public class BacteriaSettings : EditorWindow {
 
     private void LoadSettings(Node node, Bacteria bacteria)
     {
-//        _frequency = node.Frequency;
-//        _damping = node.Damping;
-//        _minDistance = node.MinDistance;
-//        _maxDistance = node.MaxDistance;
-//        _maxDistance = node.MaxDistance;
-//        _mass = node.Body.mass;
-//        _drag = node.Body.drag;
-//        _pivotFrequency = node.PivotFrequency;
-//        _pivotDamping = node.PivotDamping;
-//
-//
-//        _verticies = bacteria.Vertices;
-//        _autoAnchor = false;
-//        _autoDistance = false;
-//        _pivotMass = bacteria.GetComponent<Rigidbody2D>().mass;
-//        _pivotDrag = bacteria.GetComponent<Rigidbody2D>().drag;
-//        _pivotAngularDrag = bacteria.GetComponent<Rigidbody2D>().angularDrag;
-//        Repaint();
-//        serObj.Update();
+        _frequency = node.Frequency;
+        _damping = node.Damping;
+        _mass = node.Body.mass;
+        _drag = node.Body.drag;
+        _verticies = bacteria.Vertices;
+        _centerMass = bacteria.GetComponent<Rigidbody2D>().mass;
+        _centerDrag = bacteria.GetComponent<Rigidbody2D>().drag;
+        _centerAngularDrag = bacteria.GetComponent<Rigidbody2D>().angularDrag;
+        _connections = bacteria.nodeConnections;
+        _radius = bacteria.Radius;
+        Repaint();
+        serObj.Update();
     }
 
     private void SetNodeSettings(Node node)
     {
-//        node.Frequency = _frequency;
-//        node.Damping = _damping;
-//        node.MinDistance = _minDistance;
-//        node.MaxDistance = _maxDistance;
-//        node.MaxDistance = _maxDistance;
-//        node.Body.mass = _mass;
-//        node.Body.drag = _drag;
-//        node.PivotFrequency = _pivotFrequency;
-//        node.PivotDamping = _pivotDamping;
+        node.Frequency = _frequency;
+        node.Damping = _damping;
+        node.Body.mass = _mass;
+        node.Body.drag = _drag;
     }
 
     private void SetBacteriaSettings(Bacteria bacteria)
     {
-//        bacteria.GetComponent<Rigidbody2D>().mass = _pivotMass;
-//        bacteria.GetComponent<Rigidbody2D>().drag = _pivotDrag;
-//        bacteria.GetComponent<Rigidbody2D>().angularDrag = _pivotAngularDrag;
-//        bacteria.Vertices = _verticies;
+        bacteria.GetComponent<Rigidbody2D>().mass = _centerMass;
+        bacteria.GetComponent<Rigidbody2D>().drag = _centerDrag;
+        bacteria.GetComponent<Rigidbody2D>().angularDrag = _centerAngularDrag;
+        bacteria.nodeConnections = _connections;
+        bacteria.Radius = _radius;
+        bacteria.Vertices = _verticies;
+        bacteria.Reconnect();
     }
 
     private void GatherAndApply()
     {
-//        if (useSelection)
-//        {
-//            var obj = Selection.activeGameObject;
-//            if (obj == null)
-//            {
-//                return;
-//            }
-//            _bacteria = new List<Bacteria>();
-//            _bacteria.Add(obj.GetComponent<Bacteria>());
-//            _nodes = new List<Node>(obj.GetComponentsInChildren<Node>());
-//            if (_bacteria.Count == 0 || _bacteria[0] == null || _nodes.Count == 0)
-//            {
-//                _bacteria.Clear();
-//                _nodes.Clear();
-//                return;
-//            }
-//        }
-//        else
-//        {
-//            _nodes = new List<Node>(FindObjectsOfType<Node>());
-//            _bacteria = new List<Bacteria>();
-//            foreach (var node in _nodes.FindAll( n=> n.GetComponent<Bacteria>() != null))
-//            {
-//                _bacteria.Add(node.GetComponent<Bacteria>());
-//            }
-//
-//        }
-//        foreach (var node in _nodes)
-//        {
-//            if (_frequency != node.Frequency ||
-//                _damping != node.Damping ||
-//                _minDistance != node.MinDistance ||
-//                _maxDistance != node.MaxDistance ||
-//                _maxDistance != node.MaxDistance ||
-//                _mass != node.Body.mass ||
-//                _drag != node.Body.drag ||
-//                _pivotFrequency != node.PivotFrequency ||
-//                _pivotDamping != node.PivotDamping)
-//            {
-//                SetNodeSettings(node);
-//            }
-//        }
-//
-//        foreach (var bacteria in _bacteria)
-//        {
-//            if (_pivotMass != bacteria.GetComponent<Rigidbody2D>().mass ||
-//                _pivotDrag != bacteria.GetComponent<Rigidbody2D>().drag ||
-//                _pivotAngularDrag != bacteria.GetComponent<Rigidbody2D>().angularDrag)
-//            {
-//                bacteria.GetComponent<Rigidbody2D>().mass = _pivotMass;
-//                bacteria.GetComponent<Rigidbody2D>().drag = _pivotDrag;
-//                bacteria.GetComponent<Rigidbody2D>().angularDrag = _pivotAngularDrag;
-//            }
-//        }
-//        serObj.Update();
+        if (useSelection)
+        {
+            var obj = Selection.activeGameObject;
+            if (obj == null)
+            {
+                return;
+            }
+            _bacteria = new List<Bacteria>();
+            _bacteria.Add(obj.GetComponent<Bacteria>());
+            _nodes = new List<Node>(obj.GetComponentsInChildren<Node>());
+            if (_bacteria.Count == 0 || _bacteria[0] == null || _nodes.Count == 0)
+            {
+                _bacteria.Clear();
+                _nodes.Clear();
+                return;
+            }
+        }
+        else
+        {
+            _nodes = new List<Node>(FindObjectsOfType<Node>());
+            _bacteria = new List<Bacteria>();
+            foreach (var node in _nodes.FindAll(n => n.GetComponent<Bacteria>() != null))
+            {
+                _bacteria.Add(node.GetComponent<Bacteria>());
+            }
+
+        }
+        foreach (var node in _nodes)
+        {
+            if (_frequency != node.Frequency ||
+                _damping != node.Damping ||
+                _mass != node.Body.mass ||
+                _drag != node.Body.drag)
+            {
+                SetNodeSettings(node);
+            }
+        }
+
+        foreach (var bacteria in _bacteria)
+        {
+            bool same = bacteria.nodeConnections.Length ==_connections.Length;
+            if (same)
+            {
+                for (int i = 0; i < _connections.Length; i++)
+                {
+                    if (bacteria.nodeConnections[i].AutoDistance != _connections[i].AutoDistance ||
+                        bacteria.nodeConnections[i].Damping != _connections[i].Damping ||
+                        bacteria.nodeConnections[i].Frequency != _connections[i].Frequency ||
+                        bacteria.nodeConnections[i].IndexType != _connections[i].IndexType)
+                    {
+                        same = false;
+                        break;
+                    }
+                }
+            }
+
+            if (!same ||
+                _centerMass != bacteria.GetComponent<Rigidbody2D>().mass ||
+                _centerDrag != bacteria.GetComponent<Rigidbody2D>().drag ||
+                _centerAngularDrag != bacteria.GetComponent<Rigidbody2D>().angularDrag)
+            {
+                SetBacteriaSettings(bacteria);
+            }
+        }
+        serObj.Update();
     }
 
     private void OnGUI()
@@ -227,100 +214,86 @@ public class BacteriaSettings : EditorWindow {
             GUILayout.Space(10);
             EditorGUILayout.LabelField("Bacteria Settings");
             EditorGUILayout.PropertyField(serObj.FindProperty("_verticies"), true);
+            EditorGUILayout.PropertyField(serObj.FindProperty("_radius"), true);
 
             GUILayout.Space(10);
             EditorGUILayout.LabelField("Node Settings"); 
             EditorGUILayout.PropertyField(serObj.FindProperty("_frequency"));
             EditorGUILayout.PropertyField(serObj.FindProperty("_damping"));
-            EditorGUILayout.PropertyField(serObj.FindProperty("_minDistance"));
-            EditorGUILayout.PropertyField(serObj.FindProperty("_maxDistance"));
-            EditorGUILayout.PropertyField(serObj.FindProperty("_constrain"));
-
-            GUILayout.Space(10);
-            EditorGUILayout.LabelField("Node Body Settings");  
             EditorGUILayout.PropertyField(serObj.FindProperty("_mass"));
             EditorGUILayout.PropertyField(serObj.FindProperty("_drag"));
-            EditorGUILayout.PropertyField(serObj.FindProperty("_autoDistance"));
-            EditorGUILayout.PropertyField(serObj.FindProperty("_autoAnchor"));
 
             GUILayout.Space(10);
-            EditorGUILayout.LabelField("Pivot Body Settings");  
-            EditorGUILayout.PropertyField(serObj.FindProperty("_pivotMass"));
-            EditorGUILayout.PropertyField(serObj.FindProperty("_pivotDrag"));
-            EditorGUILayout.PropertyField(serObj.FindProperty("_pivotAngularDrag"));
-            EditorGUILayout.PropertyField(serObj.FindProperty("_pivotFrequency"));
-            EditorGUILayout.PropertyField(serObj.FindProperty("_pivotDamping"));
+            EditorGUILayout.LabelField("Pivot Body Settings");
+            EditorGUILayout.PropertyField(serObj.FindProperty("_centerMass"));
+            EditorGUILayout.PropertyField(serObj.FindProperty("_centerDrag"));
+            EditorGUILayout.PropertyField(serObj.FindProperty("_centerAngularDrag"));
+            GUILayout.Space(10);
+            EditorGUILayout.LabelField("Connections");
+            EditorGUILayout.PropertyField(serObj.FindProperty("_connections"),true);
         }
+
         EditorGUILayout.EndVertical();
 
         serObj.ApplyModifiedProperties();
-        _verticies = Mathf.Max(4, _verticies);
+        _verticies = Mathf.Max(Bacteria.MinVertexCount, _verticies);
         serObj.Update();
     }
     private void Regenerate()
     {
-//        foreach (var bacteria in _bacteria)
-//        {
-//            bacteria.Regenerate();
-//        }
+        foreach (var bacteria in _bacteria)
+        {
+            bacteria.Regenerate();
+        }
     }
 
     public void SaveSettings()
     {
-//        var node = AssetDatabase.LoadAssetAtPath<GameObject>(nodePath).GetComponent<Node>();
-//        SetNodeSettings(node);
-//        var bacteria = AssetDatabase.LoadAssetAtPath<GameObject>(bacteriaPath).GetComponent<Bacteria>();
-//        SetNodeSettings(bacteria.gameObject.GetComponent<Node>());
-//        SetBacteriaSettings(bacteria);
-//        EditorUtility.SetDirty(node.gameObject);
-//        EditorUtility.SetDirty(bacteria.gameObject);
+        var node = AssetDatabase.LoadAssetAtPath<GameObject>(nodePath).GetComponent<Node>();
+        SetNodeSettings(node);
+        var bacteria = AssetDatabase.LoadAssetAtPath<GameObject>(bacteriaPath).GetComponent<Bacteria>();
+        SetNodeSettings(bacteria.gameObject.GetComponent<Node>());
+        SetBacteriaSettings(bacteria);
+        EditorUtility.SetDirty(node.gameObject);
+        EditorUtility.SetDirty(bacteria.gameObject);
     }
 
     private void UpdateBacterias()
     {
-//        if (_nodes.Contains(null) || _bacteria.Contains(null))
-//        {
-//            _nodes.Clear();
-//            _bacteria.Clear();
-//        }
-//
-//        if (_nodes != null)
-//        {
-//            foreach (var node in _nodes)
-//            {
-//                node.Frequency = _frequency;
-//                node.Damping = _damping;
-//                node.MinDistance = _minDistance;
-//                node.MaxDistance = _maxDistance;
-//                node.MaxDistance = _maxDistance;
-//                node.Body.mass = _mass;
-//                node.Body.drag = _drag;
-//                node.PivotFrequency = _pivotFrequency;
-//                node.PivotDamping = _pivotDamping;
-//                foreach (var joint in node.GetComponentsInChildren<SpringJoint2D>())
-//                {
-//                    joint.autoConfigureConnectedAnchor = _autoAnchor;
-//                    joint.autoConfigureDistance = _autoDistance;
-//                }
-//            }
-//
-//            foreach (var bacteria in _bacteria)
-//            {
-//                bacteria.Vertices = _verticies;
-//                bacteria.GetComponent<Rigidbody2D>().mass = _pivotMass;
-//                bacteria.GetComponent<Rigidbody2D>().drag = _pivotDrag;
-//                bacteria.GetComponent<Rigidbody2D>().angularDrag = _pivotAngularDrag;
-//
-//            }
-//        }
+        if (_nodes.Contains(null) || _bacteria.Contains(null))
+        {
+            _nodes.Clear();
+            _bacteria.Clear();
+        }
+
+        if (_nodes != null)
+        {
+            foreach (var node in _nodes)
+            {
+                SetNodeSettings(node);
+                //node.Frequency = _frequency;
+                //node.Damping = _damping;
+                //node.MinDistance = _minDistance;
+                //node.MaxDistance = _maxDistance;
+                //node.MaxDistance = _maxDistance;
+                //node.Body.mass = _mass;
+                //node.Body.drag = _drag;
+                //node.PivotFrequency = _pivotFrequency;
+                //node.PivotDamping = _pivotDamping;
+            }
+
+            foreach (var bacteria in _bacteria)
+            {
+                SetBacteriaSettings(bacteria);
+            }
+        }
     }
 
 
 
     // Update is called once per frame
 	void Update () 
-    {	
-        
+    {
         if (autoUpdate || _needsUpdate)
         {
             UpdateBacterias();
