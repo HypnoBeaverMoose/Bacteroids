@@ -2,7 +2,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine.UI;
-
+using UnityEngine.Networking;
 
 public class GameController : MonoBehaviour 
 {
@@ -63,7 +63,6 @@ public class GameController : MonoBehaviour
 
 	void Awake () 
     {
-
         if (_instance != null)
         {
             Destroy(this);

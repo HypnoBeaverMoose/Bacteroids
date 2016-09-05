@@ -226,8 +226,6 @@ public class Bacteria : MonoBehaviour
         for (int i = 0; i < _nodes.Count; i++)
         {
             _nodes[i].Disconnect();
-            //var baseJoint = _nodes[i].ConnectSpring(_center, _nodes[i].TargetPosition, 2.0f, 1.0f) as SpringJoint2D; //todo: how to handle this?
-            //baseJoint.distance = 0;
             foreach (var connection in nodeConnections)
             {
                 var other = _nodes[Indexer.GetIndex(connection.IndexType, i, _nodes.Count)];
@@ -241,7 +239,7 @@ public class Bacteria : MonoBehaviour
     {
         if (collision.collider.CompareTag("Projectile"))
         {
-            //            GameController.Instance.Spawn.HandleHit(this, collision.gameObject.GetComponent<Projectile>(), collision.contacts[0].point, collision.relativeVelocity);
+            GameController.Instance.Spawn.HandleHit(this, collision.gameObject.GetComponent<Projectile>(), collision.contacts[0].point, collision.relativeVelocity);
         }
 
         if (collision.collider.CompareTag("Player"))
