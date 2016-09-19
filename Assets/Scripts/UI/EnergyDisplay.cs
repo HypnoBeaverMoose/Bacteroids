@@ -18,7 +18,11 @@ public class EnergyDisplay : MonoBehaviour
 
 	void Start () 
     {
-        _player = FindObjectOfType<Player>();        
+        _player = FindObjectOfType<Player>();
+        if (_player != null)
+        {
+            gameObject.SetActive(_player.UseEnergy);
+        }
         _target = Vector3.one;
 	}
 
@@ -37,11 +41,11 @@ public class EnergyDisplay : MonoBehaviour
             _target.x = _player.Energy / _player.MaxEnergy;
             _energyBar.localScale = Vector3.SmoothDamp(_energyBar.localScale, _target, ref _velocity, _smoothTime);
             _noEnergy.transform.position = _player.transform.position - Vector3.up * 0.5f;
-            if (_player.NoDNA && !_noEnergy.activeSelf)
+            if (!_player.HasEnergy && !_noEnergy.activeSelf)
             {
                 _noEnergy.SetActive(true);
             }
-            else if ((!_player.NoDNA || _player.Energy <= 0) && _noEnergy.activeSelf)
+            else if ((_player.HasEnergy || _player.Energy <= 0) && _noEnergy.activeSelf)
             {
                 _noEnergy.SetActive(false);
             }
@@ -52,6 +56,11 @@ public class EnergyDisplay : MonoBehaviour
             _target.x = 0;
             _energyBar.localScale = Vector3.SmoothDamp(_energyBar.localScale, _target, ref _velocity, _smoothTime);
             _player = FindObjectOfType<Player>();
+            if (_player != null)
+            {
+                gameObject.SetActive(_player.UseEnergy);
+            }
+
             if (_player != null)
             {
               //  _player.OnColorChanged += OnColorChanged;

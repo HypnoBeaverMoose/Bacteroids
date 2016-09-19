@@ -9,9 +9,8 @@ public class Player : MonoBehaviour
     public delegate void ColorChanged(Color newColor);
     public event ColorChanged OnColorChanged;
 
-    public float EnergyThreshold = 30;
-    public float ExplodeStatus { get { return 1.0f - _explodeTimer / _explodeCooldown; } }
-    public bool NoDNA { get; private set; }
+    public bool UseEnergy {  get { return _useEnergy; } }
+    public bool HasEnergy { get; private set; }
     public float Force { get; private set; }
     public float Angle { get; private set; }
     public float Energy { get { return _energy; } set { _energy = Mathf.Clamp(value, 0, _startingEnergy); } }
@@ -32,9 +31,9 @@ public class Player : MonoBehaviour
         }
     }
     [SerializeField]
-    private float _invincibleTimeout;
+    private bool _useEnergy;
     [SerializeField]
-    private float _explodeCooldown;
+    private float _invincibleTimeout;
     [SerializeField]
     private float _boostTimeout;
     [SerializeField]
@@ -43,6 +42,8 @@ public class Player : MonoBehaviour
     private float _noEnergyBonus;
     [SerializeField]
     private float _startingEnergy;
+    [SerializeField]
+    private float _energyThreshold;
     [Space(10)]
     [SerializeField]
     private float _idleEnergyBonus;
@@ -77,9 +78,7 @@ public class Player : MonoBehaviour
         {
             GetComponent<Wrappable>().Size = 0.3f;
         }
-
-        _explodeTimer = 0.25f * _explodeCooldown;
-        NoDNA = false;
+        HasEnergy = true;
         _lastBoost = Time.time;
         Force = 0;
         Angle = 0;
@@ -88,7 +87,7 @@ public class Player : MonoBehaviour
         StartCoroutine(Invincibility());
 	}
 
-    private IEnumerator NoDNARoutine()
+    private IEnumerator NoEnergyRoutine()
     {
         if (Time.time - _lastBoost > _boostTimeout)
         {
@@ -96,7 +95,7 @@ public class Player : MonoBehaviour
             _lastBoost = Time.time;
         }
         yield return new WaitForSeconds(_noEnergyTimePenalty);
-        NoDNA = false;
+        HasEnergy = true;
     }
 	
 	void Update () 
@@ -105,17 +104,17 @@ public class Player : MonoBehaviour
         Force = Mathf.Max(0, Input.GetAxis("Vertical"));
         Angle = Input.GetAxis("Horizontal") * Time.fixedDeltaTime; ;
 
-        if (Energy < EnergyThreshold && !NoDNA)
+        if (_useEnergy && (Energy < _energyThreshold && HasEnergy))
         {
-            NoDNA = true;
-            //StartCoroutine(NoDNARoutine());            
+            HasEnergy = false;
+            StartCoroutine(NoEnergyRoutine());
         }
-        if (Energy > EnergyThreshold && NoDNA)
+        if (_useEnergy && (Energy > _energyThreshold && !HasEnergy))
         {
-            NoDNA = false;
+            HasEnergy = true;
         }
             
-        if (!NoDNA)
+        if (!_useEnergy || HasEnergy)
         {
             if (Input.GetKeyDown(KeyCode.Space))
             {
@@ -132,8 +131,6 @@ public class Player : MonoBehaviour
         {
             _engineParticles.Emit(1);
         }
-
-        _explodeTimer = Mathf.Max(_explodeTimer - Time.deltaTime, 0);
 	}
 
     void FixedUpdate()
@@ -141,7 +138,7 @@ public class Player : MonoBehaviour
         _rigidbody.AddForce(transform.up * Force * _forceMultiplier);
         _rigidbody.rotation += Angle * _torqueMultiplier;
 
-        if (!NoDNA)
+        if (HasEnergy || !_useEnergy)
         {
             Energy -= Time.fixedDeltaTime * (Mathf.Abs(Force * _moveEnergyCost) + Mathf.Abs(Angle * _rotateEnergyCost));
         }
@@ -149,12 +146,9 @@ public class Player : MonoBehaviour
 
     public void Damage(Bacteria bacteria)
     {
-        if (!_invincible)
+        if (!_invincible && OnPlayerKilled != null)
         {
-            if (OnPlayerKilled != null)
-            {
-                OnPlayerKilled();
-            }
+            OnPlayerKilled();
         }
     }
 
