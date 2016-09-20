@@ -12,9 +12,13 @@ public class Energy : MonoBehaviour
     private SpriteRenderer _renderer;
     [SerializeField]
     private float _spawnBacteriaTimeout;
+    [SerializeField]
+    private float _radiusChange;
+
+    public float RadiusChange { get { return _radiusChange; } set { _radiusChange = value; } }
 
     private GameController _controller;
-    public float Amount { get { return _amount; } }
+    public float Amount { get { return _radiusChange * 1000; } }
     public Color Color { get { return _renderer.color; } set { _renderer.color = value; } }
 
 	private void Start () 
@@ -33,19 +37,21 @@ public class Energy : MonoBehaviour
         Destroy(gameObject);
     }
 
-    private void OnCollisionEnter2D(Collision2D collision)
+    private void OnTriggerStay2D(Collider2D collider)
     {
-        if (collision.collider.CompareTag("Player"))
+        if (collider.CompareTag("Player") && Vector2.Distance(collider.transform.position, transform.position) < 0.5f)
         {
-            collision.collider.GetComponent<Player>().Consume(this);
+            collider.GetComponent<Player>().Consume(this);
             _controller.Score += Amount;
             Explode(10);
         }
-        else if (collision.collider.CompareTag("Enemy"))
-        {
-            collision.collider.GetComponentInParent<Bacteria>().Consume(this);
-            Explode(10);
+    }
 
+    private void OnCollisionEnter2D(Collision2D collision)
+    {
+        if (collision.collider.CompareTag("Enemy"))
+        {
+            Explode(10);
         }
     }
 }

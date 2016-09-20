@@ -162,7 +162,7 @@ public class GameController : MonoBehaviour
 
     private float GetSpawnTime()
     {
-        return 20.0f;// _spawnCurve.Evaluate(Time.time);
+        return _spawnCurve.Evaluate(Time.time);
     }
 
     private Color GetSpawnColor()

@@ -71,7 +71,7 @@ public class BacteriaAI : MonoBehaviour
 
         if (collision.collider.CompareTag("Energy"))
         {
-            node.Body.AddForce(normal * 5, ForceMode2D.Impulse);
+            node.Body.AddForce(normal * 0.5f, ForceMode2D.Impulse);
         }
     }
 

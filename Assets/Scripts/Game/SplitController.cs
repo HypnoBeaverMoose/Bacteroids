@@ -8,6 +8,8 @@ public class SplitController : MonoBehaviour
     public event System.Action OnBacteriaKilled;
 
     [SerializeField]
+    private float _energyInitialForce;
+    [SerializeField]
     private GameObject _bacteriaPrefab;
     [SerializeField]
     private GameObject _energyPrefab;
@@ -76,9 +78,7 @@ public class SplitController : MonoBehaviour
     {
         var obj = Instantiate(_energyPrefab, position, Quaternion.identity) as GameObject;
         var energy = obj.GetComponent<Energy>();
-        energy.transform.localScale = Vector3.one * 0.12f;
-        var random = Random.insideUnitCircle.normalized;
-        energy.GetComponent<Rigidbody2D>().AddForce((Vector3.Dot(random, initialDirection) < 0 ? -random : random) * 4);
+        energy.GetComponent<Rigidbody2D>().AddForce(initialDirection * _energyInitialForce);
         return energy;
     }
 

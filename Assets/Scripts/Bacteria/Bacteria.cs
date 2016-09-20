@@ -15,8 +15,9 @@ public class Bacteria : MonoBehaviour
     public NodeConnection[] nodeConnections;
 
 
-    public const int MinVertexCount = 6;
+    public const int MinVertexCount = 7;
     public const float MaxRadius = 0.35f;
+    public const float MinRadius = 0.075f;
     private const float randomOffsetSize = 0.25f;
 
     public float Health { get { return _health; } set { _health = value; } }
@@ -109,7 +110,7 @@ public class Bacteria : MonoBehaviour
     private BacteriaDrawer _drawer;
     private BacteriaAI _ai;
     private List<Node> _nodes = new List<Node>();
-
+    private List<Collider2D> _hits = new List<Collider2D>();
     private bool _initialized = false;
     private float _angle = 0;
     private float _initialOffset = 0;
@@ -219,7 +220,10 @@ public class Bacteria : MonoBehaviour
 
     private void UpdateRadius()
     {
-        _center.Collider.radius = _radius;
+        if (_center.Collider != null)
+        {
+            _center.Collider.radius = _radius;
+        }
         for (int i = 0; i < _nodes.Count; i++)
         {
             _nodes[i].Collider.radius = _radius * Random.Range(_lowerRandomBound, _upperRandomBound);
@@ -244,38 +248,69 @@ public class Bacteria : MonoBehaviour
 
     private void OnBacteriaHit(Collision2D collision, Node node)
     {
+        if (_hits.Contains(collision.collider))
+        {
+            return;
+        }
+        _hits.Add(collision.collider);
         if (collision.collider.CompareTag("Projectile"))
         {
             Hit(collision.gameObject.GetComponent<Projectile>(), collision.contacts[0].point, collision.relativeVelocity, node);
         }
-
-        if (collision.collider.CompareTag("Player"))
+        else if (collision.collider.CompareTag("Player"))
         {
             collision.collider.GetComponent<Player>().Damage(this);
+        }
+        else if (collision.collider.CompareTag("Energy"))
+        {
+            Consume(collision.gameObject.GetComponent<Energy>());
         }
     }
 
     public void Hit(Projectile projectile, Vector2 hit, Vector2 velocity, Node node)
     {
-        Radius -= 0.0125f;
-        KillNode(_nodes.IndexOf(node));
+        if (Radius > MinRadius)
+        {
+            Radius += projectile.RadiusChange;
+            var energy = GameController.Instance.Spawn.SpawnEnergy(hit + velocity.normalized, (Random.insideUnitCircle * 2 + velocity.normalized).normalized);
+            energy.RadiusChange = -projectile.RadiusChange;
+
+            if (Vertices > MinVertexCount)
+            {
+                KillNode(_nodes.IndexOf(node));
+            }
+        }
+        else
+        {
+            var energy = GameController.Instance.Spawn.SpawnEnergy(hit + velocity.normalized, (Random.insideUnitCircle + velocity.normalized).normalized);
+            energy.transform.localScale *= 1.3f;
+            energy.RadiusChange = MinRadius;
+            _ai.Clear();
+            _drawer.Clear();
+            Destroy(gameObject);
+        }
     }
 
     public void KillNode(int index)
     {
-        var node = _nodes[index];
-        Vector2 vel = node.Body.velocity;
-        node.Disconnect();
-        node.TargetBody = null;
-        _nodes.RemoveAt(index);
-        Destroy(node.gameObject);
-        Vertices = _nodes.Count;
-        _nodes[((index >= _nodes.Count) ? _nodes.Count - 1: index)].Body.velocity = vel;
+        Debug.Log(index);
+        if (index >= 0)
+        {
+            var node = _nodes[index];
+            Vector2 vel = node.Body.velocity;
+            node.Disconnect();
+            node.TargetBody = null;
+            node.OnCollisionEnter -= OnBacteriaHit;
+            _nodes.RemoveAt(index);
+            Destroy(node.gameObject);
+            Vertices = _nodes.Count;
+            _nodes[((index >= _nodes.Count) ? _nodes.Count - 1 : index)].Body.velocity = vel;
+        }
     }
 
     public void Consume(Energy Energy)
     {
-        Radius += 0.0125f;
+        Radius += Energy.RadiusChange;
     }
 
     private void OnDestroy()

@@ -9,6 +9,11 @@ public class Projectile : MonoBehaviour
     private float _speed;
     [SerializeField]
     private SpriteRenderer _sprite;
+    [SerializeField]
+    private float _radiusChange;
+
+    public float RadiusChange { get { return _radiusChange; } }
+
     public Color Color { get { return _sprite.color; } set { _sprite.color = value; } }
     private bool _destructionStarted = false;
 
