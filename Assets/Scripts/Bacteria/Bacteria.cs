@@ -16,6 +16,7 @@ public class Bacteria : MonoBehaviour
 
 
     public const int MinVertexCount = 6;
+    public const float MaxRadius = 0.35f;
     private const float randomOffsetSize = 0.25f;
 
     public float Health { get { return _health; } set { _health = value; } }
@@ -74,8 +75,16 @@ public class Bacteria : MonoBehaviour
         set { _nodes[index] = value; }
     }
 
-    public Node[] Nodes { get { return _nodes.ToArray(); } }
+    public Node[] GetNodes()
+    {
+        return _nodes.ToArray();
+    }
 
+    public void SetNodes(List<Node> nodes)
+    {
+        _nodes.AddRange(nodes);
+        Vertices = _nodes.Count;
+    }
 
     public bool Contains(Node node)
     {
@@ -111,7 +120,7 @@ public class Bacteria : MonoBehaviour
         _ai = GetComponent<BacteriaAI>();
         _center = GetComponent<Node>();
         _center.Collider.radius = _radius;
-
+        _initialOffset = Random.Range(0, Mathf.PI);
         UpdateVerticies();
     }
 
@@ -134,7 +143,6 @@ public class Bacteria : MonoBehaviour
     private void UpdateNodes()
     {
         _angle = (2 * Mathf.PI) / _vertices;
-        _initialOffset = Random.Range(0, Mathf.PI);
 
         for (int i = 0; i < _vertices; i++)
         {
@@ -165,7 +173,7 @@ public class Bacteria : MonoBehaviour
         }
     }
 
-    private void UpdateVerticies()
+    public void UpdateVerticies()
     {
         if (_vertices < MinVertexCount)
         {
@@ -178,7 +186,7 @@ public class Bacteria : MonoBehaviour
             {
                 var node = Instantiate(_node.gameObject).GetComponent<Node>();
                 node.transform.position = transform.position;
-                _nodes.Add(node);
+                _nodes.Insert(Random.Range(0, _nodes.Count), node);
 
             }
         }
@@ -200,7 +208,6 @@ public class Bacteria : MonoBehaviour
         UpdateCollisions();
         Reconnect();
         _initialized = true;
-
         _drawer.Init(this);
         _ai.Init(this);
 
@@ -239,7 +246,7 @@ public class Bacteria : MonoBehaviour
     {
         if (collision.collider.CompareTag("Projectile"))
         {
-            GameController.Instance.Spawn.HandleHit(this, collision.gameObject.GetComponent<Projectile>(), collision.contacts[0].point, collision.relativeVelocity);
+            Hit(collision.gameObject.GetComponent<Projectile>(), collision.contacts[0].point, collision.relativeVelocity, node);
         }
 
         if (collision.collider.CompareTag("Player"))
@@ -248,8 +255,27 @@ public class Bacteria : MonoBehaviour
         }
     }
 
+    public void Hit(Projectile projectile, Vector2 hit, Vector2 velocity, Node node)
+    {
+        Radius -= 0.0125f;
+        KillNode(_nodes.IndexOf(node));
+    }
+
+    public void KillNode(int index)
+    {
+        var node = _nodes[index];
+        Vector2 vel = node.Body.velocity;
+        node.Disconnect();
+        node.TargetBody = null;
+        _nodes.RemoveAt(index);
+        Destroy(node.gameObject);
+        Vertices = _nodes.Count;
+        _nodes[((index >= _nodes.Count) ? _nodes.Count - 1: index)].Body.velocity = vel;
+    }
+
     public void Consume(Energy Energy)
     {
+        Radius += 0.0125f;
     }
 
     private void OnDestroy()
@@ -262,69 +288,3 @@ public class Bacteria : MonoBehaviour
         }
     }
 }
-
-//private CollisionType _collisionType = CollisionType.None;s
-//    public enum CollisionType
-//    {
-//        None = 0,
-//        UnConnected,
-//        All
-//    }
-//
-//    public CollisionType Collisions
-//    {
-//        get { return _collisionType; }
-//        set
-//        {
-//            if (_initialized && _collisionType != value)
-//            {
-//                _collisionType = value;
-//                UpdateCollisions(_collisionType);
-//            }
-//            _collisionType = value;
-//        }
-//    }
-//    private void UpdateCollisions(CollisionType type)
-//    {
-//        bool ignore = type == CollisionType.None;
-//            if (!ignore)
-//            {
-//                _nodes[i].Collider.radius = Mathf.Min(
-//                    Vector3.Distance(_nodes[i].Body.position, transform.position),
-//                    Vector3.Distance(_nodes[i].Body.position, _nodes[i == 0 ? _nodes.Count - 1 : i - 1].Body.position),
-//                    Vector3.Distance(_nodes[i].Body.position, _nodes[(i + 1) % _nodes.Count].Body.position)
-//                );
-//            }
-//        }
-//
-//        for (int i = 0; i < _nodes.Count; i++)
-//        {
-//            for (Node.JointType nodetype = Node.JointType.Center; nodetype < Node.JointType.TypeLength; nodetype++)
-//            {
-//                _nodes[i][nodetype].Joint.enableCollision = type == CollisionType.All;
-//
-//            }
-//        }
-//        Reconnect();
-//    }
-//private void UpdateVerticies()
-//{
-
-
-//    //_angle = (2 * Mathf.PI) / _vertices;
-//    //_initialOffset = Random.Range(0, Mathf.PI);
-//    //for (int i = 0; i < _vertices; i++)
-//    //{
-//    //    float randomOffset = Random.Range(-_angle, _angle) * randomOffsetSize;
-//    //    float angleOffset = _initialOffset - i * _angle + randomOffset;
-//    //    Vector3 position = new Vector3(Mathf.Cos(angleOffset), Mathf.Sin(angleOffset), 0) * _radius * Random.Range(_lowerRandomBound, _upperRandomBound);
-//    //    _nodes[i].Collider.radius = _radius * Random.Range(_lowerRandomBound, _upperRandomBound);;
-//    //    _nodes[i].transform.SetParent(transform, true);
-//    //    _nodes[i].Body.position = transform.TransformPoint(position);
-//    //}
-//    UpdateNodes();
-//    UpdateCollisions()
-//    Reconnect();
-//    _drawer.Init(this);
-//    _ai.Init(this);
-//}

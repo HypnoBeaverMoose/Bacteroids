@@ -70,7 +70,6 @@ public class Player : MonoBehaviour
     private float _energy;
     private float _lastBoost = 0;
     private Color _color = Color.white;
-    private float _explodeTimer = 0;
     private bool _invincible = false;
 	void Start () 
     {
@@ -109,6 +108,7 @@ public class Player : MonoBehaviour
             HasEnergy = false;
             StartCoroutine(NoEnergyRoutine());
         }
+
         if (_useEnergy && (Energy > _energyThreshold && !HasEnergy))
         {
             HasEnergy = true;

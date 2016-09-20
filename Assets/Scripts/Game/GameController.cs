@@ -72,6 +72,7 @@ public class GameController : MonoBehaviour
             _instance = this;
         }       
         _spawn = gameObject.GetComponent<SplitController>();
+
         if (_spawnType == SpawnStrategy.SpawnAvoid)
         {
             _strategy = new SpawnStrategyAvoid(_camera, 10);
@@ -110,7 +111,6 @@ public class GameController : MonoBehaviour
         _player.OnColorChanged+= OnColorChanged;
         _player.OnPlayerKilled += PlayerKilled;
         _stopSpawn = false;
-        _spawnTimer = GetSpawnTime();
         
         var energies = FindObjectsOfType<Energy>();
         foreach (var energy in energies)
@@ -123,7 +123,6 @@ public class GameController : MonoBehaviour
             Destroy(enemy);
         }
         Score = 0;
-        Spawn.SpawnBacteria(GetSpawnPosition(new Bacteria[]{}), Quaternion.identity, _startBacteriaVertices);
     }
 
     private void OnColorChanged(Color newColor)
@@ -181,7 +180,7 @@ public class GameController : MonoBehaviour
                 var enemies = FindObjectsOfType<Bacteria>();
                 if (enemies.Length < _maxBacterias)
                 {
-                    Spawn.SpawnBacteria(GetSpawnPosition(enemies), Quaternion.identity, _startBacteriaVertices);
+                    Spawn.SpawnBacteria(GetSpawnPosition(enemies));
                 }
                 _spawnTimer = GetSpawnTime();
             }

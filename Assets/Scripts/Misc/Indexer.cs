@@ -22,6 +22,7 @@ public static class Indexer
         indexers = new Dictionary<IndexType, CalculateIndex>();
         indexers.Add(IndexType.After, After);
         indexers.Add(IndexType.Before, Before);
+        indexers.Add(IndexType.Across, Across);
         indexers.Add(IndexType.BeforeAcross, BeforeAcross);
         indexers.Add(IndexType.AfterAcross, AfterAcross);
     }
