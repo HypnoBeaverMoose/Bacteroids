@@ -3,22 +3,27 @@ using System.Collections;
 
 public class Energy : MonoBehaviour 
 {
-
-    [SerializeField]
-    private float _amount;
     [SerializeField]
     private ParticleSystem _explosion;
     [SerializeField]
     private SpriteRenderer _renderer;
     [SerializeField]
-    private float _spawnBacteriaTimeout;
-    [SerializeField]
     private float _radiusChange;
+    [SerializeField]
+    private float _consumableDistance;
+    [SerializeField]
+    private int _explosionParticles;
 
-    public float RadiusChange { get { return _radiusChange; } set { _radiusChange = value; } }
+    public float RadiusChange { get { return _radiusChange; }
+        set
+        {
+            transform.localScale *= Mathf.Sqrt(value / _radiusChange);
+            _radiusChange = value;
+        }
+    }
 
     private GameController _controller;
-    public float Amount { get { return _radiusChange * 1000; } }
+    public float Score { get { return _radiusChange * 1000; } }
     public Color Color { get { return _renderer.color; } set { _renderer.color = value; } }
 
 	private void Start () 
@@ -27,23 +32,22 @@ public class Energy : MonoBehaviour
         _controller = FindObjectOfType<GameController>();
     }
 
-    private void Explode(int particleAmount)
+    private void Kill()
     {
         var exp = Instantiate(_explosion);
         exp.startColor = Color;
         exp.transform.position = transform.position;
-        exp.Emit(particleAmount);
+        exp.Emit(_explosionParticles);
         Destroy(exp.gameObject, 5);
         Destroy(gameObject);
     }
 
     private void OnTriggerStay2D(Collider2D collider)
     {
-        if (collider.CompareTag("Player") && Vector2.Distance(collider.transform.position, transform.position) < 0.5f)
+        if (collider.CompareTag("Player") && Vector2.Distance(collider.transform.position, transform.position) < _consumableDistance)
         {
             collider.GetComponent<Player>().Consume(this);
-            _controller.Score += Amount;
-            Explode(10);
+            Kill();
         }
     }
 
@@ -51,7 +55,7 @@ public class Energy : MonoBehaviour
     {
         if (collision.collider.CompareTag("Enemy"))
         {
-            Explode(10);
+            Kill();
         }
     }
 }

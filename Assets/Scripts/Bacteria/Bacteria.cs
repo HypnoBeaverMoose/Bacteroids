@@ -76,6 +76,12 @@ public class Bacteria : MonoBehaviour
         set { _nodes[index] = value; }
     }
 
+    public Color Color
+    {
+        get { return _drawer.Color; }
+        set { _drawer.Color = value; }
+    }
+
     public Node[] GetNodes()
     {
         return _nodes.ToArray();
@@ -108,9 +114,10 @@ public class Bacteria : MonoBehaviour
 
     private Node _center;
     private BacteriaDrawer _drawer;
+    private BacteriaMutate _mutate;
     private BacteriaAI _ai;
     private List<Node> _nodes = new List<Node>();
-    private List<Collider2D> _hits = new List<Collider2D>();
+    private Collider2D _lastHit = null;
     private bool _initialized = false;
     private float _angle = 0;
     private float _initialOffset = 0;
@@ -119,6 +126,7 @@ public class Bacteria : MonoBehaviour
     {
         _drawer = GetComponent<BacteriaDrawer>();
         _ai = GetComponent<BacteriaAI>();
+        _mutate = GetComponent<BacteriaMutate>();
         _center = GetComponent<Node>();
         _center.Collider.radius = _radius;
         _initialOffset = Random.Range(0, Mathf.PI);
@@ -211,6 +219,7 @@ public class Bacteria : MonoBehaviour
         _initialized = true;
         _drawer.Init(this);
         _ai.Init(this);
+        _mutate.Init(this);
 
         if (GetComponent<Wrappable>() != null)
         {
@@ -248,11 +257,13 @@ public class Bacteria : MonoBehaviour
 
     private void OnBacteriaHit(Collision2D collision, Node node)
     {
-        if (_hits.Contains(collision.collider))
+        if (_lastHit != null && _lastHit == collision.collider)
         {
             return;
         }
-        _hits.Add(collision.collider);
+        _lastHit = collision.collider;
+
+
         if (collision.collider.CompareTag("Projectile"))
         {
             Hit(collision.gameObject.GetComponent<Projectile>(), collision.contacts[0].point, collision.relativeVelocity, node);
@@ -269,12 +280,23 @@ public class Bacteria : MonoBehaviour
 
     public void Hit(Projectile projectile, Vector2 hit, Vector2 velocity, Node node)
     {
+        node.Health -= projectile.GetDamage(Color);
+
+        if (node.Health > 0)
+        {
+            return;
+        }
+
+        GameController.Instance.Spawn.SpawnEnergy(
+                                hit + velocity.normalized,
+                                (Random.insideUnitCircle * 2 + velocity.normalized).normalized,
+                                Radius > MinRadius ? projectile.RadiusChange : MinRadius, Color
+                                );
+
+
         if (Radius > MinRadius)
         {
-            Radius += projectile.RadiusChange;
-            var energy = GameController.Instance.Spawn.SpawnEnergy(hit + velocity.normalized, (Random.insideUnitCircle * 2 + velocity.normalized).normalized);
-            energy.RadiusChange = -projectile.RadiusChange;
-
+            Radius -= projectile.RadiusChange;
             if (Vertices > MinVertexCount)
             {
                 KillNode(_nodes.IndexOf(node));
@@ -282,9 +304,6 @@ public class Bacteria : MonoBehaviour
         }
         else
         {
-            var energy = GameController.Instance.Spawn.SpawnEnergy(hit + velocity.normalized, (Random.insideUnitCircle + velocity.normalized).normalized);
-            energy.transform.localScale *= 1.3f;
-            energy.RadiusChange = MinRadius;
             _ai.Clear();
             _drawer.Clear();
             Destroy(gameObject);
@@ -293,7 +312,6 @@ public class Bacteria : MonoBehaviour
 
     public void KillNode(int index)
     {
-        Debug.Log(index);
         if (index >= 0)
         {
             var node = _nodes[index];

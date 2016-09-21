@@ -26,6 +26,7 @@ public class SplitController : MonoBehaviour
         {
             Node node = bacteria[i];
             node.Disconnect();
+            node.ClearEvents();
             node.TargetBody = null;
             node.transform.parent = null;
             for (int j = 0; j < bacteria.Vertices; j++)
@@ -47,14 +48,14 @@ public class SplitController : MonoBehaviour
         }
         rightNodes.RemoveAll(n => leftNodes.Contains(n));
 
-        SpawnBacteriaFromNodes(leftNodes, bacteria.Radius * 0.5f);
-        SpawnBacteriaFromNodes(rightNodes, bacteria.Radius * 0.5f);
+        SpawnBacteriaFromNodes(leftNodes, bacteria.Radius * 0.5f).GetComponent<BacteriaMutate>().Mutate();
+        SpawnBacteriaFromNodes(rightNodes, bacteria.Radius * 0.5f).GetComponent<BacteriaMutate>().Mutate();
 
         Destroy(bacteria.gameObject);
 
     }
 
-    public void SpawnBacteriaFromNodes(List<Node> nodes, float radius)
+    public Bacteria SpawnBacteriaFromNodes(List<Node> nodes, float radius)
     {
         Vector2 com = Vector2.zero;
         foreach (var node in nodes)
@@ -62,10 +63,11 @@ public class SplitController : MonoBehaviour
             com += node.Body.position;
         }
 
-        var left = ((GameObject)Instantiate(_bacteriaPrefab, com / nodes.Count, Quaternion.identity)).GetComponent<Bacteria>();
-        left.SetNodes(nodes);
-        left.Radius = radius;
+        var bacteria = ((GameObject)Instantiate(_bacteriaPrefab, com / nodes.Count, Quaternion.identity)).GetComponent<Bacteria>();
+        bacteria.SetNodes(nodes);
+        bacteria.Radius = radius;
 
+        return bacteria;
     }
 
     public Bacteria SpawnBacteria(Vector3 position)
@@ -74,10 +76,12 @@ public class SplitController : MonoBehaviour
         return newbac.GetComponent<Bacteria>();
     }
 
-    public Energy SpawnEnergy(Vector3 position, Vector3 initialDirection)
+    public Energy SpawnEnergy(Vector3 position, Vector3 initialDirection, float radius, Color color)
     {
         var obj = Instantiate(_energyPrefab, position, Quaternion.identity) as GameObject;
         var energy = obj.GetComponent<Energy>();
+        energy.RadiusChange = radius;
+        energy.Color = color;
         energy.GetComponent<Rigidbody2D>().AddForce(initialDirection * _energyInitialForce);
         return energy;
     }

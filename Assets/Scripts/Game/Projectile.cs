@@ -11,6 +11,10 @@ public class Projectile : MonoBehaviour
     private SpriteRenderer _sprite;
     [SerializeField]
     private float _radiusChange;
+    [SerializeField]
+    private float _damage;
+    [SerializeField]
+    private float _colorPenalty;
 
     public float RadiusChange { get { return _radiusChange; } }
 
@@ -20,7 +24,6 @@ public class Projectile : MonoBehaviour
 	void Start () 
     {
         GetComponent<Rigidbody2D>().AddForce(transform.up * _speed);
-        
 	}
 	
 	// Update is called once per frame
@@ -38,6 +41,11 @@ public class Projectile : MonoBehaviour
         {
             StartCoroutine(DestroyCoroutine());
         }
+    }
+
+    public float GetDamage(Color toColor)
+    {
+        return (Color == toColor || toColor == Color.white) ? _damage : _damage * _colorPenalty;
     }
     
     private IEnumerator DestroyCoroutine()
@@ -59,10 +67,7 @@ public class Projectile : MonoBehaviour
 
     void OnCollisionEnter2D(Collision2D collision)
     {
-//        if (collision.rigidbody != null)
-//        {
-//            collision.rigidbody.AddForce( -collision.contacts[0].normal , ForceMode2D.Impulse);
-//        }
         Kill();
+        GetComponent<Collider2D>().enabled = false;
     }
 }

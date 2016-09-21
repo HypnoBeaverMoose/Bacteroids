@@ -154,7 +154,9 @@ public class Player : MonoBehaviour
 
     public void Consume(Energy energy)
     {
-        Energy += energy.Amount;
+        GameController.Instance.Score += energy.Score;
+        Energy += energy.Score;
+        Color = energy.Color;
     }
 
     private IEnumerator Invincibility()

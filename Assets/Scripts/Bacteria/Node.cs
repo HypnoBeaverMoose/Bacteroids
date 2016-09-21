@@ -35,8 +35,17 @@ public class Node : MonoBehaviour
     public Rigidbody2D Body { get { return _rigidbody; } }
     public CircleCollider2D Collider { get { return _collider; } }
 
+    public float Health = 1.0f;
+
     private void Start()
     {
+    }
+
+    public void ClearEvents()
+    {
+        OnCollisionEnter = null;
+        OnTriggerEnter = null;
+        OnTriggerExit = null;
     }
 
     public void Disconnect()
