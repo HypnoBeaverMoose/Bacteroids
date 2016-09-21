@@ -38,7 +38,7 @@ public class ScreenWrapper : MonoBehaviour
 
         for (int i = 0; i < wrappables.Count; i++)
         {
-            float radius = wrappables[i].Size;
+            float radius = 0;
             Vector3 position = wrappables[i].Position;
             if (_limits.yMin - position.y > (radius + Offset))
             {
