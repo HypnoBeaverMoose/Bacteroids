@@ -22,13 +22,13 @@ public class SplitController : MonoBehaviour
 
     public void Split(Bacteria bacteria, int startIndex, int endIndex)
     {
-        for(int i = 0; i < bacteria.Vertices; i++)
+        bacteria.Clear();
+        for (int i = 0; i < bacteria.Vertices; i++)
         {
             Node node = bacteria[i];
             node.Disconnect();
-            node.ClearEvents();
             node.TargetBody = null;
-            node.transform.parent = null;
+            node.transform.SetParent(null, true);
             for (int j = 0; j < bacteria.Vertices; j++)
             {
                 if (i != j)
@@ -61,6 +61,7 @@ public class SplitController : MonoBehaviour
         foreach (var node in nodes)
         {
             com += node.Body.position;
+            node.gameObject.SetActive(false);
         }
 
         var bacteria = ((GameObject)Instantiate(_bacteriaPrefab, com / nodes.Count, Quaternion.identity)).GetComponent<Bacteria>();

@@ -47,6 +47,14 @@ public class BacteriaMutate : MonoBehaviour
 
     }
 
+    public void Clear()
+    {
+        if (IsMutating)
+        {
+            CancelInvoke("Mutate");
+        }
+    }
+
     public void Init(Bacteria bacteria)
     {
         _bacteria = bacteria;
@@ -80,7 +88,15 @@ public class BacteriaMutate : MonoBehaviour
         }
         else if (collision.gameObject.CompareTag("Enemy"))
         {
-            color = collision.gameObject.GetComponentInParent<Bacteria>().Color;
+            var bacteria = collision.gameObject.GetComponentInParent<Bacteria>();
+            if (bacteria != null)
+            {
+                color = bacteria.Color;
+            }
+            else
+            {
+                return;
+            }
         }
         else if (collision.gameObject.CompareTag("Energy"))
         {

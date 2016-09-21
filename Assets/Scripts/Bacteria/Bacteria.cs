@@ -157,11 +157,12 @@ public class Bacteria : MonoBehaviour
         {
             float randomOffset = Random.Range(-_angle, _angle) * randomOffsetSize;
             float angleOffset = _initialOffset - i * _angle + randomOffset;
-
+            _nodes[i].gameObject.SetActive(true);
             _nodes[i].transform.SetParent(transform, true);
             _nodes[i].TargetBody = _center.Body;
             _nodes[i].TargetPosition = new Vector3(Mathf.Cos(angleOffset), Mathf.Sin(angleOffset), 0) * _radius * Random.Range(_lowerRandomBound, _upperRandomBound);
             _nodes[i].Collider.radius = _radius * Random.Range(_lowerRandomBound, _upperRandomBound);
+            _nodes[i].ClearEvents();
             _nodes[i].OnCollisionEnter += OnBacteriaHit;
         }
     }
@@ -317,8 +318,9 @@ public class Bacteria : MonoBehaviour
             var node = _nodes[index];
             Vector2 vel = node.Body.velocity;
             node.Disconnect();
+            node.ClearEvents();
             node.TargetBody = null;
-            node.OnCollisionEnter -= OnBacteriaHit;
+            node.transform.SetParent(null, true);           
             _nodes.RemoveAt(index);
             Destroy(node.gameObject);
             Vertices = _nodes.Count;
@@ -330,14 +332,19 @@ public class Bacteria : MonoBehaviour
     {
         Radius += Energy.RadiusChange;
     }
-
-    private void OnDestroy()
+    public void Clear()
     {
         _drawer.Clear();
         _ai.Clear();
+        _mutate.Clear();
         foreach (var node in _nodes)
         {
-            node.OnCollisionEnter -= OnBacteriaHit;
+            node.ClearEvents();
         }
+    }
+
+    private void OnDestroy()
+    {
+        Clear();
     }
 }

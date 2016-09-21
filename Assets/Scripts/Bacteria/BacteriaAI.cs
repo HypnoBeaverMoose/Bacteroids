@@ -29,9 +29,10 @@ public class BacteriaAI : MonoBehaviour
     void Start()
     {
         _direction = Random.insideUnitCircle.normalized;
+        StartCoroutine(Blob());
         InvokeRepeating("Move", _moveTimeot * Random.Range(0.2f, 1.5f), _moveTimeot);
         InvokeRepeating("Grow", _growTimeout * Random.Range(0.2f, 1.5f), _growTimeout);
-        StartCoroutine(Blob());
+
     }
 
     public void Init(Bacteria bacteria)
@@ -77,11 +78,19 @@ public class BacteriaAI : MonoBehaviour
 
     private void Move()
     {
-        _bacteria[Random.Range(0, _bacteria.Vertices)].Body.AddForce(_direction * _moveForce, ForceMode2D.Impulse);
+        if (_bacteria != null)
+        {
+            _bacteria[Random.Range(0, _bacteria.Vertices)].Body.AddForce(_direction * _moveForce, ForceMode2D.Impulse);
+        }
     }
 
     private void Grow()
     {
+        if (_bacteria == null)
+        {
+            return;
+        }
+
         if (_bacteria.Radius > Bacteria.MaxRadius)
         {
             GameController.Instance.Spawn.Split(_bacteria, 0, Indexer.GetIndex(Indexer.IndexType.Across, 0, _bacteria.Vertices));
