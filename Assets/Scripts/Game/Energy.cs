@@ -23,7 +23,7 @@ public class Energy : MonoBehaviour
     }
 
     private GameController _controller;
-    public float Score { get { return _radiusChange * 1000; } }
+    public int Score { get { return (int)(_radiusChange * 1000); } }
     public Color Color { get { return _renderer.color; } set { _renderer.color = value; } }
 
 	private void Start () 

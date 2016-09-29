@@ -59,6 +59,8 @@ public class Player : MonoBehaviour
     [SerializeField]
     private float _torqueMultiplier;
     [SerializeField]
+    private ParticleSystem _explosion;
+    [SerializeField]
     private ParticleSystem _engineParticles;
     [SerializeField]
     private GameObject _projectilePrefab;
@@ -173,5 +175,16 @@ public class Player : MonoBehaviour
         }
         _playerSprite.color = new Color(Color.r, Color.g, Color.b, 1.0f);
         _invincible = false;
+    }
+
+    private void OnDestroy()
+    {
+        var exp = Instantiate(_explosion);
+        exp.startColor = Color;
+        exp.transform.position = transform.position;
+        exp.Emit(100);
+        Destroy(exp.gameObject, 5);
+        OnPlayerKilled = null;
+        OnColorChanged = null;
     }
 }

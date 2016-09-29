@@ -25,7 +25,7 @@ public class GameController : MonoBehaviour
     private static GameController _instance = null;
 
     public int Lives { get; private set; }
-    public float Score { get; set; }
+    public int Score { get; set; }
 
     [SerializeField]
     private Color[] _colors;
@@ -39,8 +39,6 @@ public class GameController : MonoBehaviour
     private HighScoreScreen _scoreScreen;
     [SerializeField]
     private  StartScreen _startScreen;
-    [SerializeField]
-    private GameObject _bacteriaPrefab;
     [SerializeField]
     private GameObject _playerPrefab;
     [SerializeField]
@@ -85,29 +83,18 @@ public class GameController : MonoBehaviour
         _startScreen.gameObject.SetActive(true);
         _startScreen.OnStartGame += StartGame;
         _endScreen.OnEndGame += EndGame;
-        _scoreScreen.OnSkipScores += SkipScores;
         _stopSpawn = true;
-
-
-        Lives = _startLives;
-        HighScores.Load();
-    }
-
-    void SkipScores()
-    {
-        _scoreScreen.gameObject.SetActive(false);
-        _startScreen.gameObject.SetActive(true);
     }
 
     void EndGame()
-    {
+    {        
         _endScreen.gameObject.SetActive(false);
-        _scoreScreen.gameObject.SetActive(true);
-        CancelInvoke("CheckBacteria");
+        _startScreen.gameObject.SetActive(true);
     }
 
     private void StartGame()
     {
+        Lives = _startLives;
         _player = Instantiate<GameObject>(_playerPrefab).GetComponent<Player>();
         _player.OnColorChanged+= OnColorChanged;
         _player.OnPlayerKilled += PlayerKilled;
@@ -135,21 +122,27 @@ public class GameController : MonoBehaviour
             item.color = new Color(newColor.r, newColor.g, newColor.b, item.color.a);
         }
     }
-
+    private void ShowEndScreen()
+    {
+        _endScreen.gameObject.SetActive(true);
+    }
     private void PlayerKilled()
     {
-        _player.OnPlayerKilled += PlayerKilled;
         Destroy(_player.gameObject);
-        if (Lives == 0)
+        if (--Lives <= 0)
         {
-            _stopSpawn = true;       
-            _endScreen.gameObject.SetActive(true);
+            _stopSpawn = true;
+            if (Score > PlayerPrefs.GetInt("Best"))
+            {
+                PlayerPrefs.SetInt("Best", Score);
+            }
+            Invoke("ShowEndScreen", 2);
+            CancelInvoke("CheckBacteria");
         }
         else
         {
             _player = Instantiate<GameObject>(_playerPrefab).GetComponent<Player>();
             _player.OnPlayerKilled += PlayerKilled;
-            Lives--;
         }
     }
 

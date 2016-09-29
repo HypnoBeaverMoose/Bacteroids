@@ -11,52 +11,37 @@ public class EndScreen : MonoBehaviour {
     [SerializeField]
     private Text _titleText;
     [SerializeField]
-    private Text _nextText;
+    private Text _scoreText;
     [SerializeField]
-    private InputField _nameInput;
+    private Text _bestScoreText;
 
     private Vector3 _titleInitPos;
     private Vector3 _nextInitPos;
 
-	// Use this for initialization
-	void Start ()
+    // Use this for initialization
+    void Start()
     {
         _titleInitPos = _titleText.rectTransform.position;
-        _nextInitPos = _nextText.rectTransform.position;
-	}
-
+        _nextInitPos = _scoreText.rectTransform.position;
+    }
     void OnEnable()
     {
-        _nameInput.text = "___";
-    }
-	
-
-	// Update is called once per frame
-	void Update () 
-    {
-        _titleText.rectTransform.position = _titleInitPos + Mathf.Sin(Time.time) * Vector3.up * 0.2f;
-        _nextText.rectTransform.position = _nextInitPos + Mathf.Sin(Time.time * 2) * Vector3.up * 0.1f;
-
-        string name = _nameInput.text;
-        name = name.PadRight(3, '_');
-        for (int i = 0; i < name.Length; i++)
+        _scoreText.text = GameController.Instance.Score.ToString();
+        _bestScoreText.text = PlayerPrefs.GetInt("Best").ToString();
+        _bestScoreText.color = Color.white;
+        if (_bestScoreText.text == _scoreText.text)
         {
-            if (name[i] == '_')
-            {
-                _nameInput.caretPosition = Mathf.Min(_nameInput.caretPosition, i);
-            }
+            _bestScoreText.color = Color.red;
         }
-        name = name.Substring(0, 3);
-        name = name.ToUpper();
-        _nameInput.text = name;
+    }
+    // Update is called once per frame
+    void Update () 
+    {
+        //_titleText.rectTransform.position = _titleInitPos + Mathf.Sin(Time.time) * Vector3.up * 0.2f;
+        //_scoreText.rectTransform.position = _nextInitPos + Mathf.Sin(Time.time * 2) * Vector3.up * 0.1f;
 
         if (Input.GetKeyDown(KeyCode.Space))
         {
-            if(_nameInput.text != "___")
-            {
-                HighScores.Add(_nameInput.text, (int)FindObjectOfType<GameController>().Score);
-                HighScores.Save();
-            }
             if (OnEndGame != null)
             {
                 OnEndGame();

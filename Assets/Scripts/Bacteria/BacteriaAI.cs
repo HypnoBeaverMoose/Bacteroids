@@ -4,7 +4,6 @@ using System.Collections.Generic;
 
 public class BacteriaAI : MonoBehaviour
 {
-
     [SerializeField]
     private float _blobIntensity;
 
