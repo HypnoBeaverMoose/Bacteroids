@@ -46,11 +46,11 @@ public class GameController : MonoBehaviour
     [SerializeField]
     private AnimationCurve _spawnCurve;
     [SerializeField]
-    private float _scorePerKill;
+    private float _spawnInterval;
     [SerializeField]
-    private int _startBacteriaVertices;
+    private int _minBacteria;
     [SerializeField]
-    private int _maxBacterias;
+    private int _maxBacteria;
     [SerializeField]
     private int _startLives;
 
@@ -58,8 +58,8 @@ public class GameController : MonoBehaviour
     private float _spawnTimer = 0;
     private bool _stopSpawn = false;
     private ISpawnStrategy _strategy;
-    private SplitController _spawn;
-    public SplitController Spawn { get { return _spawn; } }
+    private SpawnController _spawn;
+    public SpawnController Spawn { get { return _spawn; } }
 
 	void Awake () 
     {
@@ -71,7 +71,7 @@ public class GameController : MonoBehaviour
         {
             _instance = this;
         }       
-        _spawn = gameObject.GetComponent<SplitController>();
+        _spawn = gameObject.GetComponent<SpawnController>();
 
         if (_spawnType == SpawnStrategy.SpawnAvoid)
         {
@@ -86,8 +86,8 @@ public class GameController : MonoBehaviour
         _startScreen.OnStartGame += StartGame;
         _endScreen.OnEndGame += EndGame;
         _scoreScreen.OnSkipScores += SkipScores;
-        _spawn.OnBacteriaKilled += EnemyKilled;
         _stopSpawn = true;
+
 
         Lives = _startLives;
         HighScores.Load();
@@ -103,6 +103,7 @@ public class GameController : MonoBehaviour
     {
         _endScreen.gameObject.SetActive(false);
         _scoreScreen.gameObject.SetActive(true);
+        CancelInvoke("CheckBacteria");
     }
 
     private void StartGame()
@@ -120,8 +121,10 @@ public class GameController : MonoBehaviour
         var enemies = FindObjectsOfType<Bacteria>();
         foreach (var enemy in enemies)
         {
-            Destroy(enemy);
+            Destroy(enemy.gameObject);
         }
+        InvokeRepeating("CheckBacteria", 1.0f, 1.0f);
+
         Score = 0;
     }
 
@@ -150,11 +153,6 @@ public class GameController : MonoBehaviour
         }
     }
 
-    private void EnemyKilled()
-    {
-        Score += _scorePerKill;
-    }
-
     private Vector2 GetSpawnPosition(Bacteria[] enemies)
     {        
         return _strategy.GetSpawnPosition(enemies);
@@ -162,7 +160,7 @@ public class GameController : MonoBehaviour
 
     private float GetSpawnTime()
     {
-        return 10.0f;// _spawnCurve.Evaluate(Time.time);
+        return _spawnInterval;
     }
 
     public Color GetRandomColor()
@@ -170,7 +168,16 @@ public class GameController : MonoBehaviour
         return _colors[Random.Range(0, _colors.Length)];
     }
 
-	void Update () 
+    private void CheckBacteria()
+    {
+        var enemies = FindObjectsOfType<Bacteria>();
+        if (enemies.Length <= _minBacteria)
+        {
+            Spawn.SpawnBacteria(GetSpawnPosition(enemies));
+        }
+    }
+
+    void Update()
     {
         if (!_stopSpawn)
         {
@@ -178,13 +185,12 @@ public class GameController : MonoBehaviour
             if (_spawnTimer <= 0 )
             {
                 var enemies = FindObjectsOfType<Bacteria>();
-                if (enemies.Length < _maxBacterias)
+                if (enemies.Length < _maxBacteria)
                 {
                     Spawn.SpawnBacteria(GetSpawnPosition(enemies));
                 }
                 _spawnTimer = GetSpawnTime();
             }
-
         }
     }
 }

@@ -2,7 +2,7 @@
 using System.Collections;
 using System.Collections.Generic;
 
-public class SplitController : MonoBehaviour 
+public class SpawnController : MonoBehaviour 
 {
 
     public event System.Action OnBacteriaKilled;
