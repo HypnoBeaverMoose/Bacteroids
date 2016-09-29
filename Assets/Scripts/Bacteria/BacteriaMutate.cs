@@ -4,6 +4,8 @@ using System.Collections;
 public class BacteriaMutate : MonoBehaviour
 {
     [SerializeField]
+    private ParticleSystem _mutateParticles;
+    [SerializeField]
     private bool _enableMutation;
     [SerializeField]
     private float _mutationTimeout;
@@ -43,9 +45,24 @@ public class BacteriaMutate : MonoBehaviour
             _mutationColor = GameController.Instance.GetRandomColor();
             return;
         }
+        for (int i = 0; i < _bacteria.Vertices; i++)
+        {
+            _bacteria[i].Body.position = _bacteria.transform.position;
+        }
         _bacteria.Color = _mutationColor;
-
+        Emit();
     }
+
+    private void Emit()
+    {
+        var exp = Instantiate(_mutateParticles);
+        exp.startColor = _bacteria.Color;       
+        exp.transform.position = transform.position;
+        exp.Emit(500);
+        exp.transform.SetParent(_bacteria.transform);
+        Destroy(exp.gameObject, 5);
+    }
+
 
     public void Clear()
     {

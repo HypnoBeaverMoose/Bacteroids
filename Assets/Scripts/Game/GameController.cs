@@ -28,6 +28,8 @@ public class GameController : MonoBehaviour
     public int Score { get; set; }
 
     [SerializeField]
+    private ParticleSystem _backgroundParticles;
+    [SerializeField]
     private Color[] _colors;
     [SerializeField]
     private SpawnStrategy _spawnType;
@@ -117,18 +119,22 @@ public class GameController : MonoBehaviour
 
     private void OnColorChanged(Color newColor)
     {
+
         foreach (var item in GetComponentsInChildren<SpriteRenderer>())
         {
             item.color = new Color(newColor.r, newColor.g, newColor.b, item.color.a);
         }
+        _backgroundParticles.startColor = new Color(newColor.r, newColor.g, newColor.b, _backgroundParticles.startColor.a);
     }
+
     private void ShowEndScreen()
     {
         _endScreen.gameObject.SetActive(true);
     }
+
     private void PlayerKilled()
     {
-        Destroy(_player.gameObject);
+        _player.Kill();
         if (--Lives <= 0)
         {
             _stopSpawn = true;

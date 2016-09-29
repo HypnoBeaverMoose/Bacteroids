@@ -48,8 +48,8 @@ public class SpawnController : MonoBehaviour
         }
         rightNodes.RemoveAll(n => leftNodes.Contains(n));
 
-        SpawnBacteriaFromNodes(leftNodes, bacteria.Radius * 0.5f).GetComponent<BacteriaMutate>().Mutate();
-        SpawnBacteriaFromNodes(rightNodes, bacteria.Radius * 0.5f).GetComponent<BacteriaMutate>().Mutate();
+        SpawnBacteriaFromNodes(leftNodes, bacteria.Radius * 0.5f).GetComponent<BacteriaMutate>().TriggerRandomMutation();
+        SpawnBacteriaFromNodes(rightNodes, bacteria.Radius * 0.5f).GetComponent<BacteriaMutate>().TriggerRandomMutation();
 
         Destroy(bacteria.gameObject);
 

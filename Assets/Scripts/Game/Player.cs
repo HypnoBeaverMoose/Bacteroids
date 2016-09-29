@@ -131,7 +131,11 @@ public class Player : MonoBehaviour
 
         if (Force > 0)
         {
-            _engineParticles.Emit(1);
+            _engineParticles.Emit(10);
+        }
+        else
+        {
+            _engineParticles.Stop();
         }
 	}
 
@@ -176,14 +180,18 @@ public class Player : MonoBehaviour
         _playerSprite.color = new Color(Color.r, Color.g, Color.b, 1.0f);
         _invincible = false;
     }
-
-    private void OnDestroy()
+    public void Kill()
     {
         var exp = Instantiate(_explosion);
         exp.startColor = Color;
         exp.transform.position = transform.position;
         exp.Emit(100);
         Destroy(exp.gameObject, 5);
+        Destroy(gameObject);
+
+    }
+    private void OnDestroy()
+    {
         OnPlayerKilled = null;
         OnColorChanged = null;
     }
