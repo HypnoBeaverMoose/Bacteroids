@@ -134,6 +134,7 @@ public class GameController : MonoBehaviour
 
     private void PlayerKilled()
     {
+        GetComponent<CameraShake>().ShakeCamera(0.1f, 0.03f);
         _player.Kill();
         if (--Lives <= 0)
         {
@@ -147,9 +148,15 @@ public class GameController : MonoBehaviour
         }
         else
         {
-            _player = Instantiate<GameObject>(_playerPrefab).GetComponent<Player>();
-            _player.OnPlayerKilled += PlayerKilled;
+            Invoke("SpawnPlayer", 1.0f);
         }
+    }
+
+    private void SpawnPlayer()
+    {
+        _player = Instantiate<GameObject>(_playerPrefab).GetComponent<Player>();
+        _player.OnPlayerKilled += PlayerKilled;
+
     }
 
     private Vector2 GetSpawnPosition(Bacteria[] enemies)

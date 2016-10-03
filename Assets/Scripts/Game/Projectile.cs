@@ -37,6 +37,10 @@ public class Projectile : MonoBehaviour
     public void Kill()
     {        
         ExplosionController.Instance.SpawnExplosion(_explosion, transform.position, Color);
+        var trail = GetComponentInChildren<ParticleSystem>();
+        trail.Stop();
+        trail.transform.SetParent(null);
+        Destroy(trail.gameObject, 5);
         Destroy(gameObject);
     }
 

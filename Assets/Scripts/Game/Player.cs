@@ -1,13 +1,13 @@
-﻿using UnityEngine;
+﻿using System;
+using UnityEngine;
 using System.Collections;
 using UnityEngine.UI;
 
 public class Player : MonoBehaviour
 {
-    public delegate void PlayerKilled();
-    public event PlayerKilled OnPlayerKilled;
-    public delegate void ColorChanged(Color newColor);
-    public event ColorChanged OnColorChanged;
+    public static event Action<Player> OnPlayerSpawned;
+    public event Action OnPlayerKilled;    
+    public event Action<Color> OnColorChanged;
 
     public bool UseEnergy {  get { return _useEnergy; } }
     public bool HasEnergy { get; private set; }
@@ -86,6 +86,8 @@ public class Player : MonoBehaviour
         Energy = _startingEnergy;
         _rigidbody = GetComponent<Rigidbody2D>();
         StartCoroutine(Invincibility());
+        OnPlayerSpawned(this);
+        OnColorChanged(Color);
 	}
 
     private IEnumerator NoEnergyRoutine()
@@ -174,11 +176,7 @@ public class Player : MonoBehaviour
     }
     public void Kill()
     {
-        var exp = Instantiate(_explosion);
-        exp.startColor = Color;
-        exp.transform.position = transform.position;
-        exp.Emit(100);
-        Destroy(exp.gameObject, 5);
+        ExplosionController.Instance.SpawnExplosion(ExplosionController.ExplosionType.Huge,transform.position, Color);
         Destroy(gameObject);
 
     }

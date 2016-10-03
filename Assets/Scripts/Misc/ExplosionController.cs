@@ -4,7 +4,7 @@ using System.Collections.Generic;
 
 public class ExplosionController : MonoBehaviour
 {
-    public enum ExplosionType { Big, Small, Random }
+    public enum ExplosionType { Big, Small, Random, Huge }
     [System.Serializable]
     public class Explosion
     {
