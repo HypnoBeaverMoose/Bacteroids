@@ -4,7 +4,7 @@ using System.Collections;
 public class Projectile : MonoBehaviour
 {
     [SerializeField]
-    private GameObject _explosionPrefab;
+    private ExplosionController.ExplosionType _explosion;
     [SerializeField]
     private float _speed;
     [SerializeField]
@@ -19,7 +19,6 @@ public class Projectile : MonoBehaviour
     public float RadiusChange { get { return _radiusChange; } }
 
     public Color Color { get { return _sprite.color; } set { _sprite.color = value; } }
-    private bool _destructionStarted = false;
 
 	void Start () 
     {
@@ -36,11 +35,9 @@ public class Projectile : MonoBehaviour
 	}
 
     public void Kill()
-    {
-        if (!_destructionStarted)
-        {
-            StartCoroutine(DestroyCoroutine());
-        }
+    {        
+        ExplosionController.Instance.SpawnExplosion(_explosion, transform.position, Color);
+        Destroy(gameObject);
     }
 
     public float GetDamage(Color toColor)
@@ -48,21 +45,9 @@ public class Projectile : MonoBehaviour
         return (Color == toColor || toColor == Color.white) ? _damage : _damage * _colorPenalty;
     }
     
-    private IEnumerator DestroyCoroutine()
+    private void DestroyCoroutine()
     {
-        _destructionStarted = true;
-        GetComponent<SpriteRenderer>().enabled = false;
-        GetComponent<Collider2D>().enabled = false;
-        GetComponent<Rigidbody2D>().velocity = Vector2.zero;
-        GetComponent<Rigidbody2D>().angularVelocity = 0;
-        var explosion = Instantiate(_explosionPrefab);
 
-        explosion.transform.position = transform.position;
-        explosion.GetComponent<ParticleSystem>().startColor = Color;
-        explosion.GetComponent<ParticleSystem>().Emit(30);
-        Destroy(explosion.gameObject, 5);
-        yield return new WaitForSeconds(1.0f);
-        Destroy(gameObject);
     }
 
     void OnCollisionEnter2D(Collision2D collision)

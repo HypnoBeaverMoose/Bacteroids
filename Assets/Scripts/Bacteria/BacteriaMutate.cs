@@ -50,19 +50,8 @@ public class BacteriaMutate : MonoBehaviour
             _bacteria[i].Body.position = _bacteria.transform.position;
         }
         _bacteria.Color = _mutationColor;
-        Emit();
+        ExplosionController.Instance.SpawnExplosion(ExplosionController.ExplosionType.Big, transform.position, _bacteria.Color);
     }
-
-    private void Emit()
-    {
-        var exp = Instantiate(_mutateParticles);
-        exp.startColor = _bacteria.Color;       
-        exp.transform.position = transform.position;
-        exp.Emit(500);
-        exp.transform.SetParent(_bacteria.transform);
-        Destroy(exp.gameObject, 5);
-    }
-
 
     public void Clear()
     {

@@ -3,8 +3,9 @@ using System.Collections;
 
 public class Energy : MonoBehaviour 
 {
+
     [SerializeField]
-    private ParticleSystem _explosion;
+    private ExplosionController.ExplosionType _explosion;
     [SerializeField]
     private SpriteRenderer _renderer;
     [SerializeField]
@@ -34,11 +35,7 @@ public class Energy : MonoBehaviour
 
     private void Kill()
     {
-        var exp = Instantiate(_explosion);
-        exp.startColor = Color;
-        exp.transform.position = transform.position;
-        exp.Emit(_explosionParticles);
-        Destroy(exp.gameObject, 5);
+        ExplosionController.Instance.SpawnExplosion(_explosion, transform.position, Color);
         Destroy(gameObject);
     }
 

@@ -128,16 +128,8 @@ public class Player : MonoBehaviour
                 }
             }
         }
-
-        if (Force > 0)
-        {
-            _engineParticles.Emit(10);
-        }
-        else
-        {
-            _engineParticles.Stop();
-        }
-	}
+        _engineParticles.Emit((int)_rigidbody.velocity.sqrMagnitude);
+    }
 
     void FixedUpdate()
     {
