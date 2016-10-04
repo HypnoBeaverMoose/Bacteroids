@@ -3,7 +3,6 @@ using System.Collections;
 
 public class Energy : MonoBehaviour 
 {
-
     [SerializeField]
     private ExplosionController.ExplosionType _explosion;
     [SerializeField]
@@ -18,7 +17,7 @@ public class Energy : MonoBehaviour
     public float RadiusChange { get { return _radiusChange; }
         set
         {
-            transform.localScale *= Mathf.Sqrt(value / _radiusChange);
+            transform.localScale *= Mathf.Sqrt(Mathf.Sqrt(value / _radiusChange));
             _radiusChange = value;
         }
     }
@@ -31,6 +30,12 @@ public class Energy : MonoBehaviour
     {
         GetComponent<Wrappable>().Size = transform.localScale.x;
         _controller = FindObjectOfType<GameController>();
+        Invoke("SwitchLayer", 1.0f);
+    }
+
+    private void SwitchLayer()
+    {
+        gameObject.layer = LayerMask.NameToLayer("Energy");
     }
 
     private void Kill()

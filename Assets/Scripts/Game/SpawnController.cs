@@ -23,10 +23,14 @@ public class SpawnController : MonoBehaviour
     public void Split(Bacteria bacteria, int startIndex, int endIndex)
     {
         bacteria.Clear();
+        bacteria.Vertices *= 2;
+        startIndex *= 2;
+        endIndex *= 2;
         for (int i = 0; i < bacteria.Vertices; i++)
         {
             Node node = bacteria[i];
             node.Disconnect();
+            node.ClearEvents();
             node.TargetBody = null;
             node.transform.SetParent(null, true);
             for (int j = 0; j < bacteria.Vertices; j++)
@@ -46,16 +50,15 @@ public class SpawnController : MonoBehaviour
             leftNodes.Add(currentNode);
             startIndex = Indexer.GetIndex(Indexer.IndexType.After, startIndex, bacteria.Vertices);
         }
+
         rightNodes.RemoveAll(n => leftNodes.Contains(n));
-
-        SpawnBacteriaFromNodes(leftNodes, bacteria.Radius * 0.5f).GetComponent<BacteriaMutate>().TriggerRandomMutation();
-        SpawnBacteriaFromNodes(rightNodes, bacteria.Radius * 0.5f).GetComponent<BacteriaMutate>().TriggerRandomMutation();
-
+                
+        SpawnBacteriaFromNodes(leftNodes, bacteria.Radius * 0.5f, bacteria.Color).GetComponent<BacteriaMutate>().TriggerMutation(0.5f);
+        SpawnBacteriaFromNodes(rightNodes, bacteria.Radius * 0.5f, bacteria.Color).GetComponent<BacteriaMutate>().TriggerMutation(0.5f);
         Destroy(bacteria.gameObject);
-
     }
 
-    public Bacteria SpawnBacteriaFromNodes(List<Node> nodes, float radius)
+    public Bacteria SpawnBacteriaFromNodes(List<Node> nodes, float radius, Color color)
     {
         Vector2 com = Vector2.zero;
         foreach (var node in nodes)
@@ -66,6 +69,7 @@ public class SpawnController : MonoBehaviour
 
         var bacteria = ((GameObject)Instantiate(_bacteriaPrefab, com / nodes.Count, Quaternion.identity)).GetComponent<Bacteria>();
         bacteria.SetNodes(nodes);
+        bacteria.Color = color;
         bacteria.Radius = radius;
 
         return bacteria;

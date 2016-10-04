@@ -12,8 +12,6 @@ public class BacteriaAI : MonoBehaviour
     [SerializeField]
     private float _growTimeout;
     [SerializeField]
-    private float _growthSpeed;
-    [SerializeField]
     private float _moveTimeot;
     [SerializeField]
     private float _moveForce;
@@ -90,14 +88,13 @@ public class BacteriaAI : MonoBehaviour
             return;
         }
 
-        if (_bacteria.Radius > Bacteria.MaxRadius)
+        if (_bacteria.Radius > _bacteria.Growth.MaxRadius)
         {
             GameController.Instance.Spawn.Split(_bacteria, 0, Indexer.GetIndex(Indexer.IndexType.Across, 0, _bacteria.Vertices));
         }
         else
         {
-            _bacteria.Radius += _growthSpeed;
-            _bacteria.Vertices++;
+            _bacteria.Radius += _bacteria.Growth.GrowthRate * _growTimeout;
         }
     }
 }

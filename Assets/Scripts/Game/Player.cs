@@ -86,8 +86,14 @@ public class Player : MonoBehaviour
         Energy = _startingEnergy;
         _rigidbody = GetComponent<Rigidbody2D>();
         StartCoroutine(Invincibility());
-        OnPlayerSpawned(this);
-        OnColorChanged(Color);
+        if (OnPlayerSpawned != null)
+        {
+            OnPlayerSpawned(this);
+        }
+        if (OnColorChanged != null)
+        {
+            OnColorChanged(Color);
+        }
 	}
 
     private IEnumerator NoEnergyRoutine()

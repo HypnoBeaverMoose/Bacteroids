@@ -236,7 +236,6 @@ public class BacteriaSettings : EditorWindow {
         EditorGUILayout.EndVertical();
 
         serObj.ApplyModifiedProperties();
-        _verticies = Mathf.Max(Bacteria.MinVertexCount, _verticies);
         serObj.Update();
     }
     private void Regenerate()
@@ -271,15 +270,6 @@ public class BacteriaSettings : EditorWindow {
             foreach (var node in _nodes)
             {
                 SetNodeSettings(node);
-                //node.Frequency = _frequency;
-                //node.Damping = _damping;
-                //node.MinDistance = _minDistance;
-                //node.MaxDistance = _maxDistance;
-                //node.MaxDistance = _maxDistance;
-                //node.Body.mass = _mass;
-                //node.Body.drag = _drag;
-                //node.PivotFrequency = _pivotFrequency;
-                //node.PivotDamping = _pivotDamping;
             }
 
             foreach (var bacteria in _bacteria)

@@ -24,10 +24,19 @@ public class BacteriaMutate : MonoBehaviour
     {
 	}
 
-    public void TriggerRandomMutation()
+    public void TriggerMutation()
     {
         _mutationColor = GameController.Instance.GetRandomColor();
         Invoke("Mutate", _mutationTimeout);
+    }
+
+    public void TriggerMutation(float probability)
+    {
+        if (Random.value < probability)
+        {
+            _mutationColor = GameController.Instance.GetRandomColor();
+            Invoke("Mutate", _mutationTimeout);
+        }
     }
 
     public void TriggerMutation(Color color)
@@ -111,11 +120,11 @@ public class BacteriaMutate : MonoBehaviour
 
         if (CanMutate && !IsMutating && (_bacteria.Color == Color.white))
         {
-            if (randomMutation && color == _bacteria.Color)
+            if (randomMutation)
             {
-                TriggerRandomMutation();
+                TriggerMutation();
             }
-            else if(!randomMutation)
+            else if (!randomMutation && color != _bacteria.Color)
             {
                 TriggerMutation(color);
             }

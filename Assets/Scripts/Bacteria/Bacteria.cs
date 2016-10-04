@@ -14,10 +14,6 @@ public class Bacteria : MonoBehaviour
 
     public NodeConnection[] nodeConnections;
 
-
-    public const int MinVertexCount = 7;
-    public const float MaxRadius = 0.35f;
-    public const float MinRadius = 0.075f;
     private const float randomOffsetSize = 0.25f;
 
     public float Health { get { return _health; } set { _health = value; } }
@@ -78,8 +74,18 @@ public class Bacteria : MonoBehaviour
 
     public Color Color
     {
-        get { return _drawer.Color; }
-        set { _drawer.Color = value; }
+        get
+        {
+            return _color;
+        }
+        set
+        {
+            _color = value;
+            if (_initialized)
+            {
+                _drawer.Color = _color;
+            }
+        }
     }
 
     public Node[] GetNodes()
@@ -98,6 +104,10 @@ public class Bacteria : MonoBehaviour
         return _nodes.Contains(node);
     }
 
+    public BacteriaGrowth Growth
+    {
+        get { return _growth; }
+    }
 
     [SerializeField]
     private Node _node;
@@ -111,10 +121,13 @@ public class Bacteria : MonoBehaviour
     private float _lowerRandomBound;
     [SerializeField]
     private float _upperRandomBound;
+    [SerializeField]
+    private Color _color;
 
     private Node _center;
     private BacteriaDrawer _drawer;
     private BacteriaMutate _mutate;
+    private BacteriaGrowth _growth;
     private BacteriaAI _ai;
     private List<Node> _nodes = new List<Node>();
     private Collider2D _lastHit = null;
@@ -127,10 +140,12 @@ public class Bacteria : MonoBehaviour
         _drawer = GetComponent<BacteriaDrawer>();
         _ai = GetComponent<BacteriaAI>();
         _mutate = GetComponent<BacteriaMutate>();
+        _growth = GetComponent<BacteriaGrowth>();
         _center = GetComponent<Node>();
         _center.Collider.radius = _radius;
         _initialOffset = Random.Range(0, Mathf.PI);
         UpdateVerticies();
+        _drawer.Color = _color;
     }
 
     public void Regenerate()
@@ -185,11 +200,6 @@ public class Bacteria : MonoBehaviour
 
     public void UpdateVerticies()
     {
-        if (_vertices < MinVertexCount)
-        {
-            return;
-        }
-
         if (_nodes.Count < _vertices)
         {
             for (int i = _nodes.Count; i < _vertices; i++)
@@ -281,27 +291,34 @@ public class Bacteria : MonoBehaviour
 
     public void Hit(Projectile projectile, Vector2 hit, Vector2 velocity, Node node)
     {
-        node.Health -= projectile.GetDamage(Color);
+        float damage = projectile.GetDamage(Color);
+        node.Health -= damage;
 
         if (node.Health > 0)
         {
             return;
         }
 
-        GameController.Instance.Spawn.SpawnEnergy(
-                                hit + velocity.normalized,
-                                (Random.insideUnitCircle * 2 + velocity.normalized).normalized,
-                                Radius > MinRadius ? projectile.RadiusChange : MinRadius, Color
-                                );
-
-
-        if (Radius > MinRadius)
+        float decrease = damage * _growth.DecreaseRate;
+        node.Health = 1.0f;
+        float radius = Radius > _growth.MinRadius ? decrease : Radius;
+        float energyPieces = Random.Range(1, 4);
+        for (int i = 0; i < energyPieces; i++)
         {
-            Radius -= projectile.RadiusChange;
-            if (Vertices > MinVertexCount)
-            {
-                KillNode(_nodes.IndexOf(node));
-            }
+            GameController.Instance.Spawn.SpawnEnergy(
+                                    hit,
+                                    (Random.insideUnitCircle + velocity.normalized).normalized,
+                                    radius / energyPieces, Color);
+        }
+                
+        if (Radius >= _growth.MinRadius * _growth.SplitWhenHitRatio)
+        {
+            int index = Mathf.Max(_nodes.IndexOf(node), 0);
+            GameController.Instance.Spawn.Split(this, index, Indexer.GetIndex(Indexer.IndexType.Across, index, Vertices));
+        }
+        else  if (Radius > _growth.MinRadius)
+        {
+            Radius -= decrease;
         }
         else
         {
@@ -332,15 +349,13 @@ public class Bacteria : MonoBehaviour
     {
         Radius += Energy.RadiusChange;
     }
+
     public void Clear()
     {
         _drawer.Clear();
         _ai.Clear();
         _mutate.Clear();
-        foreach (var node in _nodes)
-        {
-            node.ClearEvents();
-        }
+
     }
 
     private void OnDestroy()
