@@ -8,39 +8,65 @@ public class Projectile : MonoBehaviour
     [SerializeField]
     private float _speed;
     [SerializeField]
-    private SpriteRenderer _sprite;
+    private float _velocityLimit;
     [SerializeField]
-    private float _radiusChange;
+    private SpriteRenderer _sprite;
     [SerializeField]
     private float _damage;
     [SerializeField]
     private float _colorPenalty;
+    [SerializeField]
+    private int _emitRate;
+    [SerializeField]
+    private ParticleSystem _trail;
 
-    public float RadiusChange { get { return _radiusChange; } }
+    private Rigidbody2D _rigidbody;
+    private Color _color;
+    private Color _tmpColor;
 
-    public Color Color { get { return _sprite.color; } set { _sprite.color = value; } }
+    public float Damage { get { return _damage; } }
+
+    public Color Color { get { return _color; }
+        set
+        {
+            _color = value;
+            _sprite.color = new Color(_color.r, _color.g, _color.b, _sprite.color.a);
+            _tmpColor = _sprite.color;
+        }
+    }
 
 	void Start () 
     {
-        GetComponent<Rigidbody2D>().AddForce(transform.up * _speed);
-	}
+        _color = _sprite.color;
+        _rigidbody = GetComponent<Rigidbody2D>();
+        _rigidbody.AddForce(transform.up * _speed);
+
+    }
 	
 	// Update is called once per frame
 	void FixedUpdate () 
     {
-        if (!_sprite.isVisible)
+        float sqrVelocity = _rigidbody.velocity.sqrMagnitude;
+        if (sqrVelocity > 0.5f && sqrVelocity < _velocityLimit)
         {
-            Kill();
+            Kill(false);
         }
-	}
 
-    public void Kill()
-    {        
-        ExplosionController.Instance.SpawnExplosion(_explosion, transform.position, Color);
-        var trail = GetComponentInChildren<ParticleSystem>();
-        trail.Stop();
-        trail.transform.SetParent(null);
-        Destroy(trail.gameObject, 5);
+        _tmpColor.a = Mathf.Clamp01(1.0f - _velocityLimit / sqrVelocity);        
+        _tmpColor.a *= _tmpColor.a;
+        _sprite.color = _tmpColor;
+        _trail.Emit((int)(_emitRate * _tmpColor.a));
+    }
+
+    public void Kill(bool explode = true)
+    {
+        if (explode)
+        {
+            ExplosionController.Instance.SpawnExplosion(_explosion, transform.position, Color);
+        }
+        _trail.Stop();
+        _trail.transform.SetParent(null);
+        Destroy(_trail.gameObject, 5);
         Destroy(gameObject);
     }
 
@@ -49,11 +75,6 @@ public class Projectile : MonoBehaviour
         return (Color == toColor || toColor == Color.white) ? _damage : _damage * _colorPenalty;
     }
     
-    private void DestroyCoroutine()
-    {
-
-    }
-
     void OnCollisionEnter2D(Collision2D collision)
     {
         Kill();
