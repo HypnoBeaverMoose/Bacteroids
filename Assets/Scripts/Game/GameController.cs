@@ -46,6 +46,8 @@ public class GameController : MonoBehaviour
     [SerializeField]
     private AnimationCurve _spawnCurve;
     [SerializeField]
+    private float _initialSpawn;
+    [SerializeField]
     private float _spawnInterval;
     [SerializeField]
     private int _minBacteria;
@@ -94,6 +96,18 @@ public class GameController : MonoBehaviour
         _startScreen.gameObject.SetActive(true);
     }
 
+    private void SpawnInitial()
+    {
+        var enemies = new List<Bacteria>();
+        for(int i = 0; i < _initialSpawn; i++)
+        {
+            Vector2 pos;
+            if (_strategy.GetSpawnPosition(enemies.ToArray(), _player, out pos))
+            {
+                enemies.Add(Spawn.SpawnBacteria(pos));
+            }
+        }
+    }
     private void StartGame()
     {
         Lives = _startLives;
@@ -112,6 +126,7 @@ public class GameController : MonoBehaviour
         {
             Destroy(enemy.gameObject);
         }
+        SpawnInitial();
         InvokeRepeating("CheckBacteria", 1.0f, 1.0f);
 
         Score = 0;
