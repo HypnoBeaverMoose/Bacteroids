@@ -38,7 +38,7 @@ public class Energy : MonoBehaviour
         gameObject.layer = LayerMask.NameToLayer("Energy");
     }
 
-    private void Kill()
+    public void Kill()
     {
         ExplosionController.Instance.SpawnExplosion(_explosion, transform.position, Color);
         Destroy(gameObject);
@@ -58,6 +58,12 @@ public class Energy : MonoBehaviour
         if (collision.collider.CompareTag("Enemy"))
         {
             Kill();
+        }
+        else if (collision.collider.CompareTag("Player"))
+        {
+            collision.collider.GetComponent<Player>().Consume(this);
+            Kill();
+
         }
     }
 }

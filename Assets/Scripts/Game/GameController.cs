@@ -117,13 +117,13 @@ public class GameController : MonoBehaviour
         var energies = FindObjectsOfType<Energy>();
         foreach (var energy in energies)
         {
-            Destroy(energy.gameObject);
+            energy.Kill();
         }
 
         var enemies = FindObjectsOfType<Bacteria>();
         foreach (var enemy in enemies)
         {
-            Destroy(enemy.gameObject);
+            enemy.Kill();
         }
         SpawnInitial();
         InvokeRepeating("CheckBacteria", 1.0f, 1.0f);

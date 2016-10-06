@@ -350,14 +350,18 @@ public class Bacteria : MonoBehaviour
         Radius += Energy.RadiusChange;
     }
 
+    public void Kill()
+    {
+        ExplosionController.Instance.SpawnExplosion(ExplosionController.ExplosionType.Big, transform.position, Color);
+        Destroy(gameObject);
+    }
+
     public void Clear()
     {
         _drawer.Clear();
         _ai.Clear();
         _mutate.Clear();
-
     }
-
     private void OnDestroy()
     {
         Clear();
