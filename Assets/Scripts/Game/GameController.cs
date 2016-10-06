@@ -111,16 +111,15 @@ public class GameController : MonoBehaviour
     private void StartGame()
     {
         Lives = _startLives;
-        _player = Instantiate<GameObject>(_playerPrefab).GetComponent<Player>();
-        _player.OnColorChanged+= OnColorChanged;
-        _player.OnPlayerKilled += PlayerKilled;
+
         _stopSpawn = false;
-        
+
         var energies = FindObjectsOfType<Energy>();
         foreach (var energy in energies)
         {
             Destroy(energy.gameObject);
         }
+
         var enemies = FindObjectsOfType<Bacteria>();
         foreach (var enemy in enemies)
         {
@@ -128,13 +127,12 @@ public class GameController : MonoBehaviour
         }
         SpawnInitial();
         InvokeRepeating("CheckBacteria", 1.0f, 1.0f);
-
         Score = 0;
+        Invoke("SpawnPlayer", 1.0f);
     }
 
     private void OnColorChanged(Color newColor)
     {
-
         foreach (var item in GetComponentsInChildren<SpriteRenderer>())
         {
             item.color = new Color(newColor.r, newColor.g, newColor.b, item.color.a);
@@ -169,14 +167,18 @@ public class GameController : MonoBehaviour
 
     private void SpawnPlayer()
     {
+        var colliders = Physics2D.OverlapCircleAll(_playerPrefab.transform.position, 1.0f);
+        foreach (var coll in colliders)
+        {
+            if (coll.CompareTag("Enemy") && coll.GetComponentInParent<Bacteria>() != null)
+            {
+                coll.GetComponentInParent<Bacteria>().Kill();
+            }
+        }        
         _player = Instantiate<GameObject>(_playerPrefab).GetComponent<Player>();
+        _player.OnColorChanged += OnColorChanged;
         _player.OnPlayerKilled += PlayerKilled;
-
-    }
-
-    private Vector2 GetSpawnPosition(Bacteria[] enemies)
-    {        
-        return _strategy.GetSpawnPosition(enemies);
+        ExplosionController.Instance.SpawnExplosion(ExplosionController.ExplosionType.Big, _player.transform.position, Color.white);
     }
 
     private float GetSpawnTime()
