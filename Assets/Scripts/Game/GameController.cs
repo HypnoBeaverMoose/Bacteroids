@@ -26,6 +26,7 @@ public class GameController : MonoBehaviour
 
     public int Lives { get; private set; }
     public int Score { get; set; }
+    public Player Player { get { return _player; } }
 
     [SerializeField]
     private ParticleSystem _backgroundParticles;

@@ -9,17 +9,23 @@ public class BacteriaDrawer : MonoBehaviour
         get { return _color; }
         set
         {
-            _color = value;
+            _dimColor = false;
+            _color = value;        
             foreach (var shell in _shells)
             {
-                shell.Color = _color;
+                if (shell != null)
+                {
+                    shell.Color = _color;
+                }
             }
         }
     }
-            
+    private bool _dimColor;
     private Bacteria _bacteria;
     [SerializeField]
     private Color _color = new Color();
+    [SerializeField]
+    private Color _dim = new Color();
     [SerializeField]
     private GameObject _attachablePrefab;
     [SerializeField]
@@ -56,6 +62,30 @@ public class BacteriaDrawer : MonoBehaviour
         foreach (var shell in _shells)
         {
             shell.Init(bacteria.GetNodes());
+        }
+    }
+
+    
+    private void Update()
+    {
+        if( GameController.Instance.Player != null)
+        {
+            if ((GameController.Instance.Player.Color != _color) && !_dimColor)
+            {
+                _dimColor = true;
+                foreach (var shell in _shells)
+                {
+                    shell.Color = _color * _dim;
+                }
+            }
+            else if ((GameController.Instance.Player.Color == _color) && _dimColor)
+            {
+                _dimColor = false;
+                foreach (var shell in _shells)
+                {
+                    shell.Color = _color;
+                }
+            }
         }
     }
 
