@@ -60,24 +60,27 @@ public class BacteriaAI : MonoBehaviour
 
     private void NodeCollision(Collision2D collision, Node node)
     {
-        _direction = Random.insideUnitCircle;
-        Vector2 normal = ((Vector2)collision.transform.position - node.Body.position).normalized;
-        if (Vector2.Dot(_direction, normal) > 0)
+        Vector2 normal = (collision.contacts[0].point - (Vector2)_bacteria.transform.position).normalized;
+        if (collision.collider.CompareTag("Projectile"))
         {
-            _direction *= -1;
+            _direction = new Vector3(-normal.y, normal.x, 0).normalized;
+            _bacteria.GetComponent<Rigidbody2D>().AddForce(_direction * _moveForce * 2, ForceMode2D.Impulse);
+            FindNodeForDirection(_direction).Body.AddForce(_direction * _moveForce * 2, ForceMode2D.Impulse);
         }
 
         if (collision.collider.CompareTag("Energy"))
         {
             node.Body.AddForce(normal * 0.5f, ForceMode2D.Impulse);
         }
+
     }
 
     private void Move()
     {
         if (_bacteria != null)
         {
-            _bacteria[Random.Range(0, _bacteria.Vertices)].Body.AddForce(_direction * _moveForce, ForceMode2D.Impulse);
+            _direction = Random.insideUnitCircle.normalized;
+            FindNodeForDirection(_direction).Body.AddForce(_direction * _moveForce, ForceMode2D.Impulse);
         }
     }
 
@@ -100,4 +103,21 @@ public class BacteriaAI : MonoBehaviour
             _bacteria.Radius += _bacteria.Growth.GrowthRate * _growTimeout;
         }
     }
+
+    private Node FindNodeForDirection(Vector2 direction)
+    {
+        float angle = Vector2.Dot(direction, _bacteria[0].transform.localPosition.normalized);
+        int index = 0;
+        for (int i = 1; i < _bacteria.Vertices; i++)
+        {
+            float newAngle = Vector2.Dot(direction, _bacteria[i].transform.localPosition.normalized);
+            if (newAngle > angle)
+            {
+                angle = newAngle;
+                index = i;
+            }
+        }
+        return _bacteria[index];
+    }
+
 }
