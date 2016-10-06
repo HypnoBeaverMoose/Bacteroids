@@ -69,6 +69,14 @@ public class Player : MonoBehaviour
     private GameObject _projectilePrefab;
     [SerializeField]
     private SpriteRenderer _playerSprite;
+    [SerializeField]
+    private bool _mouseRotaion;
+    [SerializeField]
+    private float _rotationTurbo;
+    [SerializeField]
+    private float _movementTurbo;
+    [SerializeField]
+    private float _maxVelocty;
 
 
     private Rigidbody2D _rigidbody;
@@ -76,6 +84,7 @@ public class Player : MonoBehaviour
     private float _lastBoost = 0;
     private Color _color = Color.white;
     private bool _invincible = false;
+    private bool _turbo = false;
 	void Start () 
     {
         if (GetComponent<Wrappable>() != null)
@@ -113,7 +122,7 @@ public class Player : MonoBehaviour
 	void Update () 
     {
         Energy += _idleEnergyBonus * Time.deltaTime;
-        Force = Mathf.Max(0, Input.GetAxis("Vertical"));
+        Force = Input.GetAxis("Vertical");// Mathf.Max(0, );
         Angle = Input.GetAxis("Horizontal") * Time.fixedDeltaTime; ;
 
         if (_useEnergy && (Energy < _energyThreshold && HasEnergy))
@@ -129,7 +138,7 @@ public class Player : MonoBehaviour
             
         if (!_useEnergy || HasEnergy)
         {
-            if (Input.GetKeyDown(KeyCode.Space))
+            if (Input.GetKeyDown(KeyCode.Space) || Input.GetMouseButtonDown(0))
             {
                 var go = Instantiate(_projectilePrefab, transform.position + transform.up * 0.5f, transform.localRotation) as GameObject;
                 go.GetComponent<Projectile>().Color = Color;
@@ -139,14 +148,22 @@ public class Player : MonoBehaviour
                 }
             }
         }
-        _engineParticles.Emit((int)_rigidbody.velocity.sqrMagnitude);
+        _turbo = Input.GetKey(KeyCode.LeftShift);
+        if (_mouseRotaion)
+        {
+            transform.rotation = Quaternion.LookRotation((Camera.main.ScreenToWorldPoint(Input.mousePosition) - transform.position).normalized, Vector3.forward);
+        }
     }
 
     void FixedUpdate()
-    {
-        _rigidbody.AddForce(transform.up * Force * _forceMultiplier);
-        _rigidbody.rotation += Angle * _torqueMultiplier;
-
+    {    
+        _engineParticles.Emit((int)_rigidbody.velocity.sqrMagnitude);   
+        _rigidbody.AddForce(transform.up * Force * _forceMultiplier * (_turbo ? _movementTurbo : 1));
+        _rigidbody.velocity = Vector2.ClampMagnitude(_rigidbody.velocity, _maxVelocty * (_turbo ? _movementTurbo : 1));
+        if (!_mouseRotaion)
+        {
+            _rigidbody.rotation += Angle * _torqueMultiplier * (_turbo ? _rotationTurbo : 1);
+        }
         if (HasEnergy || !_useEnergy)
         {
             Energy -= Time.fixedDeltaTime * (Mathf.Abs(Force * _moveEnergyCost) + Mathf.Abs(Angle * _rotateEnergyCost));
