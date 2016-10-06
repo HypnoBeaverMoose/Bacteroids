@@ -62,6 +62,7 @@ public class ExplosionController : MonoBehaviour
             var pa = ((GameObject)Instantiate(go, position, Quaternion.identity)).GetComponent<ParticleSystem>();
             pa.startColor = color;
             pa.Emit(1);
+            Destroy(pa.gameObject, KeepTime);
         }
     }
 }
