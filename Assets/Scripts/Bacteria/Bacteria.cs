@@ -311,7 +311,7 @@ public class Bacteria : MonoBehaviour
                                     radius / energyPieces, Color);
         }
                 
-        if (Radius >= _growth.MinRadius * _growth.SplitWhenHitRatio)
+        if (Radius >= _growth.MinRadius * _growth.SplitWhenHitRatio && GameController.Instance.Spawn.CanSplit())
         {
             int index = Mathf.Max(_nodes.IndexOf(node), 0);
             GameController.Instance.Spawn.Split(this, index, Indexer.GetIndex(Indexer.IndexType.Across, index, Vertices));

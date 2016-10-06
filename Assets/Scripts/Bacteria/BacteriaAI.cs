@@ -90,7 +90,10 @@ public class BacteriaAI : MonoBehaviour
 
         if (_bacteria.Radius > _bacteria.Growth.MaxRadius)
         {
-            GameController.Instance.Spawn.Split(_bacteria, 0, Indexer.GetIndex(Indexer.IndexType.Across, 0, _bacteria.Vertices));
+            if (GameController.Instance.Spawn.CanSplit())
+            {
+                GameController.Instance.Spawn.Split(_bacteria, 0, Indexer.GetIndex(Indexer.IndexType.Across, 0, _bacteria.Vertices));
+            }
         }
         else
         {

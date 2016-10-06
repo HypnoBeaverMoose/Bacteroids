@@ -8,6 +8,8 @@ public class SpawnController : MonoBehaviour
     public event System.Action OnBacteriaKilled;
 
     [SerializeField]
+    private float _globalMaxBacteria;
+    [SerializeField]
     private float _energyInitialForce;
     [SerializeField]
     private GameObject _bacteriaPrefab;
@@ -20,8 +22,17 @@ public class SpawnController : MonoBehaviour
     {
  	}
 
+    public bool CanSplit()
+    {
+        return FindObjectsOfType<Bacteria>().Length < _globalMaxBacteria;
+    }
+
     public void Split(Bacteria bacteria, int startIndex, int endIndex)
     {
+        if (FindObjectsOfType<Bacteria>().Length > _globalMaxBacteria)
+        {
+            return;
+        }
         bacteria.Clear();
         bacteria.Vertices *= 2;
         startIndex *= 2;
