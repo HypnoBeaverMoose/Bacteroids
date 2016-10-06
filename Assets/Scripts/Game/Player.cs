@@ -21,12 +21,15 @@ public class Player : MonoBehaviour
         get { return _color; }
         set 
         {
-            _color = value;
-            _playerSprite.color = _color;
-            _engineParticles.startColor = _color;
-            if (OnColorChanged != null)
+            if (_color != value)
             {
-                OnColorChanged(_color);
+                _color = value;
+                _playerSprite.color = _color;
+                _engineParticles.startColor = _color;
+                if (OnColorChanged != null)
+                {
+                    OnColorChanged(_color);
+                }
             }
         }
     }
