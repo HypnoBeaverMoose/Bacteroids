@@ -49,6 +49,7 @@ public class Grid : MonoBehaviour
         gridLine.transform.localScale = new Vector3(_gridLineWitdh, length, 1);
         gridLine.transform.localPosition = position;
         gridLine.transform.localRotation = rotation;
+        gridLine.layer = gameObject.layer;
     }
 
 }
