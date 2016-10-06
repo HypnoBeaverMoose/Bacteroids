@@ -177,9 +177,10 @@ public class GameController : MonoBehaviour
     private void CheckBacteria()
     {
         var enemies = FindObjectsOfType<Bacteria>();
-        if (enemies.Length <= _minBacteria)
+        Vector2 position;
+        if (enemies.Length <= _minBacteria && _strategy.GetSpawnPosition(enemies, _player, out position))
         {
-            Spawn.SpawnBacteria(GetSpawnPosition(enemies));
+            Spawn.SpawnBacteria(position);
         }
     }
 
@@ -190,10 +191,11 @@ public class GameController : MonoBehaviour
             _spawnTimer -= Time.deltaTime;
             if (_spawnTimer <= 0 )
             {
+                Vector2 position;
                 var enemies = FindObjectsOfType<Bacteria>();
-                if (enemies.Length < _maxBacteria)
+                if (enemies.Length < _maxBacteria && _strategy.GetSpawnPosition(enemies, _player, out position))
                 {
-                    Spawn.SpawnBacteria(GetSpawnPosition(enemies));
+                    Spawn.SpawnBacteria(position);
                 }
                 _spawnTimer = GetSpawnTime();
             }

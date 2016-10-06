@@ -2,7 +2,9 @@
 using System.Collections;
 
 public class SpawnStrategyAvoid : ISpawnStrategy
-{ 
+{
+    private const float minBacteriaDistance = 1.5f;
+    private const float minPlayerDistance = 3;
     private Camera _camera;
     private int _iterations;
     public SpawnStrategyAvoid(Camera camera, int iterations)
@@ -11,22 +13,32 @@ public class SpawnStrategyAvoid : ISpawnStrategy
         _iterations = iterations;
     }
 
-    public Vector2 GetSpawnPosition(Bacteria[] enemies)
+    public bool GetSpawnPosition(Bacteria[] enemies, Player player, out Vector2 position)
     {
         int iterations = _iterations;
-        Vector2 pos = Vector2.zero;
+        position = Vector2.zero;
         do
         {
-            pos = new Vector2(Random.Range(-1.0f, 1.0f) * _camera.orthographicSize * _camera.aspect, Random.Range(-1.0f, 1.0f) * _camera.orthographicSize);
-            foreach (var bacteria in enemies)
+            position = new Vector2(Random.Range(-1.0f, 1.0f) * _camera.orthographicSize * _camera.aspect,
+                                                    Random.Range(-1.0f, 1.0f) * _camera.orthographicSize);
+            if (player == null || Vector2.Distance((Vector2)player.transform.position, position) > minPlayerDistance)
             {
-                if (Vector2.Distance((Vector2)bacteria.transform.position, pos) > bacteria.Radius * 4)
+                bool farEnough = true;
+                foreach (var bacteria in enemies)
+                {
+                    if (Vector2.Distance((Vector2)bacteria.transform.position, position) < minBacteriaDistance)
+                    {
+                        farEnough = false;
+                        break;
+                    }
+                }
+                if (farEnough)
                 {
                     break;
                 }
             }
         }
         while (iterations-- > 0);
-        return pos;
+        return iterations > 0;
     }
 }

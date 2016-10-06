@@ -5,5 +5,5 @@ enum SpawnStrategy {SpawnAvoid, SpawnGrid };
 
 public interface ISpawnStrategy 
 {
-    Vector2 GetSpawnPosition(Bacteria[] enemies);
+    bool GetSpawnPosition(Bacteria[] enemies, Player player, out Vector2 position);
 }

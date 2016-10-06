@@ -14,7 +14,7 @@ public class SpawnStrategyGrid : ISpawnStrategy
         _iterations = iterations;
     }
 
-    public Vector2 GetSpawnPosition(Bacteria[] enemies)
+    public bool GetSpawnPosition(Bacteria[] enemies, Player player, out Vector2 position)
     {
         float sizeX = _camera.orthographicSize * _camera.aspect;
         float sizeY = _camera.orthographicSize;
@@ -38,8 +38,8 @@ public class SpawnStrategyGrid : ISpawnStrategy
                 }
             }
         }
-
-        return GetPositionInGrid(minX, minY, _grid[minX, minY], enemies);
+        position = GetPositionInGrid(minX, minY, _grid[minX, minY], enemies);
+        return true;
     }
     private Vector2 GetPositionInGrid(int x, int y, int count, Bacteria[] enemies)
     {        
