@@ -126,6 +126,7 @@ public class GameController : MonoBehaviour
         {
             enemy.Kill();
         }
+        _spawnTimer = GetSpawnTime();
         SpawnInitial();
         InvokeRepeating("CheckBacteria", 1.0f, 1.0f);
         Score = 0;
@@ -187,16 +188,29 @@ public class GameController : MonoBehaviour
         return _spawnInterval;
     }
 
-    public Color GetRandomColor()
+    public Color GetRandomColor(Color color)
     {
-        return _colors[Random.Range(0, _colors.Length)];
+        int index = 0;
+        if (color == Color.white)
+        {
+            return _colors[0];
+        }
+        for (int i = 0; i < _colors.Length; i++)
+        {
+            if (color == _colors[i])
+            {
+                index = i + 1;
+                break;
+            }
+        }
+        return _colors[index % _colors.Length];
     }
 
     private void CheckBacteria()
     {
         var enemies = FindObjectsOfType<Bacteria>();
         Vector2 position;
-        if (enemies.Length <= _minBacteria && _strategy.GetSpawnPosition(enemies, _player, out position))
+        if (enemies.Length < _minBacteria && _strategy.GetSpawnPosition(enemies, _player, out position))
         {
             Spawn.SpawnBacteria(position);
         }

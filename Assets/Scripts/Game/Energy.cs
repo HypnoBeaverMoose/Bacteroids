@@ -11,8 +11,7 @@ public class Energy : MonoBehaviour
     private float _radiusChange;
     [SerializeField]
     private float _consumableDistance;
-    [SerializeField]
-    private int _explosionParticles;
+
 
     public float RadiusChange { get { return _radiusChange; }
         set
@@ -28,9 +27,8 @@ public class Energy : MonoBehaviour
 
 	private void Start () 
     {
-        GetComponent<Wrappable>().Size = transform.localScale.x;
         _controller = FindObjectOfType<GameController>();
-        Invoke("SwitchLayer", 1.0f);
+        Invoke("SwitchLayer", 0.5f);
     }
 
     private void SwitchLayer()

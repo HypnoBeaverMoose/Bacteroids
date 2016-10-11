@@ -70,14 +70,23 @@ public class Player : MonoBehaviour
     [SerializeField]
     private SpriteRenderer _playerSprite;
     [SerializeField]
-    private bool _mouseRotaion;
-    [SerializeField]
     private float _rotationTurbo;
     [SerializeField]
     private float _movementTurbo;
     [SerializeField]
-    private float _maxVelocty;
+    private bool _mouseRotaion;
+    [SerializeField]
+    private float _rotationSpeed;
 
+    [SerializeField]
+    private float _maxDrag;
+    [SerializeField]
+    private float _minDrag;
+    [SerializeField]
+    private float _dragThreshold;
+
+
+    private float turbo { get { return _turbo ? _movementTurbo : 1; } }
 
     private Rigidbody2D _rigidbody;
     private float _energy;
@@ -85,6 +94,7 @@ public class Player : MonoBehaviour
     private Color _color = Color.white;
     private bool _invincible = false;
     private bool _turbo = false;
+    private float _realMaxVelocity;
 	void Start () 
     {
         if (GetComponent<Wrappable>() != null)
@@ -122,7 +132,7 @@ public class Player : MonoBehaviour
 	void Update () 
     {
         Energy += _idleEnergyBonus * Time.deltaTime;
-        Force = Input.GetAxis("Vertical");// Mathf.Max(0, );
+        Force = Input.GetAxis("Vertical");
         Angle = Input.GetAxis("Horizontal") * Time.fixedDeltaTime; ;
 
         if (_useEnergy && (Energy < _energyThreshold && HasEnergy))
@@ -149,21 +159,34 @@ public class Player : MonoBehaviour
             }
         }
         _turbo = Input.GetKey(KeyCode.LeftShift);
-        if (_mouseRotaion)
+
+        if (Input.GetKeyDown(KeyCode.LeftShift))
         {
-            transform.rotation = Quaternion.LookRotation((Camera.main.ScreenToWorldPoint(Input.mousePosition) - transform.position).normalized, Vector3.forward);
+            ExplosionController.Instance.SpawnExplosion(ExplosionController.ExplosionType.Random, _rigidbody.position, Color);
+            Force *= 1.5f;
         }
     }
 
     void FixedUpdate()
-    {    
-        _engineParticles.Emit((int)_rigidbody.velocity.sqrMagnitude);   
-        _rigidbody.AddForce(transform.up * Force * _forceMultiplier * (_turbo ? _movementTurbo : 1));
-        _rigidbody.velocity = Vector2.ClampMagnitude(_rigidbody.velocity, _maxVelocty * (_turbo ? _movementTurbo : 1));
-        if (!_mouseRotaion)
+    {
+        _engineParticles.Emit((int)(_rigidbody.velocity.magnitude * (_turbo ? 2 : 0.8f)));
+
+        _rigidbody.drag = Mathf.Abs(Force) > _dragThreshold ? _maxDrag : _minDrag;
+
+        _rigidbody.AddForce(transform.up * Force * _forceMultiplier * turbo);
+
+        if (_mouseRotaion)
+        {
+            var dir = (new Vector3(CursorControl.Position.x, CursorControl.Position.y, transform.position.z) - transform.position).normalized;
+            float angle = Vector2.Angle(transform.up, dir);
+            var cross = Vector3.Cross(transform.up.normalized, dir.normalized);
+            _rigidbody.rotation += Mathf.Sign(cross.z) * Vector2.Angle(transform.up, dir) * _rotationSpeed * turbo;
+        }
+        else
         {
             _rigidbody.rotation += Angle * _torqueMultiplier * (_turbo ? _rotationTurbo : 1);
         }
+
         if (HasEnergy || !_useEnergy)
         {
             Energy -= Time.fixedDeltaTime * (Mathf.Abs(Force * _moveEnergyCost) + Mathf.Abs(Angle * _rotateEnergyCost));

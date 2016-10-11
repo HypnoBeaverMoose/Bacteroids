@@ -63,9 +63,9 @@ public class SpawnController : MonoBehaviour
         }
 
         rightNodes.RemoveAll(n => leftNodes.Contains(n));
-                
-        SpawnBacteriaFromNodes(leftNodes, bacteria.Radius * 0.5f, bacteria.Color).GetComponent<BacteriaMutate>().TriggerMutation(0.5f);
-        SpawnBacteriaFromNodes(rightNodes, bacteria.Radius * 0.5f, bacteria.Color).GetComponent<BacteriaMutate>().TriggerMutation(0.5f);
+        var newColor = GameController.Instance.GetRandomColor(bacteria.Color);
+        SpawnBacteriaFromNodes(leftNodes, bacteria.Radius * 0.5f, bacteria.Color).GetComponent<BacteriaMutate>().TriggerMutation(0.5f, newColor);
+        SpawnBacteriaFromNodes(rightNodes, bacteria.Radius * 0.5f, bacteria.Color).GetComponent<BacteriaMutate>().TriggerMutation(0.5f, newColor);
         Destroy(bacteria.gameObject);
     }
 

@@ -29,7 +29,8 @@ public class BacteriaAI : MonoBehaviour
         StartCoroutine(Blob());
         InvokeRepeating("Move", _moveTimeot * Random.Range(0.2f, 1.5f), _moveTimeot);
         InvokeRepeating("Grow", _growTimeout * Random.Range(0.2f, 1.5f), _growTimeout);
-
+        InvokeRepeating("ChangeDirection", 10, 10);
+        
     }
 
     public void Init(Bacteria bacteria)
@@ -46,6 +47,7 @@ public class BacteriaAI : MonoBehaviour
         StopAllCoroutines();
         CancelInvoke("Grow");
         CancelInvoke("Move");
+        CancelInvoke("ChangeDirection");
     }
 
     private IEnumerator Blob()
@@ -74,12 +76,14 @@ public class BacteriaAI : MonoBehaviour
         }
 
     }
-
+    private void ChangeDirection()
+    {
+        _direction = Random.insideUnitCircle.normalized;
+    }
     private void Move()
     {
         if (_bacteria != null)
-        {
-            _direction = Random.insideUnitCircle.normalized;
+        {            
             FindNodeForDirection(_direction).Body.AddForce(_direction * _moveForce, ForceMode2D.Impulse);
         }
     }
