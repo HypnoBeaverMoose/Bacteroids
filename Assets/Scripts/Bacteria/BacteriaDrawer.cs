@@ -25,7 +25,7 @@ public class BacteriaDrawer : MonoBehaviour
     [SerializeField]
     private Color _color = new Color();
     [SerializeField]
-    private Color _dim = new Color();
+    private float _dimAmount;
     [SerializeField]
     private GameObject _attachablePrefab;
     [SerializeField]
@@ -75,7 +75,9 @@ public class BacteriaDrawer : MonoBehaviour
                 _dimColor = true;
                 foreach (var shell in _shells)
                 {
-                    shell.Color = _color * _dim;
+                    float h, s, v;
+                    Color.RGBToHSV(_color, out h, out s, out v);
+                    shell.Color = Color.HSVToRGB(h, s * _dimAmount, v * _dimAmount);
                 }
             }
             else if ((GameController.Instance.Player.Color == _color) && _dimColor)
