@@ -27,7 +27,7 @@ public class StartScreen : MonoBehaviour {
         TitleText.rectTransform.position = titleInitPos + Mathf.Sin(Time.time) * Vector3.up * 0.2f;
         StartText.rectTransform.position = startInitPos + Mathf.Sin(Time.time * 2) * Vector3.up * 0.1f;
      
-        if (Input.GetKeyDown(KeyCode.Space) || Input.GetMouseButtonDown(0))
+        if (Input.GetMouseButtonDown(0))
         {
             if (OnStartGame != null)
             {

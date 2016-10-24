@@ -33,10 +33,6 @@ public class GameController : MonoBehaviour
     [SerializeField]
     private Color[] _colors;
     [SerializeField]
-    private SpawnStrategy _spawnType;
-    [SerializeField]
-    private Camera _camera;
-    [SerializeField]
     private EndScreen _endScreen;
     [SerializeField]
     private HighScoreScreen _scoreScreen;
@@ -45,22 +41,10 @@ public class GameController : MonoBehaviour
     [SerializeField]
     private GameObject _playerPrefab;
     [SerializeField]
-    private AnimationCurve _spawnCurve;
-    [SerializeField]
-    private float _initialSpawn;
-    [SerializeField]
-    private float _spawnInterval;
-    [SerializeField]
-    private int _minBacteria;
-    [SerializeField]
-    private int _maxBacteria;
-    [SerializeField]
     private int _startLives;
 
     private Player _player;
-    private float _spawnTimer = 0;
-    private bool _stopSpawn = false;
-    private ISpawnStrategy _strategy;
+        
     private SpawnController _spawn;
     public SpawnController Spawn { get { return _spawn; } }
 
@@ -76,19 +60,23 @@ public class GameController : MonoBehaviour
         }       
         _spawn = gameObject.GetComponent<SpawnController>();
 
-        if (_spawnType == SpawnStrategy.SpawnAvoid)
+        _startScreen.gameObject.SetActive(true);
+        if (Tutorial.NeedsTutorial)
         {
-            _strategy = new SpawnStrategyAvoid(_camera, 10);
+            _startScreen.OnStartGame += () =>
+            {
+                Invoke("SpawnPlayer", 1.0f);
+                GetComponent<Tutorial>().StartTutorial();
+            };
+            GetComponent<Tutorial>().TutorialComplete += Spawn.StartSpawn;
         }
         else
         {
-            _strategy = new SpawnStrategyGrid(_camera, 5,5, 10);
+            _startScreen.OnStartGame += StartGame;
         }
-
-        _startScreen.gameObject.SetActive(true);
-        _startScreen.OnStartGame += StartGame;
         _endScreen.OnEndGame += EndGame;
-        _stopSpawn = true;
+        Lives = _startLives;
+
     }
 
     void EndGame()
@@ -97,24 +85,9 @@ public class GameController : MonoBehaviour
         _startScreen.gameObject.SetActive(true);
     }
 
-    private void SpawnInitial()
-    {
-        var enemies = new List<Bacteria>();
-        for(int i = 0; i < _initialSpawn; i++)
-        {
-            Vector2 pos;
-            if (_strategy.GetSpawnPosition(enemies.ToArray(), _player, out pos))
-            {
-                enemies.Add(Spawn.SpawnBacteria(pos));
-            }
-        }
-    }
     private void StartGame()
     {
         Lives = _startLives;
-
-        _stopSpawn = false;
-
         var energies = FindObjectsOfType<Energy>();
         foreach (var energy in energies)
         {
@@ -125,12 +98,10 @@ public class GameController : MonoBehaviour
         foreach (var enemy in enemies)
         {
             enemy.Kill();
-        }
-        _spawnTimer = GetSpawnTime();
-        SpawnInitial();
-        InvokeRepeating("CheckBacteria", 1.0f, 1.0f);
-        Score = 0;
+        }       
         Invoke("SpawnPlayer", 1.0f);
+        Score = 0;
+        Spawn.StartSpawn();
     }
 
     private void OnColorChanged(Color newColor)
@@ -149,17 +120,23 @@ public class GameController : MonoBehaviour
 
     private void PlayerKilled()
     {
-        GetComponent<CameraShake>().ShakeCamera(0.1f, 0.03f);
+        Camera.main.GetComponent<CameraShake>().ShakeCamera(0.1f, 0.03f);
         _player.Kill();
+        Tutorial.Instance.ShowHintMessage(Tutorial.HintEvent.PlayerDead);
+        if (Tutorial.IsRunning)
+        {
+            Invoke("SpawnPlayer", 1.0f);
+            return;
+        }
+
         if (--Lives <= 0)
         {
-            _stopSpawn = true;
             if (Score > PlayerPrefs.GetInt("Best"))
             {
                 PlayerPrefs.SetInt("Best", Score);
             }
             Invoke("ShowEndScreen", 2);
-            CancelInvoke("CheckBacteria");
+            Spawn.StopSpawn();
         }
         else
         {
@@ -178,16 +155,11 @@ public class GameController : MonoBehaviour
             }
         }        
         _player = Instantiate<GameObject>(_playerPrefab).GetComponent<Player>();
-        _player.OnColorChanged += OnColorChanged;
-        _player.OnPlayerKilled += PlayerKilled;
+        _player.ColorChanged += OnColorChanged;
+        _player.PlayerKilled += PlayerKilled;
         ExplosionController.Instance.SpawnExplosion(ExplosionController.ExplosionType.Big, _player.transform.position, Color.white);
     }
-
-    private float GetSpawnTime()
-    {
-        return _spawnInterval;
-    }
-
+     
     public Color GetRandomColor(Color color)
     {
         int index = 0;
@@ -204,33 +176,5 @@ public class GameController : MonoBehaviour
             }
         }
         return _colors[index % _colors.Length];
-    }
-
-    private void CheckBacteria()
-    {
-        var enemies = FindObjectsOfType<Bacteria>();
-        Vector2 position;
-        if (enemies.Length < _minBacteria && _strategy.GetSpawnPosition(enemies, _player, out position))
-        {
-            Spawn.SpawnBacteria(position);
-        }
-    }
-
-    void Update()
-    {
-        if (!_stopSpawn)
-        {
-            _spawnTimer -= Time.deltaTime;
-            if (_spawnTimer <= 0 )
-            {
-                Vector2 position;
-                var enemies = FindObjectsOfType<Bacteria>();
-                if (enemies.Length < _maxBacteria && _strategy.GetSpawnPosition(enemies, _player, out position))
-                {
-                    Spawn.SpawnBacteria(position);
-                }
-                _spawnTimer = GetSpawnTime();
-            }
-        }
-    }
+    } 
 }

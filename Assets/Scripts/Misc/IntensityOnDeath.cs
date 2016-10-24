@@ -17,13 +17,13 @@ public class IntensityOnDeath : MonoBehaviour {
     private bool running = false;
     void Start ()
     {
-        Player.OnPlayerSpawned += OnPlayerSpawned;
+        Player.PlayerSpawned += OnPlayerSpawned;
 	}
 
     private void OnPlayerSpawned(Player obj)
     {
-        obj.OnPlayerKilled += OnPlayerKilled;
-        obj.OnColorChanged += OnColorChanged;
+        obj.PlayerKilled += OnPlayerKilled;
+        obj.ColorChanged += OnColorChanged;
         if (!running)
         {
             StartCoroutine(SpikeIntensity(Color.white, _deathDuration, _deathIntentisy));

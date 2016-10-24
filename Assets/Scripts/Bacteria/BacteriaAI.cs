@@ -21,6 +21,7 @@ public class BacteriaAI : MonoBehaviour
     private Bacteria _bacteria;
     private Vector3 _direction;
 
+    public float MoveTimeout { get { return _moveTimeot;  } set { _moveTimeot = value; } }
     public Vector3 Direction { get { return _direction; } set { _direction = value; } }
 
     void Start()
@@ -97,8 +98,9 @@ public class BacteriaAI : MonoBehaviour
 
         if (_bacteria.Radius > _bacteria.Growth.MaxRadius)
         {
-            if (GameController.Instance.Spawn.CanSplit())
+            if (GameController.Instance.Spawn.CanSpawn)
             {
+                Tutorial.Instance.ShowHintMessage(Tutorial.HintEvent.BacteriaSplitAlone, transform.position);
                 GameController.Instance.Spawn.Split(_bacteria, 0, Indexer.GetIndex(Indexer.IndexType.Across, 0, _bacteria.Vertices));
             }
         }

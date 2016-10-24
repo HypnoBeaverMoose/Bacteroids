@@ -70,7 +70,15 @@ public class BacteriaDrawer : MonoBehaviour
     {
         if( GameController.Instance.Player != null)
         {
-            if ((GameController.Instance.Player.Color != _color) && !_dimColor)
+            if((GameController.Instance.Player.Color == Color.white || GameController.Instance.Player.Color == _color) && _dimColor)
+            {
+                _dimColor = false;
+                foreach (var shell in _shells)
+                {
+                    shell.Color = _color;
+                }
+            }
+            else if ((GameController.Instance.Player.Color != Color.white && GameController.Instance.Player.Color != _color) && !_dimColor)
             {
                 _dimColor = true;
                 foreach (var shell in _shells)
@@ -78,14 +86,6 @@ public class BacteriaDrawer : MonoBehaviour
                     float h, s, v;
                     Color.RGBToHSV(_color, out h, out s, out v);
                     shell.Color = Color.HSVToRGB(h, s * _dimAmount, v * _dimAmount);
-                }
-            }
-            else if ((GameController.Instance.Player.Color == _color) && _dimColor)
-            {
-                _dimColor = false;
-                foreach (var shell in _shells)
-                {
-                    shell.Color = _color;
                 }
             }
         }

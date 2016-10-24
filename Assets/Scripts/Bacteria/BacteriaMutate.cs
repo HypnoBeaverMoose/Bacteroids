@@ -13,27 +13,31 @@ public class BacteriaMutate : MonoBehaviour
     private bool _mutateOnInit = false;
 
     public bool IsMutating { get { return IsInvoking("Mutate"); } }
-    public bool CanMutate { get { return _enableMutation; } }
+    public bool CanMutate { get { return _enableMutation; } set { _enableMutation = value; } }
 
     private Bacteria _bacteria;
     private Color _mutationColor;
     private bool _initialized = false;
-
-	// Use this for initialization
-	void Start ()
+    private Tutorial.HintEvent _hint;
+    // Use this for initialization
+    void Start ()
     {
 	}
 
     public void TriggerMutation()
     {
-        _mutationColor = GameController.Instance.GetRandomColor(_bacteria.Color);
-        Invoke("Mutate", _mutationTimeout);
+        if (CanMutate)
+        {
+            _mutationColor = GameController.Instance.GetRandomColor(_bacteria.Color);
+            Invoke("Mutate", _mutationTimeout);
+        }
     }
 
     public void TriggerMutation(float probability, Color color)
     {
-        if (Random.value < probability)
+        if (CanMutate && Random.value < probability)
         {
+            _hint = Tutorial.HintEvent.BacteriaMutatesBySplit;
             _mutationColor = color;
             Invoke("Mutate", _mutationTimeout);
         }
@@ -41,13 +45,20 @@ public class BacteriaMutate : MonoBehaviour
 
     public void TriggerMutation(Color color)
     {
-        _mutationColor = color;
-        Invoke("Mutate", _mutationTimeout);
+        if (CanMutate)
+        {
+            _mutationColor = color;
+            Invoke("Mutate", _mutationTimeout);
+        }
     }
 
 
     public void Mutate()
     {
+        if (!CanMutate)
+        {
+            return;
+        }
         if (!_initialized)
         {
             _mutateOnInit = true;
@@ -58,6 +69,8 @@ public class BacteriaMutate : MonoBehaviour
         {
             _bacteria[i].Body.position = _bacteria.transform.position;
         }
+        Tutorial.Instance.ShowHintMessage(Tutorial.HintEvent.BacteriaMutate, transform.position);
+        Tutorial.Instance.ShowHintMessage(_hint, transform.position);
         _bacteria.Color = _mutationColor;
         ExplosionController.Instance.SpawnExplosion(ExplosionController.ExplosionType.Big, transform.position, _bacteria.Color);
     }
@@ -93,19 +106,23 @@ public class BacteriaMutate : MonoBehaviour
         bool randomMutation = false;
         if (collision.gameObject.CompareTag("Player"))
         {
+            _hint = Tutorial.HintEvent.BacteriaMutatesByTouch;
             color = collision.gameObject.GetComponent<Player>().Color;
             randomMutation = true;
         }
         else if (collision.gameObject.CompareTag("Projectile"))
         {
+            _hint = Tutorial.HintEvent.BacteriaMutateByHit;
             color = collision.gameObject.GetComponent<Projectile>().Color;
             randomMutation = true;
         }
         else if (collision.gameObject.CompareTag("Enemy"))
         {
+            
             var bacteria = collision.gameObject.GetComponentInParent<Bacteria>();
             if (bacteria != null)
             {
+                _hint = Tutorial.HintEvent.BacteriaMutatesByBacteria;
                 color = bacteria.Color;
             }
             else
@@ -115,11 +132,12 @@ public class BacteriaMutate : MonoBehaviour
         }
         else if (collision.gameObject.CompareTag("Energy"))
         {
+            _hint = Tutorial.HintEvent.BacteriaMutateByConsume;
             color = collision.gameObject.GetComponent<Energy>().Color;
         }
 
         if (CanMutate && !IsMutating && (_bacteria.Color == Color.white))
-        {
+        {          
             if (randomMutation)
             {
                 TriggerMutation();
@@ -127,6 +145,17 @@ public class BacteriaMutate : MonoBehaviour
             else if (!randomMutation && color != _bacteria.Color)
             {
                 TriggerMutation(color);
+            }
+        }
+    }
+
+    void OnDestroy()
+    {
+        if (_bacteria != null)
+        {
+            foreach (var node in _bacteria.GetNodes())
+            {
+                node.OnCollisionEnter -= NodeCollision;
             }
         }
     }

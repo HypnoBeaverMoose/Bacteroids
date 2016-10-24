@@ -5,9 +5,9 @@ using UnityEngine.UI;
 
 public class Player : MonoBehaviour
 {
-    public static event Action<Player> OnPlayerSpawned;
-    public event Action OnPlayerKilled;    
-    public event Action<Color> OnColorChanged;
+    public static event Action<Player> PlayerSpawned;
+    public event Action PlayerKilled;
+    public event Action<Color> ColorChanged;
 
     public bool UseEnergy {  get { return _useEnergy; } }
     public bool HasEnergy { get; private set; }
@@ -26,9 +26,9 @@ public class Player : MonoBehaviour
                 _color = value;
                 _playerSprite.color = _color;
                 _engineParticles.startColor = _color;
-                if (OnColorChanged != null)
+                if (ColorChanged != null)
                 {
-                    OnColorChanged(_color);
+                    ColorChanged(_color);
                 }
             }
         }
@@ -108,13 +108,13 @@ public class Player : MonoBehaviour
         Energy = _startingEnergy;
         _rigidbody = GetComponent<Rigidbody2D>();
         StartCoroutine(Invincibility());
-        if (OnPlayerSpawned != null)
+        if (PlayerSpawned != null)
         {
-            OnPlayerSpawned(this);
+            PlayerSpawned(this);
         }
-        if (OnColorChanged != null)
+        if (ColorChanged != null)
         {
-            OnColorChanged(Color);
+            ColorChanged(Color);
         }
 	}
 
@@ -160,7 +160,7 @@ public class Player : MonoBehaviour
         }
         _turbo = Input.GetKey(KeyCode.LeftShift);
 
-        if (Input.GetKeyDown(KeyCode.LeftShift))
+        if (Input.GetKeyDown(KeyCode.LeftShift) && Force > 0)
         {
             ExplosionController.Instance.SpawnExplosion(ExplosionController.ExplosionType.Random, _rigidbody.position, Color);
             Force *= 1.5f;
@@ -172,7 +172,10 @@ public class Player : MonoBehaviour
         _engineParticles.Emit((int)(_rigidbody.velocity.magnitude * (_turbo ? 2 : 0.8f)));
 
         _rigidbody.drag = Mathf.Abs(Force) > _dragThreshold ? _maxDrag : _minDrag;
-
+        if (Force < 0)
+        {
+            Force *= 0.7f;
+        }
         _rigidbody.AddForce(transform.up * Force * _forceMultiplier * turbo);
 
         if (_mouseRotaion)
@@ -195,16 +198,21 @@ public class Player : MonoBehaviour
 
     public void Damage(Bacteria bacteria)
     {
-        if (!_invincible && OnPlayerKilled != null)
+        if (!_invincible && PlayerKilled != null)
         {
-            OnPlayerKilled();
+            PlayerKilled();
         }
     }
 
     public void Consume(Energy energy)
     {
+        Tutorial.Instance.ShowHintMessage(Tutorial.HintEvent.EnergyConsumedByPlayer);
         GameController.Instance.Score += energy.Score;
         Energy += energy.Score;
+        if (Color != energy.Color)
+        {
+            Tutorial.Instance.ShowHintMessage(Tutorial.HintEvent.PlayerChangesColor);
+        }
         Color = energy.Color;
     }
 
@@ -231,7 +239,7 @@ public class Player : MonoBehaviour
     }
     private void OnDestroy()
     {
-        OnPlayerKilled = null;
-        OnColorChanged = null;
+        PlayerKilled = null;
+        ColorChanged = null;
     }
 }

@@ -3,6 +3,7 @@ using UnityEngine;
 
 public class Bacteria : MonoBehaviour
 {
+    public static event System.Action<Bacteria> BacteriaKilled;
     [System.Serializable]
     public sealed class NodeConnection
     {
@@ -230,7 +231,10 @@ public class Bacteria : MonoBehaviour
         _initialized = true;
         _drawer.Init(this);
         _ai.Init(this);
-        _mutate.Init(this);
+        if (_mutate != null)
+        {
+            _mutate.Init(this);
+        }
 
         if (GetComponent<Wrappable>() != null)
         {
@@ -311,10 +315,11 @@ public class Bacteria : MonoBehaviour
                                     radius / energyPieces, Color);
         }
                 
-        if (Radius >= _growth.MinRadius * _growth.SplitWhenHitRatio && GameController.Instance.Spawn.CanSplit())
+        if (Radius >= _growth.MinRadius * _growth.SplitWhenHitRatio && GameController.Instance.Spawn.CanSpawn)
         {
             int index = Mathf.Max(_nodes.IndexOf(node), 0);
             GameController.Instance.Spawn.Split(this, index, Indexer.GetIndex(Indexer.IndexType.Across, index, Vertices));
+            Tutorial.Instance.ShowHintMessage(Tutorial.HintEvent.BacteriaSplitByPlayer, transform.position);
         }
         else  if (Radius > _growth.MinRadius)
         {
@@ -322,9 +327,7 @@ public class Bacteria : MonoBehaviour
         }
         else
         {
-            _ai.Clear();
-            _drawer.Clear();
-            Destroy(gameObject);
+            Kill();
         }
     }
 
@@ -353,6 +356,10 @@ public class Bacteria : MonoBehaviour
     public void Kill()
     {
         ExplosionController.Instance.SpawnExplosion(ExplosionController.ExplosionType.Big, transform.position, Color);
+        if (BacteriaKilled != null)
+        {
+            BacteriaKilled(this);
+        }
         Destroy(gameObject);
     }
 
@@ -360,7 +367,10 @@ public class Bacteria : MonoBehaviour
     {
         _drawer.Clear();
         _ai.Clear();
-        _mutate.Clear();
+        if (_mutate != null)
+        {
+            _mutate.Clear();
+        }
     }
     private void OnDestroy()
     {

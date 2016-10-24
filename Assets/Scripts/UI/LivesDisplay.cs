@@ -11,12 +11,13 @@ public class LivesDisplay : MonoBehaviour
 
     private void Awake()
     {
-        Player.OnPlayerSpawned += OnPlayerSpawned;
+        Player.PlayerSpawned += OnPlayerSpawned;
     }
 
     private void OnPlayerSpawned(Player obj)
     {
-        obj.OnPlayerKilled += OnPlayerKilled;
+        obj.PlayerKilled += OnPlayerKilled;
+        Invoke("UpdateLives", 1.0f);
     }
 
     private void OnPlayerKilled()

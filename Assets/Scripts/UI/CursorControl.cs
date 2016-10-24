@@ -26,7 +26,7 @@ public class CursorControl : MonoBehaviour {
         Cursor.visible = false;
         Cursor.lockState = CursorLockMode.Confined;
 
-        Player.OnPlayerSpawned += PlayerSpawned;
+        Player.PlayerSpawned += PlayerSpawned;
         _lastPos = Camera.main.ScreenToWorldPoint(Input.mousePosition);
         _position = Camera.main.ScreenToWorldPoint(Input.mousePosition);
     }

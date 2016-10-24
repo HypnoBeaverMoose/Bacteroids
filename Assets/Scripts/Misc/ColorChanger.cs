@@ -8,12 +8,12 @@ public class ColorChanger : MonoBehaviour
     private float _interval;
     void Awake()
     {
-        Player.OnPlayerSpawned += PlayerSpawned;
+        Player.PlayerSpawned += PlayerSpawned;
     }
 
     private void PlayerSpawned(Player player)
     {
-        player.OnColorChanged += OnColorChanged;
+        player.ColorChanged += OnColorChanged;
     }
 
     private void OnColorChanged(Color newColor)
