@@ -11,6 +11,8 @@ public class Energy : MonoBehaviour
     private float _radiusChange;
     [SerializeField]
     private float _consumableDistance;
+    [SerializeField]
+    private GameObject _scoreDisplay;
 
 
     public float RadiusChange { get { return _radiusChange; }
@@ -39,6 +41,12 @@ public class Energy : MonoBehaviour
     public void Kill()
     {
         ExplosionController.Instance.SpawnExplosion(_explosion, transform.position, Color);
+        var display = Instantiate<GameObject>(_scoreDisplay);
+        display.transform.position = transform.position;
+        display.GetComponentInChildren<UnityEngine.UI.Text>().text = Score.ToString();
+        display.GetComponentInChildren<UnityEngine.UI.Text>().color = Color;
+        display.GetComponent<Rigidbody2D>().AddForce(Random.insideUnitCircle.normalized * 3);
+        Destroy(display, 1);
         Destroy(gameObject);
     }
 
