@@ -11,6 +11,7 @@ public class LivesDisplay : MonoBehaviour
 
     private void Awake()
     {
+        transform.position = new Vector3(Camera.main.orthographicSize * Camera.main.aspect, Camera.main.orthographicSize, 0);
         Player.PlayerSpawned += OnPlayerSpawned;
     }
 
