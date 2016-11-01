@@ -26,6 +26,7 @@ public class Player : MonoBehaviour
                 _color = value;
                 _playerSprite.color = _color;
                 _engineParticles.startColor = _color;
+                AudioController.Instance.PlaySound(SoundType.PlayerChangeColor, transform.position);
                 if (ColorChanged != null)
                 {
                     ColorChanged(_color);
@@ -33,6 +34,8 @@ public class Player : MonoBehaviour
             }
         }
     }
+    [SerializeField]
+    private AudioSource _engineAudio;
     [SerializeField]
     private bool _useEnergy;
     [SerializeField]
@@ -47,6 +50,7 @@ public class Player : MonoBehaviour
     private float _startingEnergy;
     [SerializeField]
     private float _energyThreshold;
+
     [Space(10)]
     [SerializeField]
     private float _idleEnergyBonus;
@@ -56,6 +60,8 @@ public class Player : MonoBehaviour
     private float _moveEnergyCost;
     [SerializeField]
     private float _rotateEnergyCost;
+
+
     [Space(10)]
     [SerializeField]
     private float _forceMultiplier;
@@ -116,6 +122,7 @@ public class Player : MonoBehaviour
         {
             ColorChanged(Color);
         }
+        AudioController.Instance.PlaySound(SoundType.PlayerSpawn);
 	}
 
     private IEnumerator NoEnergyRoutine()
@@ -152,6 +159,7 @@ public class Player : MonoBehaviour
             {
                 var go = Instantiate(_projectilePrefab, transform.position + transform.up * 0.5f, transform.localRotation) as GameObject;
                 go.GetComponent<Projectile>().Color = Color;
+                AudioController.Instance.PlaySound(SoundType.PlayerShoot, transform.position);
                 if (!_invincible)
                 {
                     Energy -= _shootEnergyCost;
@@ -163,6 +171,7 @@ public class Player : MonoBehaviour
         if (Input.GetKeyDown(KeyCode.LeftShift) && Force > 0)
         {
             ExplosionController.Instance.SpawnExplosion(ExplosionController.ExplosionType.Random, _rigidbody.position, Color);
+            AudioController.Instance.PlaySound(SoundType.PlayerTurboOn, transform.position);
             Force *= 1.5f;
         }
     }
@@ -194,6 +203,7 @@ public class Player : MonoBehaviour
         {
             Energy -= Time.fixedDeltaTime * (Mathf.Abs(Force * _moveEnergyCost) + Mathf.Abs(Angle * _rotateEnergyCost));
         }
+        GetComponent<EngineSound>().speed = _rigidbody.velocity.magnitude;
     }
 
     public void Damage(Bacteria bacteria)
@@ -209,6 +219,7 @@ public class Player : MonoBehaviour
         Tutorial.Instance.ShowHintMessage(Tutorial.HintEvent.EnergyConsumedByPlayer);
         GameController.Instance.Score += energy.Score;
         Energy += energy.Score;
+        AudioController.Instance.PlaySound(SoundType.PlayerConsume, transform.position);
         if (Color != energy.Color)
         {
             Tutorial.Instance.ShowHintMessage(Tutorial.HintEvent.PlayerChangesColor);
@@ -235,6 +246,7 @@ public class Player : MonoBehaviour
     {
         ExplosionController.Instance.SpawnExplosion(ExplosionController.ExplosionType.Huge,transform.position, Color);
         Destroy(gameObject);
+        AudioController.Instance.PlaySound(SoundType.PlayerKilled, transform.position);
 
     }
     private void OnDestroy()

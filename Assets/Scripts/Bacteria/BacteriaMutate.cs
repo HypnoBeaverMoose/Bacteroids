@@ -73,6 +73,7 @@ public class BacteriaMutate : MonoBehaviour
         Tutorial.Instance.ShowHintMessage(_hint, transform.position);
         _bacteria.Color = _mutationColor;
         ExplosionController.Instance.SpawnExplosion(ExplosionController.ExplosionType.Big, transform.position, _bacteria.Color);
+        AudioController.Instance.PlaySound(SoundType.BacteriaMutate);
     }
 
     public void Clear()

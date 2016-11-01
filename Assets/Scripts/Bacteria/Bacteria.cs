@@ -300,6 +300,7 @@ public class Bacteria : MonoBehaviour
 
         if (node.Health > 0)
         {
+            AudioController.Instance.PlaySound(SoundType.BacteriaHitMutated);
             return;
         }
 
@@ -320,10 +321,12 @@ public class Bacteria : MonoBehaviour
             int index = Mathf.Max(_nodes.IndexOf(node), 0);
             GameController.Instance.Spawn.Split(this, index, Indexer.GetIndex(Indexer.IndexType.Across, index, Vertices));
             Tutorial.Instance.ShowHintMessage(Tutorial.HintEvent.BacteriaSplitByPlayer, transform.position);
+            AudioController.Instance.PlaySound(SoundType.BacteriaSplit);
         }
         else  if (Radius > _growth.MinRadius)
         {
             Radius -= decrease;
+            AudioController.Instance.PlaySound(SoundType.BacteriaHit);
         }
         else
         {
@@ -356,6 +359,7 @@ public class Bacteria : MonoBehaviour
     public void Kill()
     {
         ExplosionController.Instance.SpawnExplosion(ExplosionController.ExplosionType.Big, transform.position, Color);
+        AudioController.Instance.PlaySound(SoundType.BacteriaDie);
         if (BacteriaKilled != null)
         {
             BacteriaKilled(this);
