@@ -22,7 +22,7 @@ public class Tutorial : MonoBehaviour
         PlayerChangesColor
 
     }
-    public static bool NeedsTutorial { get { return true; /* PlayerPrefs.GetString("Tutorial", "False") == "False"; */ } }
+    public static bool NeedsTutorial { get { return false; /* PlayerPrefs.GetString("Tutorial", "False") == "False"; */ } }
     public static Tutorial Instance { get; private set; }
     public static bool IsRunning { get; private set; }
 
@@ -51,7 +51,7 @@ public class Tutorial : MonoBehaviour
 
     public void ShowHintMessage(HintEvent hint, Vector2 position)
     {
-        if (_showedMessages.Contains(hint) || (Time.time - _lastMessage) < Tooltip.DefaultDelay)
+        if (!NeedsTutorial || _showedMessages.Contains(hint) || (Time.time - _lastMessage) < Tooltip.DefaultDelay)
         {
             return;
         }
@@ -61,7 +61,7 @@ public class Tutorial : MonoBehaviour
 
     public void ShowHintMessage(HintEvent hint)
     {
-        if (_showedMessages.Contains(hint) || (Time.time - _lastMessage) < Tooltip.DefaultDelay)
+        if (!NeedsTutorial || _showedMessages.Contains(hint) || (Time.time - _lastMessage) < Tooltip.DefaultDelay)
         {
             return; 
         }

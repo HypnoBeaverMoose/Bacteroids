@@ -48,20 +48,18 @@ public class AudioController : MonoBehaviour
         public float Volume;
         public float Pitch;
         public float PitchDelta;
+        public bool Is3D;
     }
     [SerializeField]
     private Sound[] _sounds;
     [SerializeField]
     private GameObject _sourcePrefab;
 
+
     private int _currentPriotiy = 0;
     
     private List<AudioSource> _idleSources = new List<AudioSource>();
     private List<AudioSource> _playingSources = new List<AudioSource>();
-
-    void Start()
-    {        
-    }
 
     public void PlaySound(SoundType type)
     {
