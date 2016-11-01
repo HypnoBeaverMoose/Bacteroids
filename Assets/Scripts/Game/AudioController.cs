@@ -54,6 +54,8 @@ public class AudioController : MonoBehaviour
     private Sound[] _sounds;
     [SerializeField]
     private GameObject _sourcePrefab;
+    [SerializeField]
+    private float _masterVolume;
 
 
     private int _currentPriotiy = 0;
@@ -73,7 +75,7 @@ public class AudioController : MonoBehaviour
         {        
             AudioSource source = GetSource();
             source.transform.position = position;
-            source.volume = sound.Volume;
+            source.volume = sound.Volume * _masterVolume;
             source.pitch = sound.Pitch + Random.Range(-sound.PitchDelta, sound.PitchDelta);
             source.PlayOneShot(sound.Clips[Random.Range(0, sound.Clips.Length)]);
         }
