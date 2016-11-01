@@ -119,12 +119,12 @@ public class Tutorial : MonoBehaviour
         IsRunning = true;
         while (_player == null) { yield return new WaitForSeconds(1.0f); }
 
-        yield return StartCoroutine(ShowMoveText("USE <color=#a52a2aff>W</color> / <color=#a52a2aff>UPARROW</color> TO MOVE FORWARD", 1.0f));
+        yield return StartCoroutine(ShowMoveText("USE <color=#a52a2aff>W</color> / <color=#a52a2aff>RMB</color> TO MOVE FORWARD", 1.0f));
         yield return StartCoroutine(ShowMoveText("THE PROBE WILL FOLLOW THE <color=#a52a2aff>MOUSE</color> FOR DIRECTION", 1.0f));
-        yield return StartCoroutine(ShowMoveText("YOU CAN USE <color=#a52a2aff>S</color> / <color=#a52a2aff>DOWNARROW</color> TO MOVE BACKWARDS", 1.0f));        
+        //yield return StartCoroutine(ShowMoveText("YOU CAN USE <color=#a52a2aff>S</color> / <color=#a52a2aff>DOWNARROW</color> TO MOVE BACKWARDS", 1.0f));        
         yield return StartCoroutine(ShowMoveText("USE <color=#a52a2aff>LEFT</color> <color=#a52a2aff>SHIFT</color> TO GET A SPEED BOOST", 1.0f));
        
-        Tooltip.Instance.ShowText("PRESS <color=#a52a2aff>LMB</color> TO FIRE", 0);
+        Tooltip.Instance.ShowText("PRESS <color=#a52a2aff>LMB</color> / <color=#a52a2aff>SPACE</color> TO FIRE", 0);
         yield return StartCoroutine(WaitForShipToFire());
         Tooltip.Instance.Hide();
 
