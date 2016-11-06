@@ -26,6 +26,7 @@ public class Player : MonoBehaviour
                 _color = value;
                 _playerSprite.color = _color;
                 _engineParticles.startColor = _color;
+                _bubbleParticles.startColor = _color;
                 AudioController.Instance.PlaySound(SoundType.PlayerChangeColor, transform.position);
                 if (ColorChanged != null)
                 {
@@ -71,6 +72,8 @@ public class Player : MonoBehaviour
     private ParticleSystem _explosion;
     [SerializeField]
     private ParticleSystem _engineParticles;
+    [SerializeField]
+    private ParticleSystem _bubbleParticles;
     [SerializeField]
     private GameObject _projectilePrefab;
     [SerializeField]
@@ -174,12 +177,18 @@ public class Player : MonoBehaviour
             AudioController.Instance.PlaySound(SoundType.PlayerTurboOn, transform.position);
             Force *= 1.5f;
         }
+        else
+        {
+            _engineParticles.Emit((int)(Force * 10 * (_turbo ? 2 : 0.8f)));
+        }
+        _bubbleParticles.Emit((int)(_rigidbody.velocity.magnitude * (_turbo ? 2 : 0.8f)));
+        GetComponent<EngineSound>().speed = Force * 10 * turbo;
     }
 
     void FixedUpdate()
     {
-        _engineParticles.Emit((int)(_rigidbody.velocity.magnitude * (_turbo ? 2 : 0.8f)));
 
+       
         _rigidbody.drag = Mathf.Abs(Force) > _dragThreshold ? _maxDrag : _minDrag;
         if (Force < 0)
         {
@@ -203,7 +212,7 @@ public class Player : MonoBehaviour
         {
             Energy -= Time.fixedDeltaTime * (Mathf.Abs(Force * _moveEnergyCost) + Mathf.Abs(Angle * _rotateEnergyCost));
         }
-        GetComponent<EngineSound>().speed = _rigidbody.velocity.magnitude;
+        
     }
 
     public void Damage(Bacteria bacteria)

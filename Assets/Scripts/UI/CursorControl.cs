@@ -39,7 +39,11 @@ public class CursorControl : MonoBehaviour {
 	// Update is called once per frame
 	void Update ()
     {
-        
+        if (Cursor.visible)
+        {
+            Cursor.visible = false;
+            Cursor.lockState = CursorLockMode.Confined;
+        }
         
         if (_stickToPlayer && _player != null)
         {

@@ -24,6 +24,7 @@ public class EngineSound : MonoBehaviour
     
     void Update()
     {
+        Debug.Log(_speed);
         float val = _speed / _maxSpeed;
         _source.pitch = Mathf.Lerp(_source.pitch, Mathf.Lerp(_basePitch, _maxPitch, val), 0.8f);
         _source.volume = Mathf.Lerp(_source.volume, Mathf.Lerp(0.0f, _maxVolume, val), 0.8f);
