@@ -65,6 +65,11 @@ public class GameController : MonoBehaviour
         {
             _startScreen.OnStartGame += () =>
             {
+                var enemies = FindObjectsOfType<Bacteria>();
+                foreach (var enemy in enemies)
+                {
+                    enemy.Kill();
+                }
                 Invoke("SpawnPlayer", 1.0f);
                 GetComponent<Tutorial>().StartTutorial();
             };
@@ -123,7 +128,7 @@ public class GameController : MonoBehaviour
         Camera.main.GetComponent<CameraShake>().ShakeCamera(0.1f, 0.03f);
         _player.Kill();
         Tutorial.Instance.ShowHintMessage(Tutorial.HintEvent.PlayerDead);
-        if (Tutorial.IsRunning)
+        if (Tutorial.SavePlayer)
         {
             Invoke("SpawnPlayer", 1.0f);
             return;

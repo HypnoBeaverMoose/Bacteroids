@@ -22,15 +22,14 @@ public class Tutorial : MonoBehaviour
         PlayerChangesColor
 
     }
-    public static bool NeedsTutorial { get { return false; /* PlayerPrefs.GetString("Tutorial", "False") == "False"; */ } }
+    public static bool NeedsTutorial { get { return PlayerPrefs.GetString("Tutorial", "False") == "False"; } }
     public static Tutorial Instance { get; private set; }
-    public static bool IsRunning { get; private set; }
+    public static bool SavePlayer { get { return !PlayerPrefs.HasKey(HintEvent.PlayerDead.ToString()); } }
 
     private Player _player = null;
     public event System.Action TutorialComplete;
     private SpawnController _spawn;
     private float _lastMessage;
-    private List<HintEvent> _showedMessages = new List<HintEvent>();
     [SerializeField]
     private float _shipMovementAmount;
     [SerializeField]
@@ -39,6 +38,7 @@ public class Tutorial : MonoBehaviour
 
     void Awake()
     {
+        
         Instance = this;
         Player.PlayerSpawned += (Player p) => { _player = p; };
         _spawn = GetComponent<SpawnController>();
@@ -51,8 +51,8 @@ public class Tutorial : MonoBehaviour
 
     public void ShowHintMessage(HintEvent hint, Vector2 position)
     {
-        if (!NeedsTutorial || _showedMessages.Contains(hint) || (Time.time - _lastMessage) < Tooltip.DefaultDelay)
-        {
+        if (PlayerPrefs.HasKey(hint.ToString()) || (Time.time - _lastMessage) < Tooltip.DefaultDelay)
+        {            
             return;
         }
         ShowHintMessage(hint);
@@ -61,7 +61,7 @@ public class Tutorial : MonoBehaviour
 
     public void ShowHintMessage(HintEvent hint)
     {
-        if (!NeedsTutorial || _showedMessages.Contains(hint) || (Time.time - _lastMessage) < Tooltip.DefaultDelay)
+        if (PlayerPrefs.HasKey(hint.ToString()) || (Time.time - _lastMessage) < Tooltip.DefaultDelay)
         {
             return; 
         }
@@ -111,17 +111,18 @@ public class Tutorial : MonoBehaviour
                 break;
         }
         StartCoroutine(SlowTime());
-        _showedMessages.Add(hint);
+        PlayerPrefs.SetInt(hint.ToString(), 0);
+
     }
 
     private IEnumerator TutorialRoutine()
     {
-        IsRunning = true;
+        
         while (_player == null) { yield return new WaitForSeconds(1.0f); }
 
         yield return StartCoroutine(ShowMoveText("USE <color=#a52a2aff>W</color> / <color=#a52a2aff>RMB</color> TO MOVE FORWARD", 1.0f));
         yield return StartCoroutine(ShowMoveText("THE PROBE WILL FOLLOW THE <color=#a52a2aff>MOUSE</color> FOR DIRECTION", 1.0f));
-        //yield return StartCoroutine(ShowMoveText("YOU CAN USE <color=#a52a2aff>S</color> / <color=#a52a2aff>DOWNARROW</color> TO MOVE BACKWARDS", 1.0f));        
+
         yield return StartCoroutine(ShowMoveText("USE <color=#a52a2aff>LEFT</color> <color=#a52a2aff>SHIFT</color> TO GET A SPEED BOOST", 1.0f));
        
         Tooltip.Instance.ShowText("PRESS <color=#a52a2aff>LMB</color> / <color=#a52a2aff>SPACE</color> TO FIRE", 0);
@@ -129,7 +130,7 @@ public class Tutorial : MonoBehaviour
         Tooltip.Instance.Hide();
 
         Tooltip.Instance.ShowText("<color=#a52a2aff>BACTERIA</color>!\n QUICK, <color=#a52a2aff>KILL</color> THEM QUICKLY BEFORE THEY MULTIPLY");
-        CompleteTutorial();        
+        CompleteTutorial();
     }
     private IEnumerator SlowTime()
     {
@@ -175,7 +176,7 @@ public class Tutorial : MonoBehaviour
         int fires = 0;
         while (fires < _shipFireAmount)
         {
-            fires += Input.GetMouseButtonDown(0) ? 1 : 0;
+            fires += (Input.GetMouseButtonDown(0) | Input.GetKeyDown(KeyCode.Space)) ? 1 : 0;
             yield return null;
         }
 
@@ -211,6 +212,7 @@ public class Tutorial : MonoBehaviour
     public void CompleteTutorial()
     {
         PlayerPrefs.SetString("Tutorial", "True");
+        
         if (TutorialComplete != null)
         {
             TutorialComplete();
