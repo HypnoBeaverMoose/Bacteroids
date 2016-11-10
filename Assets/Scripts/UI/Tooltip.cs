@@ -37,6 +37,7 @@ public class Tooltip : MonoBehaviour
     public void ShowText(string text, Vector2 position, float delay = DefaultDelay)
     {
         transform.position = position;
+        gameObject.SetActive(true);
         _text = text;
         StopAllCoroutines();
         StartCoroutine(DrawText(delay));
@@ -44,11 +45,13 @@ public class Tooltip : MonoBehaviour
 
     public void ShowText(string text, GameObject anchor, Vector2 offset, float delay = DefaultDelay)
     {
+
         _anchor = anchor;
         _offset = offset;
         _text = text;
+        gameObject.SetActive(true);
         StopAllCoroutines();
-       StartCoroutine(DrawText(delay));
+        StartCoroutine(DrawText(delay));
     }
 
     public void Hide()

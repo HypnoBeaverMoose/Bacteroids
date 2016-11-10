@@ -225,7 +225,10 @@ public class Player : MonoBehaviour
 
     public void Consume(Energy energy)
     {
-        Tutorial.Instance.ShowHintMessage(Tutorial.HintEvent.EnergyConsumedByPlayer);
+        if (GameController.Instance.Spawn.CurrentWave > 1)
+        {
+            Tutorial.Instance.ShowHintMessage(Tutorial.HintEvent.EnergyConsumedByPlayer);
+        }
         GameController.Instance.Score += energy.Score;
         Energy += energy.Score;
         AudioController.Instance.PlaySound(SoundType.PlayerConsume, transform.position);
@@ -251,6 +254,7 @@ public class Player : MonoBehaviour
         _playerSprite.color = new Color(Color.r, Color.g, Color.b, 1.0f);
         _invincible = false;
     }
+
     public void Kill()
     {
         ExplosionController.Instance.SpawnExplosion(ExplosionController.ExplosionType.Huge,transform.position, Color);
@@ -258,6 +262,7 @@ public class Player : MonoBehaviour
         AudioController.Instance.PlaySound(SoundType.PlayerKilled, transform.position);
 
     }
+
     private void OnDestroy()
     {
         PlayerKilled = null;

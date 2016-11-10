@@ -6,8 +6,9 @@ public class Tutorial : MonoBehaviour
 {
     public enum HintEvent
     {
-        PlayerDead = 0,
-        BacteriaDead,
+        None = 0,
+        PlayerDead,
+        BacteriaHit,
         BacteriaSplit,
         BacteriaSplitAlone,
         BacteriaSplitByPlayer,
@@ -34,11 +35,12 @@ public class Tutorial : MonoBehaviour
     private float _shipMovementAmount;
     [SerializeField]
     private int _shipFireAmount;
-
+    [SerializeField]
+    private float _messsageMinTimeout;
 
     void Awake()
     {
-        
+//        PlayerPrefs.DeleteAll();
         Instance = this;
         Player.PlayerSpawned += (Player p) => { _player = p; };
         _spawn = GetComponent<SpawnController>();
@@ -51,17 +53,21 @@ public class Tutorial : MonoBehaviour
 
     public void ShowHintMessage(HintEvent hint, Vector2 position)
     {
-        if (PlayerPrefs.HasKey(hint.ToString()) || (Time.time - _lastMessage) < Tooltip.DefaultDelay)
+        if (MessageShown (hint) || (Time.time - _lastMessage) < _messsageMinTimeout)
         {            
             return;
         }
         ShowHintMessage(hint);
         EventBox.Instance.Show(position);
     }
+    public bool MessageShown(HintEvent hint)
+    {
+        return PlayerPrefs.HasKey(hint.ToString());
+    }
 
     public void ShowHintMessage(HintEvent hint)
     {
-        if (PlayerPrefs.HasKey(hint.ToString()) || (Time.time - _lastMessage) < Tooltip.DefaultDelay)
+        if (MessageShown(hint) || (Time.time - _lastMessage) < _messsageMinTimeout)
         {
             return; 
         }
@@ -71,14 +77,14 @@ public class Tutorial : MonoBehaviour
             case HintEvent.PlayerDead:
                 Tooltip.Instance.ShowText("TOUCHING THE BACTERIA CAN <color=#a52a2aff>KILL</color> <color=#a52a2aff>YOU</color>");
                 break;
-            case HintEvent.BacteriaDead:
-                Tooltip.Instance.ShowText("GREAT JOB! NOW DON'T FORGET TO COLLECT THE <color=#a52a2aff>ENERGY</color>");
+            case HintEvent.BacteriaHit:
+                Tooltip.Instance.ShowText("DON'T FORGET TO COLLECT THE <color=#a52a2aff>ENERGY</color>");
                 break;
             case HintEvent.BacteriaSplitAlone:
-                Tooltip.Instance.ShowText("<color=#a52a2aff>BACTERIA</color> CAN <color=#a52a2aff>SPLIT</color> WHEN BIG ENOUGH");
+                Tooltip.Instance.ShowText("<color=#a52a2aff>BACTERIA</color> WILL <color=#a52a2aff>SPLIT</color> WHEN THEY ARE BIG ENOUGH");
                 break;
             case HintEvent.BacteriaSplitByPlayer:
-                Tooltip.Instance.ShowText("BIG BACTERIA <color=#a52a2aff>SPLIT</color> WHEN YOU HIT THEM.");
+                Tooltip.Instance.ShowText("BIG BACTERIA <color=#a52a2aff>SPLIT</color> WHEN YOU HIT THEM");
                 break;
             case HintEvent.BacteriaMutate:
                 Tooltip.Instance.ShowText("A BACTERIA HAS DEVELOPED <color=#a52a2aff>RESISTANCE</color>");
@@ -99,13 +105,13 @@ public class Tutorial : MonoBehaviour
                 Tooltip.Instance.ShowText("MUTATED ENERGY CAUSES BACTERIA TO <color=#a52a2aff>MUTATE</color>");
                 break;
             case HintEvent.EnergyConsumedByPlayer:
-                Tooltip.Instance.ShowText("AWESOME! <color=#a52a2aff>ENEGY</color> GIVES YOU <color=#a52a2aff>POINTS</color>");
+                Tooltip.Instance.ShowText("<color=#a52a2aff>ENEGY</color> GIVES YOU <color=#a52a2aff>POINTS</color>");
                 break;
             case HintEvent.EnergyConsumedByBacteria:
                 Tooltip.Instance.ShowText("ENERGY CAUSES BACTERIA TO <color=#a52a2aff>GROW</color>");
                 break;
             case HintEvent.PlayerChangesColor:
-                Tooltip.Instance.ShowText("AWESOME! YOU FOUND A WAY TO BEAT THEIR <color=#a52a2aff>RESISTANCE</color>!");
+                Tooltip.Instance.ShowText("NOW YOU CAN KILL MUTATED BACTERIA");
                 break;
             default:
                 break;
@@ -135,12 +141,12 @@ public class Tutorial : MonoBehaviour
     private IEnumerator SlowTime()
     {
         float vel = 0;        
-        while (Time.timeScale > 0.41f)
+        while (Time.timeScale > 0.11f)
         {
-            Time.timeScale = Mathf.SmoothDamp(Time.timeScale, 0.2f, ref vel, 0.1f);
+            Time.timeScale = Mathf.SmoothDamp(Time.timeScale, 0.1f, ref vel, 0.1f);
             yield return null;
         }
-        Time.timeScale = 0.4f;
+        Time.timeScale = 0.1f;
         float timer = 1.0f;
         while (timer > 0) { timer -= Time.unscaledDeltaTime; yield return null; }
 

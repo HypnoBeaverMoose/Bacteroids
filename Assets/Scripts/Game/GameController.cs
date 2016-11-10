@@ -42,14 +42,20 @@ public class GameController : MonoBehaviour
     private GameObject _playerPrefab;
     [SerializeField]
     private int _startLives;
+    [SerializeField]
+    private int _startWave;
+    [SerializeField]
+    private bool _showTutorial;
 
+    private bool _isInWave = false;
     private Player _player;
-        
+    
     private SpawnController _spawn;
     public SpawnController Spawn { get { return _spawn; } }
 
 	void Awake () 
     {
+
         if (_instance != null)
         {
             Destroy(this);
@@ -59,26 +65,10 @@ public class GameController : MonoBehaviour
             _instance = this;
         }       
         _spawn = gameObject.GetComponent<SpawnController>();
-
+        Spawn.CurrentWave = _startWave;
         _startScreen.gameObject.SetActive(true);
-        if (Tutorial.NeedsTutorial)
-        {
-            _startScreen.OnStartGame += () =>
-            {
-                var enemies = FindObjectsOfType<Bacteria>();
-                foreach (var enemy in enemies)
-                {
-                    enemy.Kill();
-                }
-                Invoke("SpawnPlayer", 1.0f);
-                GetComponent<Tutorial>().StartTutorial();
-            };
-            GetComponent<Tutorial>().TutorialComplete += Spawn.StartSpawn;
-        }
-        else
-        {
-            _startScreen.OnStartGame += StartGame;
-        }
+        _startScreen.OnStartGame += StartGame;
+        
         _endScreen.OnEndGame += EndGame;
         Lives = _startLives;
 
@@ -92,6 +82,13 @@ public class GameController : MonoBehaviour
 
     private void StartGame()
     {
+        if (_showTutorial && Tutorial.NeedsTutorial)
+        {
+            GetComponent<Tutorial>().StartTutorial();
+            GetComponent<Tutorial>().TutorialComplete += StartGame;
+        }
+        Spawn.CurrentWave = _startWave;
+
         Lives = _startLives;
         var energies = FindObjectsOfType<Energy>();
         foreach (var energy in energies)
@@ -103,10 +100,10 @@ public class GameController : MonoBehaviour
         foreach (var enemy in enemies)
         {
             enemy.Kill();
-        }       
-        Invoke("SpawnPlayer", 1.0f);
+        }
+        StartCoroutine(StartWave());
         Score = 0;
-        Spawn.StartSpawn();
+        InvokeRepeating("CheckEndWave", 1.0f, 1.0f);
     }
 
     private void OnColorChanged(Color newColor)
@@ -136,6 +133,7 @@ public class GameController : MonoBehaviour
 
         if (--Lives <= 0)
         {
+            _isInWave = false;
             if (Score > PlayerPrefs.GetInt("Best"))
             {
                 PlayerPrefs.SetInt("Best", Score);
@@ -167,19 +165,62 @@ public class GameController : MonoBehaviour
      
     public Color GetRandomColor(Color color)
     {
-        int index = 0;
-        if (color == Color.white)
+        
+        //int index = 0;
+        //if (color == Color.white)
+        //{
+        //    return _colors[0];
+        //}
+        int count = Mathf.Min(Spawn.ColorCount, _colors.Length);
+
+        //for (int i = 0; i < count; i++)
+        //{
+        //    if (color == _colors[i])
+        //    {
+        //        index = i + 1;
+        //        break;
+        //    }
+        //}
+        return _colors[/*index % count*/ Random.Range(0,count)];
+    }
+
+    private IEnumerator StartWave()
+    {
+        Spawn.CurrentWave++;
+        Tooltip.Instance.ShowText("Wave " + Spawn.CurrentWave, Vector2.zero, 1.0f);
+        yield return new WaitForSeconds(1.0f);
+        if (_player == null)
         {
-            return _colors[0];
+            SpawnPlayer();
         }
-        for (int i = 0; i < _colors.Length; i++)
+        _isInWave = true;
+        Spawn.SpawnWave(Spawn.CurrentWave);
+    }
+    private IEnumerator EndWave()
+    {
+        var energies = FindObjectsOfType<Energy>();
+        foreach (var energy in energies)
         {
-            if (color == _colors[i])
-            {
-                index = i + 1;
-                break;
-            }
+            Score += energy.Score;
+            energy.Kill();
         }
-        return _colors[index % _colors.Length];
-    } 
+        var enemies = FindObjectsOfType<Bacteria>();
+        foreach (var enemy in enemies)
+        {
+            enemy.Kill();
+        }
+        Tooltip.Instance.ShowText("Success!", Vector2.zero, 1.0f);
+        yield return new WaitForSeconds(1.5f);
+        StartCoroutine(StartWave());        
+    }
+    private void CheckEndWave()
+    {
+        if (Spawn.Enemies.Length == 0 && _isInWave)
+        {
+            _isInWave = false;
+            StartCoroutine(EndWave());
+        }
+    }
+
+
 }

@@ -40,7 +40,7 @@ public class EndScreen : MonoBehaviour {
         //_titleText.rectTransform.position = _titleInitPos + Mathf.Sin(Time.time) * Vector3.up * 0.2f;
         //_scoreText.rectTransform.position = _nextInitPos + Mathf.Sin(Time.time * 2) * Vector3.up * 0.1f;
 
-        if (Input.GetKeyDown(KeyCode.Space))
+        if (Input.anyKeyDown)
         {
             if (OnEndGame != null)
             {

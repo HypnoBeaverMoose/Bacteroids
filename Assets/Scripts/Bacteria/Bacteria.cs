@@ -298,6 +298,8 @@ public class Bacteria : MonoBehaviour
         float damage = projectile.GetDamage(Color);
         node.Health -= damage;
 
+        Tutorial.Instance.ShowHintMessage(Tutorial.HintEvent.BacteriaHit, transform.position);
+
         if (node.Health > 0)
         {
             AudioController.Instance.PlaySound(SoundType.BacteriaHitMutated);
@@ -307,7 +309,7 @@ public class Bacteria : MonoBehaviour
         float decrease = damage * _growth.DecreaseRate;
         node.Health = 1.0f;
         float radius = Radius > _growth.MinRadius ? decrease : Radius;
-        float energyPieces = Random.Range(1, 4);
+        float energyPieces = Random.Range(1, 3);
         for (int i = 0; i < energyPieces; i++)
         {
             GameController.Instance.Spawn.SpawnEnergy(
@@ -351,9 +353,12 @@ public class Bacteria : MonoBehaviour
         }
     }
 
-    public void Consume(Energy Energy)
+    public void Consume(Energy energy)
     {
-        Radius += Energy.RadiusChange;
+        Radius += energy.RadiusChange;
+        Tutorial.Instance.ShowHintMessage(Tutorial.HintEvent.EnergyConsumedByBacteria, transform.position);
+        AudioController.Instance.PlaySound(SoundType.PlayerConsume);
+        ExplosionController.Instance.SpawnExplosion(ExplosionController.ExplosionType.Big, energy.transform.position, energy.Color);
     }
 
     public void Kill()

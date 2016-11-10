@@ -28,8 +28,8 @@ public class BacteriaAI : MonoBehaviour
     {
         _direction = Random.insideUnitCircle.normalized;
         StartCoroutine(Blob());
-        InvokeRepeating("Move", _moveTimeot * Random.Range(0.2f, 1.5f), _moveTimeot);
-        InvokeRepeating("Grow", _growTimeout * Random.Range(0.2f, 1.5f), _growTimeout);
+        InvokeRepeating("Move", Random.Range(0.2f, 1.5f), _moveTimeot);
+        InvokeRepeating("Grow", Random.Range(0.2f, 1.5f), _growTimeout);
         InvokeRepeating("ChangeDirection", 10, 10);
         
     }

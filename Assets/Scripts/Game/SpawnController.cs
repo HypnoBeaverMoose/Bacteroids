@@ -30,10 +30,12 @@ public class SpawnController : MonoBehaviour
     private List<Bacteria> _enemies = new List<Bacteria>();
     private Player _player;
     private PropertyController _sampler;
-    private int _kills = 0;
+    private int _currentWave = 0;
+
+    public int CurrentWave { get { return _currentWave; }  set { _currentWave = value; } }
     public bool CanSpawn { get { return _enemies.Count < _maxBacteria; } }
     public Bacteria[] Enemies { get { return _enemies.ToArray(); } }
-
+    public int ColorCount { get { return _sampler.SampleColorCount(_currentWave); } }
 
     private void Awake()
     {
@@ -72,9 +74,11 @@ public class SpawnController : MonoBehaviour
         }
     }
 
-    private void SpawnWave(int spawn)
+    public void SpawnWave(int wave)
     {
-        for (int i = 0; i < _initialSpawn; i++)
+        _currentWave = wave;
+        int spawn = _sampler.SampleWaveSize(wave);
+        for (int i = 0; i < spawn; i++)
         {
             SpawnBacteria();
         }
@@ -120,15 +124,23 @@ public class SpawnController : MonoBehaviour
         
         var bact = SpawnBacteriaFromNodes(leftNodes, bacteria.Radius * 0.5f, bacteria.Color);
         var mutate = bact.GetComponent<BacteriaMutate>();
-        mutate.TriggerMutation(_sampler.SampleMutation(_kills), newColor);
-        
+        if (newColor != bacteria.Color)
+        {
+            mutate.TriggerMutation(_sampler.SampleMutation(_currentWave), newColor);
+        }
         var originalMutate = bacteria.GetComponent<BacteriaMutate>();
         mutate.CanMutate = originalMutate.CanMutate;
+        //Debug.Log("Force: " + (bact.transform.position - bacteria.transform.position).normalized * 100);
+        leftNodes[0].Body.AddForce((bact.transform.position - bacteria.transform.position).normalized * 3000);
         _enemies.Add(bact);
 
-        bact = SpawnBacteriaFromNodes(rightNodes, bacteria.Radius * 0.5f, bacteria.Color);        
-        bact.GetComponent<BacteriaMutate>().TriggerMutation(_sampler.SampleMutation(_kills), newColor);
+        bact = SpawnBacteriaFromNodes(rightNodes, bacteria.Radius * 0.5f, bacteria.Color);
+        if (newColor != bacteria.Color)
+        {
+            bact.GetComponent<BacteriaMutate>().TriggerMutation(_sampler.SampleMutation(_currentWave), newColor);
+        }
         bact.GetComponent<BacteriaMutate>().CanMutate = bacteria.GetComponent<BacteriaMutate>().CanMutate;
+        rightNodes[0].Body.AddForce((bact.transform.position - bacteria.transform.position).normalized * 3000);
         _enemies.Add(bact);
         bacteria.Kill();
     }
@@ -146,7 +158,10 @@ public class SpawnController : MonoBehaviour
         bacteria.SetNodes(nodes);
         bacteria.Color = color;
         bacteria.Radius = radius;
-
+        bacteria.GetComponent<BacteriaGrowth>().GrowthRate = _sampler.SampleGrowthRate(_currentWave);
+        bacteria.GetComponent<BacteriaAI>().MoveTimeout = _sampler.SampleSpeed(_currentWave);
+        bacteria.GetComponent<BacteriaMutate>().CanMutate = _sampler.CanMutate(_currentWave);
+        bacteria.GetComponent<BacteriaMutate>().MutateTimeoout = _sampler.SampleMutateTime(_currentWave);
         return bacteria;
     }
 
@@ -178,9 +193,12 @@ public class SpawnController : MonoBehaviour
         if (enemies.Length < _maxBacteria && _strategy.GetSpawnPosition(enemies, _player, out position))
         {
             var bacteria = ((GameObject)Instantiate(_bacteriaPrefab, position, Quaternion.identity)).GetComponent<Bacteria>();
-            bacteria.GetComponent<BacteriaGrowth>().GrowthRate = _sampler.SampleGrowthRate(_kills);
-            bacteria.GetComponent<BacteriaAI>().MoveTimeout = _sampler.SampleSpeed(_kills);
-            bacteria.GetComponent<BacteriaMutate>().CanMutate = _sampler.CanMutate(_kills);
+            bacteria.GetComponent<BacteriaGrowth>().GrowthRate = _sampler.SampleGrowthRate(_currentWave);
+            bacteria.GetComponent<BacteriaAI>().MoveTimeout = _sampler.SampleSpeed(_currentWave);
+            bool canMutate = _sampler.CanMutate(_currentWave);
+            bacteria.GetComponent<BacteriaMutate>().CanMutate = canMutate;
+            bacteria.Radius = _sampler.SampleStartRadius(_currentWave);
+            bacteria.GetComponent<BacteriaMutate>().MutateTimeoout = _sampler.SampleMutateTime(_currentWave);
             _enemies.Add(bacteria);
         }
     }
@@ -208,8 +226,7 @@ public class SpawnController : MonoBehaviour
 
     private void OnBacteriaKilled(Bacteria obj)
     {
-        _kills++;
-        Tutorial.Instance.ShowHintMessage(Tutorial.HintEvent.BacteriaDead, obj.transform.position);
+        
         _enemies.Remove(obj);
     }
 

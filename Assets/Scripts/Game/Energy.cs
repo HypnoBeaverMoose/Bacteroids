@@ -30,7 +30,7 @@ public class Energy : MonoBehaviour
 	private void Start () 
     {
         _controller = FindObjectOfType<GameController>();
-        Invoke("SwitchLayer", 0.5f);
+        Invoke("SwitchLayer", 1.0f);
     }
 
     private void SwitchLayer()
